@@ -62,7 +62,6 @@ public class CacheLoader extends HecticusThread {
             if(app.getBatchClientsUrl() != null && !app.getBatchClientsUrl().isEmpty()){
                 boolean done = false;
                 int index = 0;
-                long startTime = System.currentTimeMillis();
                 while (isAlive() && !done) {
                     F.Promise<WSResponse> result = WS.url(app.getBatchClientsUrl() + "/" + index + "/" + pageSize).get();
                     ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
@@ -75,7 +74,7 @@ public class CacheLoader extends HecticusThread {
                             try {
                                 ClientsCache.getInstance().getClient(app.getIdApp() + "-" + cl.asLong());
                             } catch (Exception e) {
-                                Utils.printToLog(CacheLoader.class, "Error en el CacheLoader", "Ocurrio un error en el CacheLoader ", false, e, "support-level-1", Config.LOGGER_ERROR);
+                                Utils.printToLog(CacheLoader.class, "", "No existe el cliente " + app.getIdApp() + "-" + cl.asLong(), false, null, "support-level-1", Config.LOGGER_ERROR);
                             }
                         }
                         done = cant != pageSize;

@@ -51,7 +51,6 @@ public class HecticusProducer extends HecticusThread{
     @Override
     public void process() {
         try{
-//            Utils.printToLog(HecticusProducer.class, "", "Procesando el evento "+event.toString(), false, null, "support-level-1", Config.LOGGER_INFO);
             long appID = event.get("app").asLong();
             String msg = event.get("msg").asText();
             long insertionTime = event.get("insertionTime").asLong();
@@ -91,25 +90,21 @@ public class HecticusProducer extends HecticusThread{
                         count++;
                     } else {
                         if(!droidIDs.toString().isEmpty()){
-//                            generateEvent("DROID", msg,appID,insertionTime,emTime, droidIDs.toString());
                             generateEvent("DROID", event,  droidIDs.toString());
                             droidIDs.delete(0, droidIDs.length());
                         }
 
                         if(!iosIDs.toString().isEmpty()){
-//                            generateEvent("IOS", msg,appID,insertionTime,emTime, iosIDs.toString());
                             generateEvent("IOS", event,  iosIDs.toString());
                             iosIDs.delete(0, iosIDs.length());
                         }
 
                         if(!webIDs.toString().isEmpty()){
-//                            generateEvent("WEB", msg,appID,insertionTime,emTime, webIDs.toString());
                             generateEvent("WEB", event,  webIDs.toString());
                             webIDs.delete(0, webIDs.length());
                         }
 
                         if(!msisdnIDs.toString().isEmpty()){
-//                            generateEvent("SMS", msg,appID,insertionTime,emTime, msisdnIDs.toString());
                             generateEvent("SMS", event,  msisdnIDs.toString());
                             msisdnIDs.delete(0, msisdnIDs.length());
                         }
@@ -118,35 +113,29 @@ public class HecticusProducer extends HecticusThread{
                         count++;
                     }
                 } catch (Exception ex) {
-                    Utils.printToLog(HecticusProducer.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
+                    Utils.printToLog(HecticusProducer.class, null, "No se enviara el evento \"" + msg + "\" al cliente " + key, false, null, "support-level-1", Config.LOGGER_ERROR);
                 }
 
             }
             if(!droidIDs.toString().isEmpty()){
-//                generateEvent("DROID", msg,appID,insertionTime,emTime, droidIDs.toString());
                 generateEvent("DROID", event,  droidIDs.toString());
                 droidIDs.delete(0, droidIDs.length());
             }
 
             if(!iosIDs.toString().isEmpty()){
-//                generateEvent("IOS", msg,appID,insertionTime,emTime, iosIDs.toString());
                 generateEvent("IOS", event,  iosIDs.toString());
                 iosIDs.delete(0, iosIDs.length());
             }
 
             if(!webIDs.toString().isEmpty()){
-//                generateEvent("WEB", msg,appID,insertionTime,emTime, webIDs.toString());
                 generateEvent("WEB", event,  webIDs.toString());
                 webIDs.delete(0, webIDs.length());
             }
 
             if(!msisdnIDs.toString().isEmpty()){
-//                generateEvent("SMS", msg,appID,insertionTime,emTime, msisdnIDs.toString());
                 generateEvent("SMS", event,  msisdnIDs.toString());
                 msisdnIDs.delete(0, msisdnIDs.length());
             }
-
-//            Utils.printToLog(HecticusProducer.class, "", "Msg " + msg + ". Se proceso el evento en " + (System.currentTimeMillis() - insertionTime) + " para " + total + " clientes", false, null, "support-level-1", Config.LOGGER_INFO);
         }catch (Exception e){
             Utils.printToLog(HecticusProducer.class, "Error en el HecticusProducer", "Ocurrio un error en el HecticusProducer procesando el evento: " + event.toString(), true, e, "support-level-1", Config.LOGGER_ERROR);
         }
