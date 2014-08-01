@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Clase que genera subeventos con los RegistrationIDs y los inserta en la cola PUSH
  * Created by plesse on 7/10/14.
  */
 public class HecticusProducer extends HecticusThread{
@@ -48,13 +49,14 @@ public class HecticusProducer extends HecticusThread{
         this.event = event;
     }
 
+    /**
+     * Metodo que recibe un evento de clientes, lo pica en sub eventos de RegistrationIDs y lo inserta en PUSH
+     */
     @Override
     public void process() {
         try{
             long appID = event.get("app").asLong();
             String msg = event.get("msg").asText();
-            long insertionTime = event.get("insertionTime").asLong();
-            long emTime = event.get("emTime").asLong();
             int pushSize = Config.getInt("push-size");
             Iterator<JsonNode> clients = event.get("clients").elements();
             event.remove("clients");
@@ -141,6 +143,15 @@ public class HecticusProducer extends HecticusThread{
         }
     }
 
+    /**
+     * Metodo para organizar los RegistrationIDs de un cliente por tipo
+     *
+     * @param client        Client con los RegistrationIDs
+     * @param droidIDs      string donde se anexaran los RegistrationIDs tipo droid del cliente (CSV)
+     * @param iosIDs        string donde se anexaran los RegistrationIDs tipo ios del cliente (CSV)
+     * @param webIDs        string donde se anexaran los RegistrationIDs tipo web del cliente (CSV)
+     * @param msisdnIDs     string donde se anexaran los RegistrationIDs tipo msisdn del cliente (CSV)
+     */
     private void sortClientRegIDs(Client client, StringBuilder droidIDs, StringBuilder iosIDs, StringBuilder webIDs, StringBuilder msisdnIDs) {
         if(client != null){
             ArrayList<String> droid = client.getDroid();
@@ -168,6 +179,16 @@ public class HecticusProducer extends HecticusThread{
         }
     }
 
+    /**
+     * Metodo para generar en insertar un evento de push en la cola PUSH
+     *
+     * @param type              tipo de dispositivo de los RegistrationIDs (droid, ops, web,etc)
+     * @param msg               mensaje a enviar
+     * @param app               id del app asociada al evento
+     * @param insertionTime     epoch en el que se inserto el evento en la cola EVENTS
+     * @param emTime            epoch en el que el EventManager proceso el evento
+     * @param regIDs            String CSV con los RegistrationIDs del tipo type
+     */
     private void generateEvent(String type, String msg, long app, long insertionTime, long emTime, String regIDs) {
         ObjectNode event = Json.newObject();
         event.put("msg", msg);
@@ -184,6 +205,13 @@ public class HecticusProducer extends HecticusThread{
         }
     }
 
+    /**
+     * Metodo para generar en insertar un evento de push en la cola PUSH
+     *
+     * @param type          tipo de dispositivo de los RegistrationIDs (droid, ops, web,etc)
+     * @param event         evento original sin la lista de clientes
+     * @param regIDs        String CSV con los RegistrationIDs del tipo type
+     */
     private void generateEvent(String type, ObjectNode event, String regIDs){
         ObjectNode finalEvent = event.deepCopy();
         finalEvent.put("type", type);

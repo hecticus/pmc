@@ -1,5 +1,6 @@
 package controllers.events;
 
+import backend.apns.JavApns;
 import backend.job.*;
 //import backend.pushy.PushyManager;
 import backend.rabbitmq.RabbitMQ;
@@ -12,10 +13,7 @@ import com.hecticus.rackspacemailgun.MailGun;
 //import com.relayrides.pushy.apns.util.TokenUtil;
 import controllers.HecticusController;
 import javapns.Push;
-import javapns.notification.Payload;
-import javapns.notification.PushedNotification;
-import javapns.notification.PushedNotifications;
-import javapns.notification.ResponsePacket;
+import javapns.notification.*;
 import models.apps.Application;
 import models.basic.Config;
 import org.bouncycastle.openssl.PEMReader;
@@ -112,8 +110,10 @@ public class EventsWS extends HecticusController {
                             return sendDroidPushRequest(event, idAppF);
                         } else if(methodF == 1) {
                             return sendWEBPushRequest(event, idAppF);
-                        } else {
+                        } else if(methodF == 2) {
                             return sendIOSPushRequest(event, idAppF);
+                        } else {
+                            return sendIOSPushRequestPool(event, idAppF);
                         }
                     }
                 }
@@ -253,6 +253,38 @@ public class EventsWS extends HecticusController {
         }
     }
 
+    private static ObjectNode sendIOSPushRequestPool(ObjectNode event, long idApp) {
+        Application app = Application.finder.byId(idApp);
+        String regIDs = event.get("regIDs").asText();
+        String msg = event.get("msg").asText();
+        String[] registrationIds = regIDs.split(",");
+        if(app.getDebug() == 0){
+            ObjectNode fResponse = Json.newObject();
+            try {
+                fResponse.put("error", 0);
+                fResponse.put("description", "");
+                PushedNotifications result = null;
+                PushNotificationPayload payload = PushNotificationPayload.alert(msg);
+                if(app.getSound() != null && !app.getSound().isEmpty()){
+                    payload.addSound(app.getSound());
+                }
+                JavApns.getInstance().enqueue(app, payload, registrationIds);
+                return fResponse;
+            } catch (Exception e) {
+                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
+                fResponse.put("error", 1);
+                fResponse.put("description", e.getMessage());
+            } finally {
+                return fResponse;
+            }
+        } else {
+
+            ObjectNode fResponse = Json.newObject();
+            fResponse.put("response", "pushing " + msg + " to " + regIDs);
+            return fResponse;
+        }
+    }
+
     @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
     public static F.Promise<Result> insertEvent() {
         if(request().body().isMaxSizeExceeded()){
@@ -271,6 +303,11 @@ public class EventsWS extends HecticusController {
         return promiseOfObjectNode.map(
                 new F.Function<ObjectNode, Result>() {
                     public Result apply(ObjectNode i) {
+                        if(i.get("error").asInt() == 2){
+                            return forbidden(i);
+                        } else if(i.get("error").asInt() == 1){
+                            return badRequest(i);
+                        }
                         return ok(i);
                     }
                 }
@@ -280,6 +317,12 @@ public class EventsWS extends HecticusController {
     private static ObjectNode insertEv(ObjectNode event) {
         ObjectNode fResponse = Json.newObject();
         try {
+            int allowInsert = Config.getInt("allow-insert-events");
+            if(allowInsert == 0){
+                fResponse.put("error", 2);
+                fResponse.put("description", "El servicio de insercion de eventos esta apagado");
+                return fResponse;
+            }
             fResponse.put("error", 0);
             fResponse.put("description", "");
             event.put("insertionTime", System.currentTimeMillis());
@@ -287,7 +330,7 @@ public class EventsWS extends HecticusController {
             RabbitMQ.getInstance().insertEventLyra(event.toString());
             return fResponse;
         } catch (Exception e) {
-            Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
+            Utils.printToLog(EventsWS.class, "Error en el EventsWS", "El ocurrio un error en el EventsWS insertando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
             fResponse.put("error", 1);
             fResponse.put("description", e.getMessage());
         } finally {

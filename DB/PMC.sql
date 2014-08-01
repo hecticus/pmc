@@ -44,7 +44,7 @@ CREATE TABLE `app` (
   `sound` varchar(45) NOT NULL,
   `debug` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_app`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,7 +74,7 @@ CREATE TABLE `app_device` (
   KEY `fk_id_device_idx` (`id_device`),
   CONSTRAINT `fk_id_app` FOREIGN KEY (`id_app`) REFERENCES `app` (`id_app`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_id_device` FOREIGN KEY (`id_device`) REFERENCES `device` (`id_device`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +100,7 @@ CREATE TABLE `configs` (
   `value` text,
   `description` text,
   PRIMARY KEY (`id_config`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=192 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -109,7 +109,7 @@ CREATE TABLE `configs` (
 
 LOCK TABLES `configs` WRITE;
 /*!40000 ALTER TABLE `configs` DISABLE KEYS */;
-INSERT INTO `configs` VALUES (1,'alarm-send-millis','300000','Tiempo entre envios en milisegundos'),(2,'alarm-smtp-server','smtp.gmail.com','Servidor SMTP'),(3,'alarm-sender-address','alarma.rk@hecticus.com','Direccion de email de las alarmas'),(4,'alarm-sender-pw','alarma12345','Password del email de las alarmas'),(6,'config-read-millis','10000','Tiempo de refresh del estas variables de config'),(5,'core-query-limit','5000','Tamano maximo del query utilizado en varios sitios'),(16,'support-level-1','inaki@hecticus.com ','Correos separados por ;'),(7,'app-name','PMC_INAKI','Pais o aplicacion de la instacia'),(8,'jobs-keep-alive-allowed','3600000','Tiempo en milisegundos para determinar timeout del job. Default 3600000'),(9,'pmc-url','a-wing:9015','revan:9000'),(10,'caches-update-delay','300000','Tiempo en que un cache vence y tiene que buscar nuevamente a traves del WS apropiado. Tiempo en millisegundos (default 300000)'),(17,'pushConsumers','1','...'),(11,'guava-caches-update-delay','10','Tiempo en que un cache vence y tiene que buscar nuevamente a traves del WS apropiado. Tiempo en minutos'),(12,'guava-vars-cache-update-delay','10','Delay para actualizar cache de placeholders'),(13,'rackspace-username','hctcsproddfw','Usuario de rackspace '),(14,'rackspace-apiKey','276ef48143b9cd81d3bef7ad9fbe4e06','clave de rackspacew'),(15,'rackspace-provider','cloudfiles-us','Nombre del proveedor de rackspace'),(30,'kraken-play-url','http://10.0.3.2:9010/','Url para conectarse con los web services desarrollados en Play'),(18,'eventConsumers','1',',,,'),(19,'rabbit-mq-host','10.0.3.30','rabbit host'),(20,'rabbit-mq-user','admin','user'),(21,'rabbit-mq-password','abc123','pwd'),(22,'rabbit-mq-event-queue','EVENTS','cola de eventos'),(23,'packages-size','500','pack size'),(24,'push-size','10','push-size'),(25,'rabbit-mq-push-queue','PUSH','push'),(26,'android-push-url','https://android.googleapis.com/gcm/send','url de push de google'),(29,'ws-timeout-millis','1000','timeout ws'),(27,'rabbit-mq-result-queue','PUSH_RESULT','cola de resultados'),(28,'cache-loader-sleep','60','tiempo que duerme el cache loader en segundos'),(31,'resultAnalyzers','0',',');
+INSERT INTO `configs` VALUES (1,'alarm-send-millis','300000','Tiempo entre envios en milisegundos'),(2,'alarm-smtp-server','smtp.gmail.com','Servidor SMTP'),(3,'alarm-sender-address','alarma.rk@hecticus.com','Direccion de email de las alarmas'),(4,'alarm-sender-pw','alarma12345','Password del email de las alarmas'),(6,'config-read-millis','10000','Tiempo de refresh del estas variables de config'),(5,'core-query-limit','5000','Tamano maximo del query utilizado en varios sitios'),(16,'support-level-1','inaki@hecticus.com ','Correos separados por ;'),(7,'app-name','PMC_INAKI','Pais o aplicacion de la instacia'),(8,'jobs-keep-alive-allowed','3600000','Tiempo en milisegundos para determinar timeout del job. Default 3600000'),(9,'pmc-url','revan:9000','a-wing:9015'),(10,'caches-update-delay','300000','Tiempo en que un cache vence y tiene que buscar nuevamente a traves del WS apropiado. Tiempo en millisegundos (default 300000)'),(17,'pushConsumers','0','...'),(11,'guava-caches-update-delay','10','Tiempo en que un cache vence y tiene que buscar nuevamente a traves del WS apropiado. Tiempo en minutos'),(12,'guava-vars-cache-update-delay','10','Delay para actualizar cache de placeholders'),(13,'rackspace-username','hctcsproddfw','Usuario de rackspace '),(14,'rackspace-apiKey','276ef48143b9cd81d3bef7ad9fbe4e06','clave de rackspacew'),(15,'rackspace-provider','cloudfiles-us','Nombre del proveedor de rackspace'),(30,'kraken-play-url','http://10.0.3.2:9010/','Url para conectarse con los web services desarrollados en Play'),(37,'allow-RMQFC','1','switch de RabbitMQFailChecker'),(36,'allow-CL','0','switch de CacheLoader'),(35,'allow-IOSFC','0','switch de IOSFeedbackChecker'),(34,'rabbitFC-max-retry','3','reintentps de eventos fallidos'),(32,'max-apns-threads','15','hilos de apns'),(33,'allow-insert-events','1','switch de apagado de insercion de eventos'),(18,'eventConsumers','0',',,,'),(19,'rabbit-mq-host','10.208.226.225','rabbit host 10.0.3.30'),(20,'rabbit-mq-user','pmc','user admin'),(21,'rabbit-mq-password','64svL&r#','pwd abc123'),(22,'rabbit-mq-event-queue','EVENTS','cola de eventos'),(23,'packages-size','500','pack size'),(24,'push-size','10','push-size'),(25,'rabbit-mq-push-queue','PUSH','push'),(26,'android-push-url','https://android.googleapis.com/gcm/send','url de push de google'),(29,'ws-timeout-millis','1000','timeout ws'),(27,'rabbit-mq-result-queue','PUSH_RESULT','cola de resultados'),(28,'cache-loader-sleep','60','tiempo que duerme el cache loader en segundos'),(31,'resultAnalyzers','0',',');
 /*!40000 ALTER TABLE `configs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -124,7 +124,7 @@ CREATE TABLE `device` (
   `id_device` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   PRIMARY KEY (`id_device`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,6 +135,31 @@ LOCK TABLES `device` WRITE;
 /*!40000 ALTER TABLE `device` DISABLE KEYS */;
 INSERT INTO `device` VALUES (1,'droid'),(2,'ios'),(3,'web'),(4,'msisdn');
 /*!40000 ALTER TABLE `device` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `event`
+--
+
+DROP TABLE IF EXISTS `event`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `event` (
+  `id_event` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  `event` text NOT NULL,
+  `retry` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id_event`)
+) ENGINE=InnoDB AUTO_INCREMENT=251 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `event`
+--
+
+LOCK TABLES `event` WRITE;
+/*!40000 ALTER TABLE `event` DISABLE KEYS */;
+/*!40000 ALTER TABLE `event` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -321,4 +346,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-29 14:35:18
+-- Dump completed on 2014-08-01 16:05:22

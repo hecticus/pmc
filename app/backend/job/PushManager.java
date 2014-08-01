@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Clase para procesar los eventos de la cola PUSH
+ *
  * Created by plesse on 7/10/14.
  */
 public class PushManager extends HecticusThread {
@@ -30,6 +32,9 @@ public class PushManager extends HecticusThread {
         super("PushManager", run);
     }
 
+    /**
+     * Metodo que toma un evento de la cola PUSH y lo envia a un HecticusPusher
+     */
     @Override
     public void process() {
         try{
@@ -44,6 +49,11 @@ public class PushManager extends HecticusThread {
         }
     }
 
+    /**
+     * Metodo que envia un evento para que un HecticusPusher lo envie a los devices
+     *
+     * @param event     evento a ser pusheado
+     */
     private void sendPushRequest(ObjectNode event) {
         try{
             F.Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/push").post(event);

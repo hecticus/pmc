@@ -20,6 +20,7 @@ import play.libs.F.Promise;
 import utils.Utils;
 
 /**
+ * Clase para tratar los eventos de la cola EVENTS
  * Created by plesse on 7/10/14.
  */
 public class EventManager extends HecticusThread {
@@ -36,36 +37,37 @@ public class EventManager extends HecticusThread {
         super("EventManager",run);
     }
 
+    /**
+     * Metodo para obtener un evento de la cola EVENTS, validarlo, picarlo y enviarlo a un @{HecticusThread}.HecticusProducer
+     */
     @Override
     public void process() {
         try{
             String eventString = RabbitMQ.getInstance().getNextEventLyra();
             if(eventString != null){
                 ObjectNode event = (ObjectNode)Json.parse(eventString);
-                String msg = event.get("msg").asText();
-                long insertionTime = event.get("insertionTime").asLong();
-//                Utils.printToLog(EventManager.class, "", "Procesando el evento "+msg, false, null, "support-level-1", Config.LOGGER_INFO);
                 boolean valid = validateEvent(event);
                 if(valid){
                     splitAndSendProcessRequest(event);
                 } else {
-                    Utils.printToLog(EventManager.class, "Evento Invalido", "El evento "+event.toString() + " no sera enviado por ser invalido", true, null, "support-level-1", Config.LOGGER_INFO);
+                    Utils.printToLog(EventManager.class, "Evento Invalido", "El evento " + event.toString() + " no sera enviado por ser invalido", true, null, "support-level-1", Config.LOGGER_INFO);
                 }
-//                Utils.printToLog(EventManager.class, "", "Msg " + msg + ". Se proceso el evento en " + (System.currentTimeMillis() - insertionTime), false, null, "support-level-1", Config.LOGGER_INFO);
             }
         } catch (Exception ex) {
-            Utils.printToLog(EventManager.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
+            Utils.printToLog(EventManager.class, null, "Error procesando un evento", false, ex, "support-level-1", Config.LOGGER_ERROR);
         }
     }
 
+    /**
+     * Metodo para picar un evento en subeventos y enviarlo a un @{HecticusThread}.HecticusProducer
+     *
+     * @param event     evento a picar
+     */
     private void splitAndSendProcessRequest(ObjectNode event) {
         Iterator<JsonNode> clients = event.get("clients").elements();
         event.remove("clients");
         int packagesSize = Config.getInt("packages-size");
         int count = 0;
-        long appID = event.get("app").asLong();
-        long insertionTime = event.get("insertionTime").asLong();
-        String msg = event.get("msg").asText();
         ArrayList<JsonNode> clientsPage = new ArrayList<>(packagesSize);
         while(isAlive() && clients.hasNext()) {
             JsonNode cl = clients.next();
@@ -73,7 +75,6 @@ public class EventManager extends HecticusThread {
                 clientsPage.add(cl);
                 count++;
             } else {
-//                ObjectNode finalEvent = generateEvent(appID, msg, insertionTime, clientsPage);
                 ObjectNode finalEvent = generateEvent(event, clientsPage);
                 sendProcessRequest(finalEvent);
                 clientsPage.clear();
@@ -83,13 +84,22 @@ public class EventManager extends HecticusThread {
             }
         }
         if(!clientsPage.isEmpty()){
-//            ObjectNode finalEvent = generateEvent(appID, msg, insertionTime, clientsPage);
             ObjectNode finalEvent = generateEvent(event, clientsPage);
             sendProcessRequest(finalEvent);
             clientsPage.clear();
         }
     }
 
+    /**
+     * Funcion para generar un sub evento
+     *
+     * @deprecated
+     * @param appID             id de la aplicacion asociada al evento
+     * @param msg               mensaje que se enviara
+     * @param insertionTime     momento en que se inserto el evento en la cola EVENTS
+     * @param clients           lista del subconjunto de clientes que se asociaran a este subevento
+     * @return                  sub evento a enviar
+     */
     private ObjectNode generateEvent(long appID, String msg, long insertionTime, ArrayList<JsonNode> clients) {
         ObjectNode finalEvent = Json.newObject();
         finalEvent.put("app", appID);
@@ -102,6 +112,13 @@ public class EventManager extends HecticusThread {
         return finalEvent;
     }
 
+    /**
+     * Funcion para generar un sub evento
+     *
+     * @param event         evento padre del que se copiara la data de push
+     * @param clients       lista del subconjunto de clientes que se asociaran a este subevento
+     * @return              sub evento a enviar
+     */
     private ObjectNode generateEvent(ObjectNode event, ArrayList<JsonNode> clients){
         ObjectNode finalEvent = event.deepCopy();
         finalEvent.put("emTime", System.currentTimeMillis());
@@ -109,17 +126,32 @@ public class EventManager extends HecticusThread {
         return finalEvent;
     }
 
+    /**
+     * Metodo para enviar el evento al WS que levantara el @{HecticusThread}.HecticusProducer que procesara el evento
+     *
+     * @param event     evento validado que se procesara
+     */
     private void sendProcessRequest(ObjectNode event) {
         try{
             Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/process").post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
-//            Utils.printToLog(EventManager.class, null,response.toString(), false, null, "support-level-1", Config.LOGGER_INFO);
             setAlive();
         }catch (Exception ex){
             Utils.printToLog(EventManager.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
         }
     }
 
+    /**
+     * Metodo para validar que un evento y determinar si puede ser enviado.
+     *
+     * Un evento debe tener:
+     * - app
+     * - msg
+     * - clients
+     *
+     * @param event     evento a validar
+     * @return          true si puede ser enviado
+     */
     private boolean validateEvent(ObjectNode event) {
         if(!event.has("app") || !event.has("msg") || !event.has("clients")){
             return false;

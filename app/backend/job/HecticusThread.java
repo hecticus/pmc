@@ -7,6 +7,8 @@ import utils.Utils;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Clase base de los hilos del PMC
+ *
  * Created by plesse on 7/9/14.
  */
 public abstract class HecticusThread implements Runnable {
@@ -40,6 +42,9 @@ public abstract class HecticusThread implements Runnable {
         this.active = false;
     }
 
+    /**
+     * Metodo que ejecuta la funcionalidad real de un HecticusThread
+     */
     public abstract void process();
 
     public String getName() {
@@ -75,22 +80,38 @@ public abstract class HecticusThread implements Runnable {
         actTime = System.currentTimeMillis();
     }
 
+    /**
+     * Funcion para que un hilo sepa si aun el PMC esta vivo
+     *
+     * @return      true si el PMC esta vivo
+     */
     public boolean isAlive(){
         prevTime = actTime;
         actTime = System.currentTimeMillis();
-        return run.get();
+        boolean canExecute = run.get();
+        if(cancellable != null) {
+            canExecute &= !cancellable.isCancelled();
+        }
+        return canExecute;
     }
 
+    /**
+     * Funcion para obtener el tiempo que ha pasado el hilo  corriendo
+     *
+     * @return      tiempo entre pasos por el marcador de tiempo
+     */
     public long runningTime(){
         return actTime - prevTime;
     }
 
+    /**
+     * Metodo de ejecucion de los HecticusThread
+     */
     @Override
     public void run() {
-        if(run.get()){
+        if(isAlive()){
             try{
                 active = true;
-                setAlive();
                 process();
             } catch (Throwable t){
                 Utils.printToLog(HecticusThread.class, "Error en el HecticusThread", "Ocurrio un error que llego hasta el HecticusThread: " + name, true, t, "support-level-1", Config.LOGGER_ERROR);
@@ -101,6 +122,21 @@ public abstract class HecticusThread implements Runnable {
         }
     }
 
+    public void stop() {
+        //doSomething...
+    }
 
+    public void cancel() {
+        try{
+            active = false;
+            stop();
+            if(cancellable != null) {
+                cancellable.cancel();
+            }
+            Utils.printToLog(HecticusThread.class, null, "Apagado " + name, false, null, "support-level-1", Config.LOGGER_INFO);
+        } catch (Throwable t){
+            Utils.printToLog(HecticusThread.class, "Error en el HecticusThread", "Ocurrio cancelando el HecticusThread: " + name, true, t, "support-level-1", Config.LOGGER_ERROR);
+        }
+    }
 
 }

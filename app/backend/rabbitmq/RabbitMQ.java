@@ -1,6 +1,7 @@
 package backend.rabbitmq;
 
 import com.rabbitmq.client.*;
+import models.basic.Event;
 import net.jodah.lyra.ConnectionOptions;
 import net.jodah.lyra.Connections;
 import net.jodah.lyra.config.Config;
@@ -8,6 +9,8 @@ import net.jodah.lyra.config.RecoveryPolicies;
 import net.jodah.lyra.config.RetryPolicy;
 import net.jodah.lyra.util.Duration;
 import utils.Utils;
+
+import java.net.URLEncoder;
 
 /**
  * Clase para manejar la conexion a RabbitMQ y los metodos para insertar y consumir de las colas
@@ -38,15 +41,17 @@ public class RabbitMQ {
         eventsQueue = models.basic.Config.getString("rabbit-mq-event-queue");
         pushQueue = models.basic.Config.getString("rabbit-mq-push-queue");
         resultQueue = models.basic.Config.getString("rabbit-mq-result-queue");
+        Utils.printToLog(RabbitMQ.class, null, "Levantando RabbitMQ hacia " + host + " con el User " + user, false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
         Config config = new Config()
                 .withRecoveryPolicy(RecoveryPolicies.recoverAlways())
                 .withRetryPolicy(new RetryPolicy()
-                        .withBackoff(Duration.seconds(1), Duration.seconds(30))
+                        .withBackoff(Duration.seconds(30), Duration.seconds(120))
                         .withMaxDuration(Duration.minutes(10)));
         ConnectionOptions options = new ConnectionOptions().withHost(host)
                 .withUsername(user)
                 .withPassword(password).withName("RabbitMQ-"+System.currentTimeMillis());
         connection = Connections.create(options, config);
+        Utils.printToLog(RabbitMQ.class, null, "Conectado RabbitMQ con " + host + " con el User " + user, false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
     }
 
     /**
@@ -66,9 +71,9 @@ public class RabbitMQ {
      * Metodo para obtener el siguiente evento de la cola EVENTS de RabbitMQ
      *
      * @return              string parseable a json con el evento a procesar
-     * @throws Exception
+     *
      */
-    public String getNextEventLyra() throws Exception {
+    public String getNextEventLyra() {
         String event = null;
         Channel channel = null;
         try{
@@ -82,7 +87,7 @@ public class RabbitMQ {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ obteniendo eventos de " + eventsQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
         } finally {
             try{channel.close();}catch (Exception ex) {}
         }
@@ -93,9 +98,9 @@ public class RabbitMQ {
      * Metodo para obtener el siguiente evento de la cola PUSH de RabbitMQ
      *
      * @return              string parseable a json con el evento a procesar
-     * @throws Exception
+     *
      */
-    public String getNextPushLyra() throws Exception {
+    public String getNextPushLyra() {
         String event = null;
         Channel channel = null;
         try{
@@ -109,7 +114,7 @@ public class RabbitMQ {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ obteniendo eventos de " + pushQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
         } finally {
             try{channel.close();}catch (Exception ex) {}
         }
@@ -120,9 +125,9 @@ public class RabbitMQ {
      * Metodo para obtener el siguiente evento de la cola PUSH_RESULT de RabbitMQ
      *
      * @return              string parseable a json con el evento a procesar
-     * @throws Exception
+     *
      */
-    public String getNextPushResultLyra() throws Exception {
+    public String getNextPushResultLyra() {
         String event = null;
         Channel channel = null;
         try{
@@ -136,7 +141,7 @@ public class RabbitMQ {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ obteniendo eventos de " + resultQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
         } finally {
             try{channel.close();}catch (Exception ex) {}
         }
@@ -149,7 +154,7 @@ public class RabbitMQ {
      * @param event         string parseable a json con el evento a insertar
      * @throws Exception
      */
-    public void insertEventLyra(String event) throws Exception {
+    public void insertEventLyra(String event) {
         Channel channel = null;
         try{
             channel = connection.createChannel();
@@ -157,7 +162,8 @@ public class RabbitMQ {
             AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
             channel.basicPublish("", eventsQueue, props, event.getBytes());
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + eventsQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            insertObjectInDB("event", event);
         } finally {
             try{channel.close();}catch (Exception ex) {}
         }
@@ -169,7 +175,7 @@ public class RabbitMQ {
      * @param event         string parseable a json con el evento a insertar
      * @throws Exception
      */
-    public void insertPushLyra(String event) throws Exception {
+    public void insertPushLyra(String event) {
         Channel channel = null;
         try{
             channel = connection.createChannel();
@@ -177,7 +183,8 @@ public class RabbitMQ {
             AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
             channel.basicPublish("", pushQueue, props, event.getBytes());
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + pushQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            insertObjectInDB("push", event);
         } finally {
             try{channel.close();}catch (Exception ex) {}
         }
@@ -189,7 +196,7 @@ public class RabbitMQ {
      * @param event         string parseable a json con el evento a insertar
      * @throws Exception
      */
-    public void insertPushResultLyra(String event) throws Exception {
+    public void insertPushResultLyra(String event) {
         Channel channel = null;
         try{
             channel = connection.createChannel();
@@ -197,9 +204,86 @@ public class RabbitMQ {
             AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
             channel.basicPublish("", resultQueue, props, event.getBytes());
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, null, "error", false, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + resultQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            insertObjectInDB("result", event);
         } finally {
             try{channel.close();}catch (Exception ex) {}
+        }
+    }
+
+    /**
+     * Metodo para insertar eventos en la cola EVENTS de RabbitMQ
+     *
+     * @param event         string parseable a json con el evento a insertar
+     * @throws Exception
+     */
+    public boolean insertEventLyraWithResult(String event) {
+        Channel channel = null;
+        try{
+            channel = connection.createChannel();
+            channel.queueDeclare(eventsQueue, true, false, false, null);
+            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
+            channel.basicPublish("", eventsQueue, props, event.getBytes());
+            return true;
+        }catch(Exception e){
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + eventsQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            return false;
+        } finally {
+            try{channel.close();}catch (Exception ex) {}
+        }
+    }
+
+    /**
+     * Metodo para insertar eventos en la cola PUSH de RabbitMQ
+     *
+     * @param event         string parseable a json con el evento a insertar
+     * @throws Exception
+     */
+    public boolean insertPushLyraWithResult(String event) {
+        Channel channel = null;
+        try{
+            channel = connection.createChannel();
+            channel.queueDeclare(pushQueue, true, false, false, null);
+            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
+            channel.basicPublish("", pushQueue, props, event.getBytes());
+            return true;
+        }catch(Exception e){
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + pushQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            return false;
+        } finally {
+            try{channel.close();}catch (Exception ex) {}
+        }
+    }
+
+    /**
+     * Metodo para insertar eventos en la cola PUSH_RESULT de RabbitMQ
+     *
+     * @param event         string parseable a json con el evento a insertar
+     * @throws Exception
+     */
+    public boolean insertPushResultLyraWithResult(String event) {
+        Channel channel = null;
+        try{
+            channel = connection.createChannel();
+            channel.queueDeclare(resultQueue, true, false, false, null);
+            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().deliveryMode(2).contentType("application/json").priority(1).build();
+            channel.basicPublish("", resultQueue, props, event.getBytes());
+            return true;
+        }catch(Exception e){
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + resultQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            return false;
+        } finally {
+            try{channel.close();}catch (Exception ex) {}
+        }
+    }
+
+    private void insertObjectInDB(String type, String event) {
+        try{
+            Event e = new Event(type, URLEncoder.encode(event,"UTF-8"));
+            System.out.println(e.toJson().toString());
+            Event.save(e);
+        }catch(Exception e){
+            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + resultQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
         }
     }
 }
