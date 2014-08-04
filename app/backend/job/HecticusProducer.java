@@ -157,19 +157,25 @@ public class HecticusProducer extends HecticusThread{
             ArrayList<String> droid = client.getDroid();
             if(pDroid && droid != null && !droid.isEmpty()){
                 for(String id : droid){
-                    droidIDs.append(id).append(",");
+                    if(id != null && !id.isEmpty()){
+                        droidIDs.append(id).append(",");
+                    }
                 }
             }
             ArrayList<String> ios = client.getIos();
             if(pIOS && ios != null && !ios.isEmpty()){
                 for(String id : ios){
-                    iosIDs.append(id).append(",");
+                    if(id != null && !id.isEmpty()){
+                        iosIDs.append(id).append(",");
+                    }
                 }
             }
             ArrayList<String> web = client.getWeb();
             if(pWEB && web != null && !web.isEmpty()){
                 for(String id : web){
-                    webIDs.append(id).append(",");
+                    if(id != null && !id.isEmpty()){
+                        webIDs.append(id).append(",");
+                    }
                 }
             }
             String msisdn = client.getMsisdn();
