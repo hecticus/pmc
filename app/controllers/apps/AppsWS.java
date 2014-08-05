@@ -26,36 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AppsWS extends HecticusController {
 
-    public static Promise<Result> test(String nameL) {
-        final String name = nameL;
-        Promise<Long> promiseOfLong = Promise.promise(
-                new Function0<Long>() {
-                    public Long apply() {
-                        return intensiveComputation(name);
-                    }
-                }
-        );
-
-        return promiseOfLong.map(
-                new Function<Long, Result>() {
-                    public Result apply(Long i) {
-                        return ok("Got result: " + i);
-                    }
-                }
-        );
-    }
-
-    private static long intensiveComputation(String name){
-        Utils.printToLog(AppsWS.class, null, "llegue a intensiveComputation() " + name, false, null, "support-level-1", Config.LOGGER_ERROR);
-        long i = 0;
-        while(i < 3){
-            Utils.printToLog(AppsWS.class, null, name + " " + i, false, null, "support-level-1", Config.LOGGER_ERROR);
-            i++;
-        }
-        Utils.printToLog(AppsWS.class, null, "termine intensiveComputation() " + i + " " + name, false, null, "support-level-1", Config.LOGGER_ERROR);
-        return i;
-    }
-
     public static Result update(Long idApp){
         ObjectNode result = Json.newObject();
         ObjectNode jsonInfo = getJson();
