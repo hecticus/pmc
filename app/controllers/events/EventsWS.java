@@ -66,7 +66,6 @@ public class EventsWS extends HecticusController {
             } else {
                 process = new HecticusPusher("WS", Utils.run, event);
             }
-//            Utils.printToLog(EventsWS.class, null,"Levantando un " + (producerFlag?"HecticusProducer":"HecticusPusher") + " para el evento " + event.toString(), false, null, "support-level-1", Config.LOGGER_INFO);
             Thread th = new Thread(process);
             th.start();
             ObjectNode response = Json.newObject();
@@ -141,16 +140,24 @@ public class EventsWS extends HecticusController {
             if(app.getSound() != null && !app.getSound().isEmpty()){
                 message.put("sound", app.getSound());
             }
-            ObjectNode extraParams = event.deepCopy();
-            extraParams.put("pushTime", System.currentTimeMillis());
-            message.put("extra_params", extraParams);
+            if(event.has("extra_params")){
+                message.put("extra_params", event.get("extra_params"));
+            } else {
+                ObjectNode extraParams = event.deepCopy();
+                extraParams.remove("regIDs");
+                extraParams.remove("emTime");
+                extraParams.remove("prodTime");
+                extraParams.remove("pmTime");
+                extraParams.remove("msg");
+                extraParams.put("pushTime", System.currentTimeMillis());
+                message.put("extra_params", extraParams);
+            }
             ObjectNode fields = Json.newObject();
             fields.put("registration_ids", Json.toJson(registrationIds));
             fields.put("data", message);
             fields.put("collapse_key", app.getName());
             if(app.getDebug() == 0){
                 F.Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
-                Utils.printToLog(EventsWS.class, "", "result = " + result.toString(), false, null, "support-level-1", Config.LOGGER_INFO);
                 ObjectNode fResponse = Json.newObject();
                 fResponse.put("response", Json.toJson((ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson()));
                 return fResponse;
@@ -239,7 +246,7 @@ public class EventsWS extends HecticusController {
                 }
                 return fResponse;
             } catch (Exception e) {
-                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
+                Utils.printToLog(EventsWS.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
                 fResponse.put("error", 1);
                 fResponse.put("description", e.getMessage());
             } finally {
@@ -264,14 +271,30 @@ public class EventsWS extends HecticusController {
                 fResponse.put("error", 0);
                 fResponse.put("description", "");
                 PushedNotifications result = null;
-                PushNotificationPayload payload = PushNotificationPayload.alert(msg);
+                ObjectNode payloadToSend = Json.newObject();
+                payloadToSend.put("alert", msg);
+                if(event.has("extra_params")){
+                    payloadToSend.put("extra_params", event.get("extra_params").asText());
+                } else {
+                    ObjectNode extraParams = event.deepCopy();
+                    extraParams.remove("regIDs");
+                    extraParams.remove("emTime");
+                    extraParams.remove("prodTime");
+                    extraParams.remove("pmTime");
+                    extraParams.remove("msg");
+                    extraParams.put("pushTime", System.currentTimeMillis());
+                    payloadToSend.put("extra_params", extraParams.toString());
+                }
+                ObjectNode aps = Json.newObject();
+                aps.put("aps", payloadToSend);
+                PushNotificationPayload payload = PushNotificationPayload.fromJSON(aps.toString());
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     payload.addSound(app.getSound());
                 }
                 JavApns.getInstance().enqueue(app, payload, registrationIds);
                 return fResponse;
             } catch (Exception e) {
-                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
+                Utils.printToLog(EventsWS.class, "Error en el sendIOSPushRequestPool", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
                 fResponse.put("error", 1);
                 fResponse.put("description", e.getMessage());
             } finally {
@@ -287,10 +310,6 @@ public class EventsWS extends HecticusController {
 
     @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
     public static F.Promise<Result> insertEvent() {
-        if(request().body().isMaxSizeExceeded()){
-            System.out.println("yes");
-        }
-
         final ObjectNode event = getJson();
         F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
                 new F.Function0<ObjectNode>() {

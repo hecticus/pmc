@@ -2,6 +2,7 @@ package backend.job;
 
 import akka.actor.ActorSystem;
 import akka.actor.Cancellable;
+import backend.apns.JavApns;
 import backend.rabbitmq.RabbitMQ;
 import models.basic.Config;
 import scala.concurrent.duration.Duration;
@@ -198,6 +199,7 @@ public class ThreadSupervisor extends HecticusThread {
     private void init(){
         try {
             RabbitMQ.getInstance();
+            JavApns.getInstance();
         } catch (Exception e) {
             Utils.printToLog(ThreadSupervisor.class, null, "Error instanciando RabbitMQ", false, null, "support-level-1", Config.LOGGER_INFO);
         }

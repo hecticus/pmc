@@ -230,13 +230,18 @@ public class HecticusPusher extends HecticusThread {
         if(app.getSound() != null && !app.getSound().isEmpty()){
             message.put("sound", app.getSound());
         }
-        ObjectNode extraParams = event.deepCopy();
-        extraParams.remove("regIDs");
-        extraParams.remove("emTime");
-        extraParams.remove("prodTime");
-        extraParams.remove("pmTime");
-        extraParams.put("pushTime", System.currentTimeMillis());
-        message.put("extra_params", extraParams);
+        if(event.has("extra_params")){
+            message.put("extra_params", event.get("extra_params"));
+        } else {
+            ObjectNode extraParams = event.deepCopy();
+            extraParams.remove("regIDs");
+            extraParams.remove("emTime");
+            extraParams.remove("prodTime");
+            extraParams.remove("pmTime");
+            extraParams.remove("msg");
+            extraParams.put("pushTime", System.currentTimeMillis());
+            message.put("extra_params", extraParams);
+        }
         ObjectNode fields = Json.newObject();
         fields.put("registration_ids", Json.toJson(registrationIds));
         fields.put("data", message);
@@ -280,7 +285,23 @@ public class HecticusPusher extends HecticusThread {
         String[] registrationIds = regIDs.split(",");
         if(app.getDebug() == 0){
             try {
-                PushNotificationPayload payload = PushNotificationPayload.alert(msg);
+                ObjectNode payloadToSend = Json.newObject();
+                payloadToSend.put("alert", msg);
+                if(event.has("extra_params")){
+                    payloadToSend.put("extra_params", event.get("extra_params").asText());
+                } else {
+                    ObjectNode extraParams = event.deepCopy();
+                    extraParams.remove("regIDs");
+                    extraParams.remove("emTime");
+                    extraParams.remove("prodTime");
+                    extraParams.remove("pmTime");
+                    extraParams.remove("msg");
+                    extraParams.put("pushTime", System.currentTimeMillis());
+                    payloadToSend.put("extra_params", extraParams.toString());
+                }
+                ObjectNode aps = Json.newObject();
+                aps.put("aps", payloadToSend);
+                PushNotificationPayload payload = PushNotificationPayload.fromJSON(aps.toString());
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     payload.addSound(app.getSound());
                 }
