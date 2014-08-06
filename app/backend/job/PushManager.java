@@ -45,7 +45,7 @@ public class PushManager extends HecticusThread {
                 sendPushRequest(event);
             }
         } catch (Exception ex) {
-            Utils.printToLog(PushManager.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
+            Utils.printToLog(PushManager.class, null, "Error procesando un evento de la cola PUSH", false, ex, "support-level-1", Config.LOGGER_ERROR);
         }
     }
 
@@ -59,7 +59,7 @@ public class PushManager extends HecticusThread {
             F.Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/push").post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
         }catch (Exception ex){
-            Utils.printToLog(PushManager.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
+            Utils.printToLog(PushManager.class, null, "Error en el WS de distribucion de eventos", false, ex, "support-level-1", Config.LOGGER_ERROR);
         }
     }
 }

@@ -42,6 +42,7 @@ public class Global extends GlobalSettings {
     public void onStop(Application application) {
         super.onStop(application);
         run.set(false);
+        Utils.printToLog(Global.class, "Apagando " + Config.getString("app-name"), "Apagando " + Config.getString("app-name")+", se recibio la señal de shutdown", true, null, "support-level-1", Config.LOGGER_INFO);
         supervisor.cancel();
     }
 }

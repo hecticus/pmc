@@ -48,7 +48,7 @@ public class JavApns {
                 }
             }
         }catch(Exception e){}
-        Utils.printToLog(JavApns.class, null, "Levantado JavApns", false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
+        Utils.printToLog(JavApns.class, null, "Levantado JavApns con " + threads + " por app", false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
     }
 
     /**
