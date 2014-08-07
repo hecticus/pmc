@@ -6,6 +6,9 @@ import models.basic.Config;
 import models.basic.Event;
 import utils.Utils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,28 +36,47 @@ public class RabbitMQFailChecker extends HecticusThread {
     @Override
     public void process() {
         try{
-            List<Event> events = Event.finder.all();
+            List<Event> events = Event.finder.where().eq("server", Utils.serverIp).findList();
             for(int i = 0; isAlive() && i < events.size(); ++i){
                 Event e = events.get(i);
-                String body = URLDecoder.decode(e.getEvent(),"UTF-8");
-                boolean result = false;
-                if(e.getType().equalsIgnoreCase("event")){
-                    result = RabbitMQ.getInstance().insertEventLyraWithResult(body);
-                } else if(e.getType().equalsIgnoreCase("push")){
-                    result = RabbitMQ.getInstance().insertPushLyraWithResult(body);
-                } else if(e.getType().equalsIgnoreCase("result")){
-                    result = RabbitMQ.getInstance().insertPushResultLyraWithResult(body);
+                String body = null;
+                BufferedReader br = null;
+                try {
+                    br = new BufferedReader(new FileReader(e.getEvent()));
+                    body = br.readLine();
+                } catch (Exception ex) {
+                } finally {
+                    try {
+                        if (br != null)br.close();
+                    } catch (Exception ex) {
+
+                    }
                 }
-                if(result){
-                    Event.delete(e);
-                } else {
-                    int retry = e.getRetry();
-                    if(retry >= maxRetry) {
+//                String body = URLDecoder.decode(e.getEvent(),"UTF-8");
+                if(body != null && !body.isEmpty()){
+                    boolean result = false;
+                    if(e.getType().equalsIgnoreCase("event")){
+                        result = RabbitMQ.getInstance().insertEventLyraWithResult(body);
+                    } else if(e.getType().equalsIgnoreCase("push")){
+                        result = RabbitMQ.getInstance().insertPushLyraWithResult(body);
+                    } else if(e.getType().equalsIgnoreCase("result")){
+                        result = RabbitMQ.getInstance().insertPushResultLyraWithResult(body);
+                    }
+                    if(result){
+                        File f = new File(e.getEvent());
                         Event.delete(e);
+                        f.delete();
                     } else {
-                        retry++;
-                        e.setRetry(retry);
-                        Event.update(e);
+                        int retry = e.getRetry();
+                        if(retry >= maxRetry) {
+                            File f = new File(e.getEvent());
+                            Event.delete(e);
+                            f.delete();
+                        } else {
+                            retry++;
+                            e.setRetry(retry);
+                            Event.update(e);
+                        }
                     }
                 }
             }

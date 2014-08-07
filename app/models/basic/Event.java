@@ -27,19 +27,23 @@ public class Event extends HecticusModel {
     private String event;
     @Constraints.Required
     private int retry;
+    @Constraints.Required
+    private String server;
 
     public static Model.Finder<Long, Event> finder = new Model.Finder<Long, Event>(Long.class, Event.class);
 
-    public Event(String type, String event, int retry) {
+    public Event(String type, String event, int retry, String server) {
         this.type = type;
         this.event = event;
         this.retry = retry;
+        this.server = server;
     }
 
-    public Event(String type, String event) {
+    public Event(String type, String event, String server) {
         this.type = type;
         this.event = event;
         this.retry = 0;
+        this.server = server;
     }
 
     public String getType() {
@@ -66,6 +70,14 @@ public class Event extends HecticusModel {
         this.retry = retry;
     }
 
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
     @Override
     public ObjectNode toJson() {
         ObjectNode response = Json.newObject();
@@ -73,6 +85,7 @@ public class Event extends HecticusModel {
         response.put("type", type);
         response.put("event", event);
         response.put("retry", retry);
+        response.put("server", server);
         return response;
     }
 

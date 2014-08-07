@@ -10,6 +10,9 @@ import net.jodah.lyra.config.RetryPolicy;
 import net.jodah.lyra.util.Duration;
 import utils.Utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.net.URLEncoder;
 
 /**
@@ -26,6 +29,7 @@ public class RabbitMQ {
     private String eventsQueue;
     private String pushQueue;
     private String resultQueue;
+    private String failedRoute;
 
     public static RabbitMQ getInstance() throws Exception {
         if(me == null){
@@ -35,6 +39,7 @@ public class RabbitMQ {
     }
 
     public RabbitMQ() throws Exception {
+        failedRoute = models.basic.Config.getString("failed-events-files-route");
         host = models.basic.Config.getString("rabbit-mq-host");
         user = models.basic.Config.getString("rabbit-mq-user");
         password = models.basic.Config.getString("rabbit-mq-password");
@@ -279,11 +284,19 @@ public class RabbitMQ {
 
     private void insertObjectInDB(String type, String event) {
         try{
-            Event e = new Event(type, URLEncoder.encode(event,"UTF-8"));
-            System.out.println(e.toJson().toString());
+            String name = failedRoute + type + "-" + System.currentTimeMillis() + ".txt";
+            File file = new File(name);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(event);
+            bw.close();
+            Event e = new Event(type, name, Utils.serverIp);
             Event.save(e);
         }catch(Exception e){
-            Utils.printToLog(RabbitMQ.class, "Error en la conexion a RabbitMQ", "Error en la conexion a RabbitMQ insertando eventos en " + resultQueue, true, e, "support-level-1",models.basic.Config.LOGGER_ERROR);
+            Utils.printToLog(RabbitMQ.class, "Error en Guardando evento en MySQL", "Error el evento no se pudo guardar en MySQL luego de fallar en RabbitMQ cola:" + type + ", evento: " + event, true, e, "support-level-1", models.basic.Config.LOGGER_ERROR);
         }
     }
 }

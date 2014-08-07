@@ -59,7 +59,7 @@ public class CacheLoader extends HecticusThread {
      */
     private void getClientsFromApp(Application app, int pageSize) {
         try{
-            if(app.getBatchClientsUrl() != null && !app.getBatchClientsUrl().isEmpty()){
+            if(app.getActive() == 1 && app.getBatchClientsUrl() != null && !app.getBatchClientsUrl().isEmpty()){
                 boolean done = false;
                 int index = 0;
                 while (isAlive() && !done) {

@@ -94,7 +94,7 @@ public class ThreadSupervisor extends HecticusThread {
     }
 
     private void checkRabbitMQFailChecker() {
-        if(rabbitMQFailChecker == null && Config.getInt("allow-RMQFC") == 1){
+        if(rabbitMQFailChecker == null && Utils.serverIp != null && Config.getInt("allow-RMQFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando RabbitMQFailChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             rabbitMQFailChecker = new RabbitMQFailChecker(getRun());
             Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(1, HOURS), rabbitMQFailChecker, system.dispatcher());
@@ -244,7 +244,7 @@ public class ThreadSupervisor extends HecticusThread {
             cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("cache-loader-sleep"), SECONDS), cacheLoader, system.dispatcher());
             cacheLoader.setCancellable(cancellable);
         }
-        if(Config.getInt("allow-RMQFC") == 1){
+        if(Utils.serverIp != null && Config.getInt("allow-RMQFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando RabbitMQFailChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             rabbitMQFailChecker = new RabbitMQFailChecker(getRun());
             cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(1, HOURS), rabbitMQFailChecker, system.dispatcher());
