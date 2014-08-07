@@ -42,9 +42,9 @@ public class Global extends GlobalSettings {
         try {
             br = new BufferedReader(new FileReader(Config.getString("server-ip-file")));
             Utils.serverIp = br.readLine();
-        } catch (Exception e) {
+        } catch (Exception ex) {
             Utils.serverIp = null;
-            Utils.printToLog(Global.class, "Error cargando el IP del servidor", "Ocurrio un error cargando el IP del servidor desde el archivo. El PMC levantara pero no procesara eventos fallidos que esten en MySQL", false, null, "support-level-1", Config.LOGGER_ERROR);
+            Utils.printToLog(Global.class, "Error cargando el IP del servidor", "Ocurrio un error cargando el IP del servidor desde el archivo. El PMC levantara pero no procesara eventos fallidos que esten en MySQL", true, ex, "support-level-1", Config.LOGGER_ERROR);
         } finally {
             try {if (br != null)br.close();} catch (Exception ex) {}
         }

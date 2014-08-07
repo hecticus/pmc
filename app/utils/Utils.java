@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.w3c.dom.Document;
 
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 
 import java.util.Random;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Utils {
     public static AtomicBoolean run;
+    public static String serverIp;
 
     /**
      * Data para el generador de cadenas alfanumericas
