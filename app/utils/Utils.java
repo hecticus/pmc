@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import models.basic.Config;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.basic.Instance;
 import org.w3c.dom.Document;
 
 import play.Logger;
@@ -24,7 +25,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Utils {
     public static AtomicBoolean run;
     public static String serverIp;
-
+    public static boolean test;
+    public static Instance actual;
     /**
      * Data para el generador de cadenas alfanumericas
      */
@@ -37,6 +39,8 @@ public class Utils {
             tmp.append(ch);
         symbols = tmp.toString().toCharArray();
     }
+
+
 
     /**
 	 * Metodo para imprimir errores al log
@@ -98,7 +102,7 @@ public class Utils {
 				break;
 		}
 
-		if(sendMail){
+		if(!test && sendMail){
             try{
                 if(ex==null){
                     Alarm.sendMail(Config.getStringArray(supportLevel, ";"), title, message.toString());

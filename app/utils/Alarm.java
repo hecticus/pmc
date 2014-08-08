@@ -9,6 +9,7 @@ import java.security.Security;
 import javax.mail.*;
 import javax.mail.internet.*;
 
+import models.basic.Instance;
 import play.Logger;
 import models.basic.Config;
 
@@ -50,7 +51,11 @@ public class Alarm {
 //		Logger logger = Logger.getLogger(Alarm.class);	
 
 		try {
-			subject = "PLAY-"+Config.getString("app-name")+" - "+subject;
+            if(Utils.actual != null) {
+                subject = Utils.actual.getName() + " - " + subject;
+            } else {
+                subject = Config.getString("app-name")+(Utils.serverIp==null?"":"-"+Utils.serverIp)+" - "+subject;
+            }
 			Long o = tabla.get(subject);
 			if (o != null) {
 				if ((System.currentTimeMillis() - o) < Config.getLong("alarm-send-millis")) {

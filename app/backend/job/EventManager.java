@@ -169,8 +169,91 @@ public class EventManager extends HecticusThread {
             return false;
         }
         try{
+            boolean sendAlarm = false;
+            int androidSize = Config.getInt("android-payload-max-size");
+            int iosSize = Config.getInt("ios-payload-max-size");
             msg = URLDecoder.decode(msg, "UTF-8");
-            event.put("msg", msg.length() > 100?msg.substring(0, 99):msg);
+            msg = msg.length() > 100?msg.substring(0, 99):msg;
+            event.put("msg", msg);
+            ObjectNode extraParams = null;
+            if(event.has("extra_params")){
+                extraParams = (ObjectNode) event.get("extra_params");
+            } else {
+                extraParams = event.deepCopy();
+                extraParams.remove("regIDs");
+                extraParams.remove("emTime");
+                extraParams.remove("prodTime");
+                extraParams.remove("pmTime");
+                extraParams.remove("msg");
+                extraParams.remove("clients");
+                extraParams.remove("generationTime");
+                extraParams.remove("insertionTime");
+                extraParams.remove("app");
+            }
+
+            //android
+            ObjectNode message = Json.newObject();
+            message.put("message", msg);
+            message.put("title", app.getTitle());
+            if(app.getSound() != null && !app.getSound().isEmpty()){
+                message.put("sound", app.getSound());
+            }
+            if(extraParams != null) {
+                message.put("extra_params", extraParams);
+            }
+            int length = message.toString().getBytes().length;
+            while(length >= androidSize){
+                msg = msg.substring(0, msg.length() - 1);
+                message.put("message", msg);
+                length = message.toString().getBytes().length;
+            }
+            if(msg.isEmpty()){
+                msg = event.get("msg").asText();
+                msg = msg.substring(0, 20);
+                message.put("message", msg);
+                sendAlarm = true;
+            }
+            ObjectNode android = Json.newObject();
+            android.put("data", message);
+            android.put("collapse_key", app.getName());
+            if(msg.isEmpty()){
+                msg = event.get("msg").asText();
+                message.put("message", msg);
+            }
+
+            //IOS
+            msg = event.get("msg").asText();
+            ObjectNode payloadToSend = Json.newObject();
+            payloadToSend.put("alert", msg);
+            if(extraParams != null) {
+                payloadToSend.put("extra_params", extraParams.toString());
+            }
+            if(app.getSound() != null && !app.getSound().isEmpty()){
+                payloadToSend.put("sound", app.getSound());
+            }
+            ObjectNode aps = Json.newObject();
+            length = payloadToSend.toString().getBytes().length;
+            while(length >= iosSize){
+                msg = msg.substring(0, msg.length() - 1);
+                payloadToSend.put("alert", msg);
+                length = payloadToSend.toString().getBytes().length;
+            }
+            if(msg.isEmpty()){
+                msg = event.get("msg").asText();
+                msg = msg.substring(0, 20);
+                payloadToSend.put("alert", msg);
+                sendAlarm = true;
+            }
+
+            if(sendAlarm){
+                ObjectNode wrongEvent = event.deepCopy();
+                wrongEvent.remove("clients");
+                Utils.printToLog(EventManager.class, "Payload demasiado grande", "El payload generado es demasiado grande, se cortara el mensaje a 20 chars y se intentara enviar. Evento: " + wrongEvent.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
+            }
+
+            aps.put("aps", payloadToSend);
+            event.put("gcm", android);
+            event.put("apns", aps);
         }catch (Exception ex){
             return false;
         }

@@ -291,6 +291,10 @@ public class EventsWS extends HecticusController {
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     payload.addSound(app.getSound());
                 }
+                fResponse.put("payload", payload.toString());
+                fResponse.put("payload_bytes", payload.toString().getBytes().length);
+                fResponse.put("app", app.toJson());
+                System.out.println(payload.toString() + " size = " + payload.toString().getBytes().length);
                 JavApns.getInstance().enqueue(app, payload, registrationIds);
                 return fResponse;
             } catch (Exception e) {
