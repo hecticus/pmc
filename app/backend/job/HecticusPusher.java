@@ -248,7 +248,7 @@ public class HecticusPusher extends HecticusThread {
         fields.put("collapse_key", app.getName());
         if(app.getDebug() == 0){
             Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
-            ObjectNode response = (ObjectNode) result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
+            ObjectNode response = (ObjectNode) result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
             if(response.has("canonical_ids") || (response.has("failure") && response.get("failure").asInt() > 0)){
                 response.put("original_ids", Json.toJson(registrationIds));
                 response.put("type", "DROID");

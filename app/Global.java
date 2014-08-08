@@ -48,7 +48,7 @@ public class Global extends GlobalSettings {
         } finally {
             try {if (br != null)br.close();} catch (Exception ex) {}
         }
-        Utils.printToLog(Global.class, null, "Arrancando " + Config.getString("app-name"), false, null, "support-level-1", Config.LOGGER_INFO);
+        Utils.printToLog(Global.class, null, "Arrancando " + Config.getString("app-name") + (Utils.serverIp==null?"":Utils.serverIp), false, null, "support-level-1", Config.LOGGER_INFO);
         ActorSystem system = ActorSystem.create("application");
         run = new AtomicBoolean(true);
         Utils.run = run;
