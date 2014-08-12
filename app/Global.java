@@ -108,9 +108,21 @@ public class Global extends GlobalSettings {
     Action newAction = new Action.Simple() {
         @Override
         public F.Promise<Result> call(Http.Context ctx) throws Throwable {
-            // TODO Auto-generated method stub
-            Logger.info("Calling action for " + ctx);
-            return delegate.call(ctx);
+            F.Promise<String> promiseOfString = F.Promise.promise(
+                    new F.Function0<String>() {
+                        public String apply() {
+                            return "You dont have access to this service, contact the Administrator for more information";
+                        }
+                    }
+            );
+
+            return promiseOfString.map(
+                    new F.Function<String, Result>() {
+                        public Result apply(String i) {
+                            return forbidden(i);
+                        }
+                    }
+            );
         }
     };
 
@@ -125,7 +137,6 @@ public class Global extends GlobalSettings {
                     || (ipString.startsWith("10.182.") && Integer.parseInt(octetos[2]) <= 127 )
                     || ipString.startsWith("10.181.")
                     || ipString.startsWith("10.208.")
-                    || request.path().endsWith(".hecticus.com")
                     || request.path().equals("190.14.219.174")
                     || request.path().equals("201.249.204.73")
                     || request.path().equals("186.74.13.178")){
