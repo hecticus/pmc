@@ -43,8 +43,6 @@ public class CacheLoader extends HecticusThread {
     public void process() {
         long start = System.currentTimeMillis();
         try{
-
-            System.out.println("cargando cache");
             int pageSize = Config.getInt("core-query-limit");
             List<Application> apps = Application.finder.all();
             for(int i = 0; isAlive() && i < apps.size(); ++i){
@@ -55,7 +53,7 @@ public class CacheLoader extends HecticusThread {
         } catch(Exception e) {
             Utils.printToLog(CacheLoader.class, "Error en el CacheLoader", "Ocurrio un error en el CacheLoader ", true, e, "support-level-1", Config.LOGGER_ERROR);
         } finally {
-            System.out.println("cache cargada en " + (System.currentTimeMillis() - start));
+            Utils.printToLog(CacheLoader.class, null, "cache cargada en " + (System.currentTimeMillis() - start), false, null, "support-level-1", Config.LOGGER_INFO);
         }
     }
 
