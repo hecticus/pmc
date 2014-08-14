@@ -41,14 +41,21 @@ public class CacheLoader extends HecticusThread {
      */
     @Override
     public void process() {
+        long start = System.currentTimeMillis();
         try{
+
+            System.out.println("cargando cache");
             int pageSize = Config.getInt("core-query-limit");
             List<Application> apps = Application.finder.all();
             for(int i = 0; isAlive() && i < apps.size(); ++i){
-                getClientsFromApp(apps.get(i), pageSize);
+                if(apps.get(i).getActive() == 1 && apps.get(i).getBatchClientsUrl() != null && !apps.get(i).getBatchClientsUrl().isEmpty()) {
+                    ClientsCache.getInstance().loadClients(apps.get(i), pageSize);
+                }
             }
         } catch(Exception e) {
             Utils.printToLog(CacheLoader.class, "Error en el CacheLoader", "Ocurrio un error en el CacheLoader ", true, e, "support-level-1", Config.LOGGER_ERROR);
+        } finally {
+            System.out.println("cache cargada en " + (System.currentTimeMillis() - start));
         }
     }
 
@@ -56,6 +63,7 @@ public class CacheLoader extends HecticusThread {
      * Metodo para obtener todos los idClients de la app recibida por parametro e ir llenando la cache de estos clientes
      * @param app       id del app
      * @param pageSize  maximo tamaño de pagina que se solicitar al ws
+     * @deprecated
      */
     private void getClientsFromApp(Application app, int pageSize) {
         try{
