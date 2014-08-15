@@ -109,7 +109,7 @@ public abstract class HecticusThread implements Runnable {
      */
     @Override
     public void run() {
-        if(isAlive()){
+        if(isAlive() && !active){
             try{
                 active = true;
                 process();
@@ -133,7 +133,7 @@ public abstract class HecticusThread implements Runnable {
             if(cancellable != null) {
                 cancellable.cancel();
             }
-            Utils.printToLog(HecticusThread.class, null, "Apagado " + name, false, null, "support-level-1", Config.LOGGER_INFO);
+            Utils.printToLog(HecticusThread.class, null, "Apagado " + name + " vivio " + (System.currentTimeMillis() - initTime), false, null, "support-level-1", Config.LOGGER_INFO);
         } catch (Throwable t){
             Utils.printToLog(HecticusThread.class, "Error en el HecticusThread", "Ocurrio cancelando el HecticusThread: " + name, true, t, "support-level-1", Config.LOGGER_ERROR);
         }

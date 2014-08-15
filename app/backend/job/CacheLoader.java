@@ -47,7 +47,7 @@ public class CacheLoader extends HecticusThread {
             List<Application> apps = Application.finder.all();
             for(int i = 0; isAlive() && i < apps.size(); ++i){
                 if(apps.get(i).getActive() == 1 && apps.get(i).getBatchClientsUrl() != null && !apps.get(i).getBatchClientsUrl().isEmpty()) {
-                    ClientsCache.getInstance().loadClients(apps.get(i), pageSize);
+                    ClientsCache.getInstance().loadClients(this, apps.get(i), pageSize);
                 }
             }
         } catch(Exception e) {

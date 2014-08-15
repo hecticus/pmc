@@ -97,7 +97,7 @@ public class ThreadSupervisor extends HecticusThread {
         if(rabbitMQFailChecker == null && Utils.serverIp != null && Config.getInt("allow-RMQFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando RabbitMQFailChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             rabbitMQFailChecker = new RabbitMQFailChecker(getRun());
-            Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(1, HOURS), rabbitMQFailChecker, system.dispatcher());
+            Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("RMQFC-sleep"), HOURS), rabbitMQFailChecker, system.dispatcher());
             rabbitMQFailChecker.setCancellable(cancellable);
         } else if(rabbitMQFailChecker != null && Config.getInt("allow-RMQFC") == 0){
             rabbitMQFailChecker.cancel();
@@ -121,7 +121,7 @@ public class ThreadSupervisor extends HecticusThread {
         if(iosFeedbackChecker == null && Config.getInt("allow-IOSFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando IOSFeedbackChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             iosFeedbackChecker = new IOSFeedbackChecker(getRun());
-            Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(2, HOURS), iosFeedbackChecker, system.dispatcher());
+            Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("IOSFC-sleep"), HOURS), iosFeedbackChecker, system.dispatcher());
             iosFeedbackChecker.setCancellable(cancellable);
         } else if(iosFeedbackChecker != null && Config.getInt("allow-IOSFC") == 0){
             iosFeedbackChecker.cancel();
@@ -235,7 +235,7 @@ public class ThreadSupervisor extends HecticusThread {
         if(Config.getInt("allow-IOSFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando IOSFeedbackChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             iosFeedbackChecker = new IOSFeedbackChecker(getRun());
-            cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(2, HOURS), iosFeedbackChecker, system.dispatcher());
+            cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("IOSFC-sleep"), HOURS), iosFeedbackChecker, system.dispatcher());
             iosFeedbackChecker.setCancellable(cancellable);
         }
         if(Config.getInt("allow-CL") == 1){
@@ -247,7 +247,7 @@ public class ThreadSupervisor extends HecticusThread {
         if(Utils.serverIp != null && Config.getInt("allow-RMQFC") == 1){
             Utils.printToLog(ThreadSupervisor.class, null, "Arrancando RabbitMQFailChecker", false, null, "support-level-1", Config.LOGGER_INFO);
             rabbitMQFailChecker = new RabbitMQFailChecker(getRun());
-            cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(1, HOURS), rabbitMQFailChecker, system.dispatcher());
+            cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("RMQFC-sleep"), HOURS), rabbitMQFailChecker, system.dispatcher());
             rabbitMQFailChecker.setCancellable(cancellable);
         }
     }
@@ -280,7 +280,7 @@ public class ThreadSupervisor extends HecticusThread {
         }
 
         if(cacheLoader != null){
-            cacheLoader.getCancellable().cancel();
+            cacheLoader.cancel();
         }
 
         if(iosFeedbackChecker != null){
