@@ -140,7 +140,7 @@ public class Global extends GlobalSettings {
                     || request.path().equals("190.14.219.174")
                     || request.path().equals("201.249.204.73")
                     || request.path().equals("186.74.13.178")){
-                if(!request.path().equals("10.182.7.53")){
+                if(!invoker.startsWith("controllers.Application")){
                     Logger.info("Pass request from "+ipString+" to "+invoker);
                 }
                 return super.onRequest(request, actionMethod);
