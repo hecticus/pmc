@@ -3,6 +3,7 @@ package backend.job;
 import akka.actor.Cancellable;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controllers.basic.Secured;
 import models.basic.Config;
 import play.libs.F;
 import play.libs.Json;
@@ -56,7 +57,7 @@ public class PushManager extends HecticusThread {
      */
     private void sendPushRequest(ObjectNode event) {
         try{
-            F.Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/push").post(event);
+            F.Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/push").setHeader(Secured.AUTH_TOKEN_HEADER, Secured.getAuthToken()).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
         }catch (Exception ex){
             Utils.printToLog(PushManager.class, null, "Error en el WS de distribucion de eventos", false, ex, "support-level-1", Config.LOGGER_ERROR);

@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import controllers.basic.Secured;
 import models.apps.Application;
 import models.basic.Config;
 import play.libs.F;
@@ -133,7 +134,7 @@ public class EventManager extends HecticusThread {
      */
     private void sendProcessRequest(ObjectNode event) {
         try{
-            Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/process").post(event);
+            Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/process").setHeader(Secured.AUTH_TOKEN_HEADER, Secured.getAuthToken()).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
             setAlive();
         }catch (Exception ex){

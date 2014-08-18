@@ -1,6 +1,9 @@
 package utils;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -240,5 +243,19 @@ public class Utils {
         for (int idx = 0; idx < buf.length; ++idx)
             buf[idx] = symbols[random.nextInt(symbols.length)];
         return new String(buf);
+    }
+
+
+    public static String generateMD5(String input) {
+        String md5 = null;
+        if(null == input) return null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.update(input.getBytes(), 0, input.length());
+            md5 = new BigInteger(1, digest.digest()).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return md5;
     }
 }

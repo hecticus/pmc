@@ -12,6 +12,7 @@ import com.hecticus.rackspacemailgun.MailGun;
 //import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
 //import com.relayrides.pushy.apns.util.TokenUtil;
 import controllers.HecticusController;
+import controllers.basic.Secured;
 import javapns.Push;
 import javapns.notification.*;
 import models.apps.Application;
@@ -22,10 +23,7 @@ import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import play.mvc.BodyParser;
-import play.mvc.Http;
-import play.mvc.Result;
-import play.mvc.Results;
+import play.mvc.*;
 import utils.Utils;
 
 import java.security.KeyStore;
@@ -36,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by plesse on 7/15/14.
  */
+@Security.Authenticated(Secured.class)
 public class EventsWS extends HecticusController {
 
     public static F.Promise<Result> launchProcess(Boolean prod) {
