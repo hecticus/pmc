@@ -3,6 +3,7 @@ package backend.job;
 import akka.actor.Cancellable;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -176,8 +177,14 @@ public class EventManager extends HecticusThread {
             msg = msg.length() > 100?msg.substring(0, 99):msg;
             event.put("msg", msg);
             ObjectNode extraParams = null;
+            int extraParamsInt = 0;
             if(event.has("extra_params")){
-                extraParams = (ObjectNode) event.get("extra_params");
+                Object ep = event.get("extra_params");
+                if(ep instanceof ObjectNode){
+                    extraParams = (ObjectNode) event.get("extra_params");
+                } else{
+                    extraParamsInt = event.get("extra_params").asInt();
+                }
             } else {
                 extraParams = event.deepCopy();
                 extraParams.remove("regIDs");
@@ -200,6 +207,8 @@ public class EventManager extends HecticusThread {
             }
             if(extraParams != null) {
                 message.put("extra_params", extraParams);
+            } else {
+                message.put("extra_params", extraParamsInt);
             }
             int length = message.toString().getBytes().length;
             while(length >= androidSize){
