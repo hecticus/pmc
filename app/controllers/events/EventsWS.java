@@ -159,7 +159,22 @@ public class EventsWS extends HecticusController {
             if(app.getDebug() == 0){
                 F.Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
                 ObjectNode fResponse = Json.newObject();
-                fResponse.put("response", Json.toJson((ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson()));
+
+                WSResponse r = null;
+                String resp = null;
+                try{
+                    r = result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS);
+                    ObjectNode response = (ObjectNode) r.asJson();
+                    resp = response.toString();
+                    fResponse.put("response", Json.toJson(response));
+                } catch(Exception e){
+                    try{
+                        resp = r.asXml().toString();
+                    } catch(Exception e1){
+                    }
+                    fResponse.put("response", "error de Google " + resp + " exception: " + e.getMessage());
+                }
+//                fResponse.put("response", Json.toJson((ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson()));
                 return fResponse;
             } else {
                 ObjectNode fResponse = Json.newObject();

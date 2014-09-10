@@ -228,28 +228,42 @@ public class HecticusPusher extends HecticusThread {
         gcm.put("registration_ids", Json.toJson(registrationIds));
         if(app.getDebug() == 0){
             Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(gcm);
-            ObjectNode response = (ObjectNode) result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
-            if(response.has("canonical_ids") || (response.has("failure") && response.get("failure").asInt() > 0)){
-                response.put("original_ids", Json.toJson(registrationIds));
-                response.put("type", "DROID");
-                long emTime = event.get("emTime").asLong();
-                long prodTime = event.get("prodTime").asLong();
-                long pmTime = event.get("pmTime").asLong();
-                long insertionTime = event.get("insertionTime").asLong();
-                response.put("emTime", emTime);
-                response.put("prodTime", prodTime);
-                response.put("pmTime", pmTime);
-                if(event.has("generationTime")) {
-                    response.put("generationTime", event.get("generationTime").asLong());
+            WSResponse r = null;
+            String resp = null;
+            try{
+                r = result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS);
+                ObjectNode response = (ObjectNode) r.asJson();
+                resp = response.toString();
+//                ObjectNode response = (ObjectNode) result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
+                if(response.has("canonical_ids") || (response.has("failure") && response.get("failure").asInt() > 0)){
+                    response.put("original_ids", Json.toJson(registrationIds));
+                    response.put("type", "DROID");
+                    long emTime = event.get("emTime").asLong();
+                    long prodTime = event.get("prodTime").asLong();
+                    long pmTime = event.get("pmTime").asLong();
+                    long insertionTime = event.get("insertionTime").asLong();
+                    response.put("emTime", emTime);
+                    response.put("prodTime", prodTime);
+                    response.put("pmTime", pmTime);
+                    if(event.has("generationTime")) {
+                        response.put("generationTime", event.get("generationTime").asLong());
+                    }
+                    response.put("insertionTime", insertionTime);
+                    response.put("app", app.getIdApp());
+                    try {
+                        RabbitMQ.getInstance().insertPushResultLyra(response.toString());
+                    } catch (Exception e) {
+                        String emsg = "Proceso continua. Error insertando resultado de push en rabbit, response = " + response.toString();
+                        Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, e, "support-level-1", Config.LOGGER_ERROR);
+                    }
                 }
-                response.put("insertionTime", insertionTime);
-                response.put("app", app.getIdApp());
-                try {
-                    RabbitMQ.getInstance().insertPushResultLyra(response.toString());
-                } catch (Exception e) {
-                    String emsg = "Proceso continua. Error insertando resultado de push en rabbit, response = " + response.toString();
-                    Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, e, "support-level-1", Config.LOGGER_ERROR);
+            } catch (Exception e){
+                try{
+                    resp = r.asXml().toString();
+                } catch(Exception e1){
+                    resp = "la respuesta no es casteable a Json ni a XML";
                 }
+                Utils.printToLog(HecticusPusher.class, null, "Error en la respuesta de Google, resp: " + resp, false, e, "support-level-1", Config.LOGGER_ERROR);
             }
         }
     }
