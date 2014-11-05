@@ -5,6 +5,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.avaje.ebean.Page;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
@@ -63,7 +64,7 @@ public class Config extends Model{
 	private Long idConfig;
 	@Required
 	@MaxLength(50)
-	private String key;
+	private String configKey;
 	@Required
 	private String value;
 	@Required
@@ -78,11 +79,11 @@ public class Config extends Model{
 	public void setIdConfig(Long idConfig) {
 		this.idConfig = idConfig;
 	}
-	public String getKey() {
-		return key;
+	public String getConfigKey() {
+		return configKey;
 	}
-	public void setKey(String key) {
-		this.key = key;
+	public void setConfigKey(String configKey) {
+		this.configKey = configKey;
 	}
 	public String getValue() {
 		return value;
@@ -102,22 +103,22 @@ public class Config extends Model{
 	}
 	
 	public static String getString(String key){
-		Config c = finder.where().eq("key", key).findUnique();
+		Config c = finder.where().eq("configKey", key).findUnique();
 		return c.getValue();
 	}
 	
 	public static Long getLong(String key){
-		Config c = finder.where().eq("key", key).findUnique();
+		Config c = finder.where().eq("configKey", key).findUnique();
 		return Long.parseLong(c.getValue());
 	}
 	
 	public static String[] getStringArray(String key, String separator){
-		Config c = finder.where().eq("key", key).findUnique();
+		Config c = finder.where().eq("configKey", key).findUnique();
 		return c.getValue().split(separator);
 	}
 	
 	public static int getInt(String key){
-		Config c = finder.where().eq("key", key).findUnique();
+		Config c = finder.where().eq("configKey", key).findUnique();
 		return Integer.parseInt(c.getValue());
 	}
 	
@@ -126,7 +127,7 @@ public class Config extends Model{
 	 * @return nombre del host actual
 	 */
 	public static String getDaemonHost() {
-		Config c = finder.where().eq("key","pmc-url").findUnique();
+		Config c = finder.where().eq("configKey","pmc-url").findUnique();
 		return c.getValue();
 	}
 	
@@ -135,7 +136,7 @@ public class Config extends Model{
 	 * @return nombre del host actual
 	 */
 	public static String getHost() {
-		Config c = finder.where().eq("key","kraken-url").findUnique();
+		Config c = finder.where().eq("configKey","kraken-url").findUnique();
 		return c.getValue();
 	}
 	
@@ -144,8 +145,11 @@ public class Config extends Model{
 	 * @return nombre del host actual
 	 */
 	public static String getFervidHost() {
-		Config c = finder.where().eq("key","fervid-url").findUnique();
+		Config c = finder.where().eq("configKey","fervid-url").findUnique();
 		return c.getValue();
 	}
 
+    public static Page<Config> page(int page, int pageSize, String sortBy, String order, String filter) {
+        return finder.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+    }
 }

@@ -1,15 +1,17 @@
 package models.apps;
 
+import com.avaje.ebean.Page;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.HecticusModel;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
+import play.i18n.Messages;
 import play.libs.Json;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.mutable.Buffer;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class Application extends HecticusModel {
     private String name;
     @Constraints.Required
     private int active;
-    @OneToMany(mappedBy="app")
+    @OneToMany(mappedBy="app", cascade = CascadeType.ALL)
     private List<AppDevice> appDevices;
 
     @Constraints.Required
@@ -37,44 +39,71 @@ public class Application extends HecticusModel {
     @Constraints.Required
     private String cleanDeviceUrl;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String iosPushApnsCertProduction;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String iosPushApnsCertSandbox;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String iosPushApnsPassphrase;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String googleApiKey;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String mailgunApikey;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String mailgunFrom;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String mailgunTo;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String mailgunApiurl;
 
     @Constraints.Required
     private String title;
 
-    @Constraints.Required
+//    @Constraints.Required
     private String sound;
 
     @Constraints.Required
     private int debug;
 
-    @Constraints.Required
+//    @Constraints.Required
     private int iosSandbox;
+
+    public String validate() {
+        if(iosPushApnsCertProduction != null && !iosPushApnsCertProduction.isEmpty()){
+            if(!iosPushApnsCertProduction.endsWith(".p12")){
+                return Messages.get("applications.java.invalidIosProductionFile");
+            }
+        }
+        if(iosPushApnsCertSandbox != null && !iosPushApnsCertSandbox.isEmpty()){
+            if(!iosPushApnsCertSandbox.endsWith(".p12")){
+                return Messages.get("applications.java.invalidIosSandboxFile");
+            }
+        }
+        return null;
+    }
 
 
     public static Model.Finder<Long, Application> finder = new Model.Finder<Long, Application>(Long.class, Application.class);
+
+    public Application() {
+        this.iosPushApnsCertProduction = "";
+        this.iosPushApnsCertSandbox = "";
+        this.iosPushApnsPassphrase = "";
+        this.googleApiKey = "";
+        this.mailgunApikey = "";
+        this.mailgunFrom = "";
+        this.mailgunTo = "";
+        this.mailgunApiurl = "";
+        this.sound = "";
+        this.iosSandbox = 0;
+    }
 
     @Override
     public ObjectNode toJson() {
@@ -270,5 +299,29 @@ public class Application extends HecticusModel {
 
     public void setCleanDeviceUrl(String cleanDeviceUrl) {
         this.cleanDeviceUrl = cleanDeviceUrl;
+    }
+
+    public void setIdApp(Long idApp) {
+        this.idApp = idApp;
+    }
+
+    public void setAppDevices(List<AppDevice> appDevices) {
+        this.appDevices = appDevices;
+    }
+
+    public static Page<Application> page(int page, int pageSize, String sortBy, String order, String filter) {
+        return finder.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+    }
+
+    public static scala.collection.immutable.List<Tuple2<String, String>> toSeq() {
+        List<Application> applications = Application.finder.all();
+        ArrayList<Tuple2<String, String>> proxy = new ArrayList<>();
+        for(Application application : applications) {
+            Tuple2<String, String> t = new Tuple2<>(application.getIdApp().toString(), application.getName());
+            proxy.add(t);
+        }
+        Buffer<Tuple2<String, String>> appBuffer = JavaConversions.asScalaBuffer(proxy);
+        scala.collection.immutable.List<Tuple2<String, String>> appList = appBuffer.toList();
+        return appList;
     }
 }

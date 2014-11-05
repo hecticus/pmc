@@ -156,6 +156,7 @@ public class EventsWS extends HecticusController {
             fields.put("registration_ids", Json.toJson(registrationIds));
             fields.put("data", message);
             fields.put("collapse_key", app.getName());
+            System.out.println(fields.toString());
             if(app.getDebug() == 0){
                 F.Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
                 ObjectNode fResponse = Json.newObject();
@@ -171,6 +172,7 @@ public class EventsWS extends HecticusController {
                     try{
                         resp = r.asXml().toString();
                     } catch(Exception e1){
+                        System.out.println("e1 " + e1.getMessage());
                     }
                     fResponse.put("response", "error de Google " + resp + " exception: " + e.getMessage());
                 }

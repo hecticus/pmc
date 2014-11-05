@@ -1,9 +1,9 @@
 package utils;
 
 import java.io.ByteArrayInputStream;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,13 +12,13 @@ import models.basic.Config;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.basic.Instance;
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 
 import play.Logger;
 import play.Play;
 import play.libs.Json;
 
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -240,5 +240,32 @@ public class Utils {
         for (int idx = 0; idx < buf.length; ++idx)
             buf[idx] = symbols[random.nextInt(symbols.length)];
         return new String(buf);
+    }
+
+    public static String uploadCertificate(File file, String appName, String certificateName) throws IOException {
+        File folder = new File(Config.getString("certificates-route") + appName);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        String route = Config.getString("certificates-route") + appName + "/" + certificateName;
+        File dest = new File(route);
+        FileUtils.copyFile(file, dest);
+        return route;
+    }
+
+    public static void renameCertificateFolder(String oldName, String newName) throws IOException {
+        File oldDir = new File(Config.getString("certificates-route") + oldName);
+        if(oldDir.exists()) {
+            File newDir = new File(Config.getString("certificates-route") + newName);
+            FileUtils.copyDirectory(oldDir, newDir);
+            FileUtils.deleteDirectory(oldDir);
+        }
+    }
+
+    public static void deleteCertificateFolder(String appName) throws IOException {
+        File appDir = new File(Config.getString("certificates-route") + appName);
+        if(appDir.exists()) {
+            FileUtils.deleteDirectory(appDir);
+        }
     }
 }

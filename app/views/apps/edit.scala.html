@@ -1,0 +1,259 @@
+@(id: Long, applicationViewForm: Form[models.apps.Application])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@deviceGroup(field: Field, className: String = "device") = {
+    <div class="twipsies well @className">
+        <a class="removeDevice btn btn-primary danger pull-right">@Messages("applications.device.remove")</a>
+        @select(
+            field("dev.idDevice"),
+            models.apps.Device.toSeq,
+            '_label -> Messages("applications.device"),
+            'class -> "form-control"
+        )
+        @inputText(field("status"), '_label -> Messages("applications.device.active"), '_help -> Messages("applications.device.active.help"), '_error -> applicationViewForm.globalError, 'class -> "form-control")
+    </div>
+}
+
+@main(title = Messages("applications.edit"), nav = "create") {
+
+    @if(applicationViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@applicationViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(controllers.routes.ApplicationsView.update(id), 'enctype -> "multipart/form-data", 'id -> "form") {
+
+        <fieldset>
+            <legend>@Messages("applications.info")</legend>
+
+            @inputText(
+                applicationViewForm("name"),
+                '_label -> Messages("applications.name"),
+                '_help -> Messages("applications.name.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("active"),
+                '_label -> Messages("applications.active"),
+                '_help -> Messages("applications.active.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("batchClientsUrl"),
+                '_label -> Messages("applications.batchClientsUrl"),
+                '_help -> Messages("applications.batchClientsUrl.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("singleClientUrl"),
+                '_label -> Messages("applications.singleClientUrl"),
+                '_help -> Messages("applications.singleClientUrl.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("cleanDeviceUrl"),
+                '_label -> Messages("applications.cleanDeviceUrl"),
+                '_help -> Messages("applications.cleanDeviceUrl.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+            @inputText(
+                applicationViewForm("title"),
+                '_label -> Messages("applications.title"),
+                '_help -> Messages("applications.title.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("sound"),
+                '_label -> Messages("applications.sound"),
+                '_help -> Messages("applications.sound.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("debug"),
+                '_label -> Messages("applications.debug"),
+                '_help -> Messages("applications.debug.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            <h2>@Messages("applications.android")</h2>
+
+            @inputText(
+                applicationViewForm("googleApiKey"),
+                '_label -> Messages("applications.googleApiKey"),
+                '_help -> Messages("applications.googleApiKey.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            <h2>@Messages("applications.ios")</h2>
+
+            @**inputText(
+                applicationViewForm("iosPushApnsCertProduction"),
+                '_label -> Messages("applications.iosPushApnsCertProduction"),
+                '_help -> Messages("applications.iosPushApnsCertProduction.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )*@
+
+
+            @input(applicationViewForm("iosPushApnsCertProduction"), '_label -> Messages("applications.iosPushApnsCertProduction"),'_help -> Messages("applications.iosPushApnsCertProduction.help")) { (id, name, value, _) =>
+                <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
+                <input type="file" name="@name" value="@value" id="iosProdFile" multiple="">
+            }
+
+            @input(applicationViewForm("iosPushApnsCertSandbox"), '_label -> Messages("applications.iosPushApnsCertSandbox"),'_help -> Messages("applications.iosPushApnsCertSandbox.help")) { (id, name, value, _) =>
+                <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
+                <input type="file" name="@name" value="@value" id="iosSandFile" multiple="">
+            }
+
+            @**inputText(
+                applicationViewForm("iosPushApnsCertSandbox"),
+                '_label -> Messages("applications.iosPushApnsCertSandbox"),
+                '_help -> Messages("applications.iosPushApnsCertSandbox.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )*@
+
+            @inputText(
+                applicationViewForm("iosPushApnsPassphrase"),
+                '_label -> Messages("applications.iosPushApnsPassphrase"),
+                '_help -> Messages("applications.iosPushApnsPassphrase.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("iosSandbox"),
+                '_label -> Messages("applications.iosSandbox"),
+                '_help -> Messages("applications.iosSandbox.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            <h2>@Messages("applications.mailgun")</h2>
+
+            @inputText(
+                applicationViewForm("mailgunApikey"),
+                '_label -> Messages("applications.mailgunApikey"),
+                '_help -> Messages("applications.mailgunApikey.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("mailgunApiurl"),
+                '_label -> Messages("applications.mailgunApiurl"),
+                '_help -> Messages("applications.mailgunApiurl.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("mailgunFrom"),
+                '_label -> Messages("applications.mailgunFrom"),
+                '_help -> Messages("applications.mailgunFrom.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            @inputText(
+                applicationViewForm("mailgunTo"),
+                '_label -> Messages("applications.mailgunTo"),
+                '_help -> Messages("applications.mailgunTo.help"),
+                'class -> "form-control",
+                '_error -> applicationViewForm.globalError
+            )
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>@Messages("applications.devices")</h2>
+                </div>
+            </div>
+
+            <div id="localizations">
+
+                @repeat(applicationViewForm("appDevices")) { appDevice =>
+
+                    @deviceGroup(appDevice)
+
+                }
+                @deviceGroup(
+                    applicationViewForm("appDevices[x]"),
+                    className = "device_template"
+                )
+
+                <div class="manage">
+                    <a class="addDevice btn btn-primary success">@Messages("applications.device.add")</a>
+                </div>
+
+            </div>
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value=@Messages("applications.submit.update") class="btn btn-success">
+            <a href="@controllers.routes.ApplicationsView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+    @form(controllers.routes.ApplicationsView.delete(id), 'class -> "topRight") {
+        <input type="submit" value=@Messages("applications.submit.delete") class="btn btn-danger">
+
+    }
+
+    <script type="text/javascript" charset="utf-8">
+
+        $(document).on('click','.removeDevice', function(e) {
+            $(this).parents('.device').remove()
+            renumberDevices()
+        })
+
+        $(document).on('click','.addDevice', function(e) {
+            var template = $('.device_template')
+            template.before('<div class="twipsies well device">' + template.html() + '</div>')
+            renumberDevices()
+        })
+
+        var renumberDevices = function() {
+            $('.localization').each(function(i) {
+                $('select', this).each(function() {
+                    $(this).attr('name', $(this).attr('name').replace(/appDevices\[.+?\]/g, 'appDevices[' + i + ']'))
+                })
+                $('input', this).each(function() {
+                    $(this).attr('name', $(this).attr('name').replace(/appDevices\[.+?\]/g, 'appDevices[' + i + ']'))
+                })
+            })
+        }
+
+        $('#form').submit(function() {
+            $('.device_template').remove()
+        })
+
+
+    </script>
+
+}

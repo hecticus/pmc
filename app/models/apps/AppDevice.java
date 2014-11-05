@@ -49,4 +49,24 @@ public class AppDevice  extends HecticusModel {
     public Device getDev() {
         return dev;
     }
+
+    public Long getIdAppDevice() {
+        return idAppDevice;
+    }
+
+    public void setIdAppDevice(Long idAppDevice) {
+        this.idAppDevice = idAppDevice;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public void setDev(Device dev) {
+        this.dev = dev;
+    }
+
+    public void setApp(Application app) {
+        this.app = app;
+    }
 }

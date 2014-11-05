@@ -46,6 +46,14 @@ public class Event extends HecticusModel {
         this.server = server;
     }
 
+    public Long getIdEvent() {
+        return idEvent;
+    }
+
+    public void setIdEvent(Long idEvent) {
+        this.idEvent = idEvent;
+    }
+
     public String getType() {
         return type;
     }

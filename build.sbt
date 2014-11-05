@@ -47,7 +47,21 @@ libraryDependencies ++= Seq(
   "com.sun.jersey.contribs" % "jersey-multipart" % "1.8",
   "net.jodah" % "lyra" % "0.4.1",
   "bouncycastle" % "bcprov-jdk15" % "140",
-  "com.github.fernandospr" % "javapns-jdk16" % "2.2.1"
+  "com.github.fernandospr" % "javapns-jdk16" % "2.2.1",
+  "be.objectify"  %% "deadbolt-java"     % "2.3.0-RC1",
+  "com.feth"      %% "play-authenticate" % "0.6.5-SNAPSHOT",
+  "org.apache.commons" % "commons-io" % "1.3.2"
 )
 
-resolvers += "Maven1 Repository" at "http://repo1.maven.org/maven2/net/vz/mongodb/jackson/play-mongo-jackson-mapper_2.10/1.1.0/"
+//resolvers += "Maven1 Repository" at "http://repo1.maven.org/maven2/net/vz/mongodb/jackson/play-mongo-jackson-mapper_2.10/1.1.0/"
+
+resolvers ++= Seq(
+    "Maven1 Repository" at "http://repo1.maven.org/maven2/net/vz/mongodb/jackson/play-mongo-jackson-mapper_2.10/1.1.0/",
+    "Apache" at "http://repo1.maven.org/maven2/",
+    "jBCrypt Repository" at "http://repo1.maven.org/maven2/org/",
+    "play-easymail (release)" at "http://joscha.github.io/play-easymail/repo/releases/",
+    "play-easymail (snapshot)" at "http://joscha.github.io/play-easymail/repo/snapshots/",
+    Resolver.url("Objectify Play Repository", url("http://schaloner.github.io/releases/"))(Resolver.ivyStylePatterns),
+    "play-authenticate (release)" at "http://joscha.github.io/play-authenticate/repo/releases/",
+    "play-authenticate (snapshot)" at "http://joscha.github.io/play-authenticate/repo/snapshots/"
+)

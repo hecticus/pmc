@@ -1,0 +1,103 @@
+@(eventViewForm: Form[models.basic.EventToPush])
+
+@import helper._
+@import helper.twitterBootstrap._
+@import tags._
+
+@title = {}
+
+@main(title = Messages("events.create"), nav = "create") {
+
+    @if(flash.containsKey("success")) {
+        <div class="alert-message warning">
+            <strong>Success!</strong> @flash.get("success")
+        </div>
+    }
+
+    @if(eventViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@eventViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(action = controllers.routes.EventToPushView.submit) {
+
+        <fieldset>
+            <legend>@Messages("events.info")</legend>
+
+            @select(
+                eventViewForm("application.idApp"),
+                models.apps.Application.toSeq,
+                '_label -> Messages("events.application"),
+                '_help -> Messages("events.application.help"),
+                'class -> "form-control"
+            )
+
+            @inputText(
+                eventViewForm("message"),
+                '_label -> Messages("events.message"),
+                '_help -> Messages("events.message.help"),
+                'class -> "form-control",
+                '_error -> eventViewForm.globalError
+            )
+
+            @inputText(
+                eventViewForm("extraParams"),
+                '_label -> Messages("events.extraParams"),
+                '_help -> Messages("events.extraParams.help"),
+                'class -> "form-control",
+                '_error -> eventViewForm.globalError
+            )
+
+            @materialCheckbox(
+                eventViewForm("all"),
+                'label -> Messages("events.all"),
+                '_help -> Messages("events.all.help"),
+                'class -> "allCheckbox"
+            )
+
+            @materialRadio(
+                eventViewForm("type"),
+                options = Seq("0"->"Android","2"->"IOS"),
+                '_label -> Messages("events.type"),
+                '_help -> Messages("events.type.help"),
+                '_error -> eventViewForm.globalError,
+                'class -> "platformRadio"
+            )
+
+            @inputText(
+                eventViewForm("receivers"),
+                '_label -> Messages("events.receivers"),
+                '_help -> Messages("events.receivers.help"),
+                'class -> "form-control receivers",
+                '_error -> eventViewForm.globalError
+            )
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" class="btn btn-success" value=@Messages("events.push")>
+            <a href="@controllers.routes.ApplicationsView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+    <script>
+        $(document).on('click','.allCheckbox', function(e) {
+            var attr = $('.platformRadio').attr('disabled');
+            if (typeof attr !== typeof undefined && attr === 'disabled') {
+                $('.platformRadio').removeAttr('disabled');
+                $('.receivers').removeAttr('disabled');
+            } else {
+                $('.platformRadio').attr('disabled','disabled');
+                $('.receivers').attr('disabled','disabled');
+            }
+        })
+
+    </script>
+
+}

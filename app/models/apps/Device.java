@@ -5,6 +5,9 @@ import models.HecticusModel;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import play.libs.Json;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.mutable.Buffer;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -52,5 +55,29 @@ public class Device extends HecticusModel {
 
     public String getName() {
         return name;
+    }
+
+    public Long getIdDevice() {
+        return idDevice;
+    }
+
+    public void setIdDevice(Long idDevice) {
+        this.idDevice = idDevice;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public static scala.collection.immutable.List<Tuple2<String, String>> toSeq() {
+        List<Device> devices = Device.finder.all();
+        ArrayList<Tuple2<String, String>> proxy = new ArrayList<>();
+        for(Device device : devices) {
+            Tuple2<String, String> t = new Tuple2<>(device.getIdDevice().toString(), device.getName());
+            proxy.add(t);
+        }
+        Buffer<Tuple2<String, String>> deviceBuffer = JavaConversions.asScalaBuffer(proxy);
+        scala.collection.immutable.List<Tuple2<String, String>> deviceList = deviceBuffer.toList();
+        return deviceList;
     }
 }
