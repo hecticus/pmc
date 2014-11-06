@@ -11,6 +11,7 @@ import com.feth.play.module.pa.user.AuthUserIdentity;
 import com.feth.play.module.pa.user.EmailIdentity;
 import com.feth.play.module.pa.user.NameIdentity;
 import com.feth.play.module.pa.user.FirstLastNameIdentity;
+import controllers.Application;
 import models.TokenAction.Type;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
@@ -91,6 +92,16 @@ public class User extends Model implements Subject {
 		}
 		return exp.findRowCount() > 0;
 	}
+
+    public boolean isAdmin(){
+        SecurityRole securityRole = SecurityRole.findByRoleName(Application.ADMIN_ROLE);
+        if(securityRole != null){
+            if(roles !=  null && roles.contains(securityRole)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 	private static ExpressionList<User> getAuthUserFind(
 			final AuthUserIdentity identity) {

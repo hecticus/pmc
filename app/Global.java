@@ -66,12 +66,12 @@ public class Global extends GlobalSettings {
             public Call afterAuth() {
                 // The user will be redirected to this page after authentication
                 // if no original URL was saved
-                return routes.Application.index(0, "", "", "");
+                return routes.Application.index();
             }
 
             @Override
             public Call afterLogout() {
-                return routes.Application.index(0, "", "", "");
+                return routes.Application.index();
             }
 
             @Override

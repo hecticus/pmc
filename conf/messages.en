@@ -162,6 +162,7 @@ main.create=Create
 
 generic.error.title=Error
 generic.error.content=Change a few things up and try submitting again.
+generic.error.forbidden=You do not have access to this feature
 generic.cancel=Cancel
 generic.list.done=Done!
 generic.list.apply=Apply
@@ -171,6 +172,7 @@ generic.list.next=Next
 generic.list.listing=Listing from
 generic.list.through=through
 generic.list.of=of
+
 
 configs.list.head=Configurations
 configs.list.title={0,choice,0#There are no configurations|1#One configuration found|1<{0,number,integer} configurations found}

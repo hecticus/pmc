@@ -160,6 +160,7 @@ main.create=Crear
 
 generic.error.title=Error
 generic.error.content=Revise los errores y haga la solicitud de nuevo
+generic.error.forbidden=Usted no tiene acceso a esta utilidad
 generic.cancel=Cancelar
 generic.list.done=Hecho!
 generic.list.apply=Aplicar

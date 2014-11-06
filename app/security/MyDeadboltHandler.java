@@ -1,6 +1,7 @@
 package security;
 
 import models.User;
+import play.i18n.Messages;
 import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -10,6 +11,8 @@ import be.objectify.deadbolt.core.models.Subject;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUserIdentity;
+
+import static play.mvc.Controller.flash;
 
 public class MyDeadboltHandler extends AbstractDeadboltHandler {
 
@@ -65,7 +68,8 @@ public class MyDeadboltHandler extends AbstractDeadboltHandler {
             @Override
             public Result apply() throws Throwable
             {
-                return forbidden("Forbidden");
+                flash("forbidden", Messages.get("generic.error.forbidden"));
+                return redirect(controllers.routes.Application.index());
             }
         });
 	}

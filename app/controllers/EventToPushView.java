@@ -39,17 +39,17 @@ public class EventToPushView extends HecticusController {
     public static Result GO_HOME = redirect(routes.EventToPushView.blank());
 
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result index() {
         return GO_HOME;
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result blank() {
         return ok(form.render(EventToPushViewForm));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result submit() throws IOException {
         Form<EventToPush> filledForm = EventToPushViewForm.bindFromRequest();
         if(filledForm.hasErrors()) {

@@ -22,9 +22,10 @@ public class Application extends Controller {
     public static final String FLASH_MESSAGE_KEY = "message";
     public static final String FLASH_ERROR_KEY = "error";
     public static final String USER_ROLE = "user";
+    public static final String ADMIN_ROLE = "admin";
 
     @Restrict(@Group(Application.USER_ROLE))
-    public static Result index(int page, String sortBy, String order, String filter) {
+    public static Result index() {
         return ok(index.render("Your new application is ready."));
     }
 
