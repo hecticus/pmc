@@ -50,9 +50,9 @@ playauthenticate.password.signup.error.passwords_not_same=Las contraseñas no co
 playauthenticate.password.login.unknown_user_or_pw=Usuario o contraseña incorrectos.
 playauthenticate.email.signup.error.not_valid=Su cuenta de correo no es valida en este sitio
 
-playauthenticate.password.verify_signup.subject=A Gata Do Dia: Complete su registro
-playauthenticate.password.verify_email.subject=A Gata Do Dia: Confirme su dirección de email
-playauthenticate.password.reset_email.subject=A Gata Do Dia: Cómo restablecer su contraseña
+playauthenticate.password.verify_signup.subject=PMC: Complete su registro
+playauthenticate.password.verify_email.subject=PMC: Confirme su dirección de email
+playauthenticate.password.reset_email.subject=PMC: Cómo restablecer su contraseña
 
 # play-authenticate: Additional translations
 
@@ -92,7 +92,7 @@ playauthenticate.link.account.ok=OK
 # play-authenticate: Signup folder translations
 
 playauthenticate.verify.email.title=Verifique su email
-playauthenticate.verify.email.requirement=Antes de usar A Gata Do Dia, debe validar su email.
+playauthenticate.verify.email.requirement=Antes de usar PMC, debe validar su email.
 playauthenticate.verify.email.cta=Se le ha enviado un email a la dirección registrada. Por favor, siga el link de este email para activar su cuenta.
 playauthenticate.password.reset.title=Restablecer contraseña
 playauthenticate.password.reset.cta=Restablecer mi contraseña
@@ -101,7 +101,7 @@ playauthenticate.password.forgot.title=Contraseña olvidada
 playauthenticate.password.forgot.cta=Enviar instrucciones para restablecer la contraseña
 
 playauthenticate.oauth.access.denied.title=Acceso denegado por OAuth
-playauthenticate.oauth.access.denied.explanation=Si quiere usar A Gata Do Dia con OAuth, debe aceptar la conexión.
+playauthenticate.oauth.access.denied.explanation=Si quiere usar PMC con OAuth, debe aceptar la conexión.
 playauthenticate.oauth.access.denied.alternative=Si prefiere no hacerlo, puede también
 playauthenticate.oauth.access.denied.alternative.cta=registrarse con un usuario y una contraseña.
 
