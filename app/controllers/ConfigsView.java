@@ -32,7 +32,7 @@ public class ConfigsView extends HecticusController {
 
     @Restrict(@Group(Application.USER_ROLE))
     public static Result list(int page, String sortBy, String order, String filter) {
-        return ok(list.render(Config.page(page, 10, sortBy, order, filter), sortBy, order, filter, false));
+        return ok(list.render(Config.page(page, 25, sortBy, order, filter), sortBy, order, filter, false));
     }
 
     @Restrict(@Group(Application.USER_ROLE))
