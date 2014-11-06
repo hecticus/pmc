@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.Page[models.apps.Application], currentSortBy: String, currentOrder: String, currentFilter: String, sortView: Boolean)
+@(currentPage: com.avaje.ebean.Page[models.basic.PushedEvent], id: Int, currentSortBy: String, currentOrder: String, currentFilter: String, sortView: Boolean)
 
 @****************************************
 * Helper generating navigation links    *
@@ -22,7 +22,7 @@
     }
 
     // Generate the link
-    controllers.routes.ApplicationsView.list(newPage, sortBy, order, currentFilter)
+    controllers.routes.ApplicationsView.listPushed(newPage, id, sortBy, order, currentFilter)
 
 }
 
@@ -37,44 +37,26 @@
 
 @title = {}
 
-@main(title = Messages("applications.list.head"), nav = "") {
+@main(title = Messages("applications.pushed.list.head"), nav = "") {
     <div class="bs-docs-section">
 
         <div class="row">
             <div class="col-lg-12">
-                <h1 id="homeTitle">@Messages("applications.list.title", currentPage.getTotalRowCount)</h1>
+                <h1 id="homeTitle">@Messages("applications.pushed.list.title", currentPage.getTotalRowCount)</h1>
             </div>
         </div>
 
         <!--DIALOG-->
         @if(flash.containsKey("success")) {
-            <div class="alert-message warning">
-                <strong>@Messages("generic.list.done")</strong> @flash.get("success")
-            </div>
+        <div class="alert-message warning">
+            <strong>@Messages("generic.list.done")</strong> @flash.get("success")
+        </div>
         }
         <div id="alert" class="alert-message warning" style="display: none; ">
             <strong>@Messages("generic.list.done")</strong>
         </div>
 
-        <!--ACTIONS-->
-        <div id="actions">
-            <form action='@link(0, "name")' method="GET">
 
-                @if(!sortView) {
-                    <div class="col-lg-6">
-                        <input type="search" class="form-control floating-label" id="searchbox" name="f" placeholder=@Messages("applications.list.filter.name")>
-                    </div>
-                    <div class="col-lg-6">
-                        <input type="submit" id="searchsubmit" value=@Messages("applications.list.filter.name") class="btn btn-info">
-                    </div>
-                }
-
-                @if(sortView) {
-                    <a class="btn success" id="ajax" href="#" data-url="/garotas/v1/applications/sort/" >@Messages("generic.list.apply")</a>
-                }
-
-            </form>
-        </div>
 
         @if(currentPage.getTotalRowCount == 0) {
 
@@ -87,21 +69,26 @@
                 <div class="col-lg-12">
                     <div class="bs-component">
                         <div class="list-group">
-                            @for((application, index) <-  currentPage.getList().zipWithIndex) {
-                                <div class="list-group-item">
-                                    <div class="row-content">
-                                    <a href="@controllers.routes.ApplicationsView.edit(application.getIdApp())">
-                                        <h4 class="list-group-item-heading">@Html(""+application.getIdApp()) - @Html(application.getName())</h4>
-                                    </a>
-                                    <a href="@controllers.routes.ApplicationsView.listPushed(application.getIdApp().toInt)">
-                                        <p class="list-group-item-text">@Messages("applications.pushed") <span class="badge">@application.getPushedEvents().size</span></p>
-                                    </a>
-                                    </div>
-                                </div>
-                                <div class="list-group-separator">
-                                    <!--separator-->
-                                </div>
-                            }
+                            <table class="table table-striped table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>@Messages("applications.pushed.message")</th>
+                                        <th>@Messages("applications.pushed.date")</th>
+                                        <th>@Messages("applications.pushed.quantity")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for((pushed, index) <-  currentPage.getList().zipWithIndex) {
+                                        <tr>
+                                            <td>@Html(""+index)</td>
+                                            <td>@Html(pushed.getMessage())</td>
+                                            <td>@Html(pushed.getFormatedTime())</td>
+                                            <td>@Html(""+pushed.getQuantity())</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -144,11 +131,7 @@
                 </ul>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <a href="@controllers.routes.ApplicationsView.blank" class="btn btn-primary">@Messages("applications.list.new")</a>
-            </div>
-        </div>
+
 
     </div>
 

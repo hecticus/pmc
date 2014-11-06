@@ -305,6 +305,14 @@ applications.java.fileError=Error con archivo
 applications.java.fileError.iosProduction=Falta el archivo para Certificado IOS de Produccion
 applications.java.fileError.iosSandbox=Falta el archivo para Certificado IOS de Sandbox
 
+applications.pushed=Eventos Enviados
+applications.pushed.list.head=Eventos Enviados
+applications.pushed.list.title={0,choice,0#No hay eventos enviados|1#Un evento enviado encontrado|1<{0,number,integer} Eventos Enviados Encontrados}
+applications.pushed.list.filter.name=Filtrar por nombre de la aplicacion...
+applications.pushed.message=Mensaje
+applications.pushed.date=Fecha
+applications.pushed.quantity=Cantidad
+
 applications.java.created= La aplicacion {0} ha sido creada!
 applications.java.updated= La aplicacion {0} ha sido actualizada!
 applications.java.deleted= La aplicacion {0} ha sido eliminada!

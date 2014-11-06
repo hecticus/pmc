@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
 import models.basic.Config;
+import models.basic.PushedEvent;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.*;
@@ -266,6 +267,9 @@ public class EventManager extends HecticusThread {
         }catch (Exception ex){
             return false;
         }
+
+        PushedEvent pushedEvent = new PushedEvent(app, msg, System.currentTimeMillis(), event.get("clients").size());
+        pushedEvent.save();
         return true;
     }
 }

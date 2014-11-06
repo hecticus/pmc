@@ -45,6 +45,7 @@ POST    /instances/:id/delete		                                                 
 #ApplicationsView
 # ApplicationsView list (look at the default values for pagination parameters)
 GET     /applications/list			                                                    controllers.ApplicationsView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET     /applications/pushed/list/:id			                                        controllers.ApplicationsView.listPushed(id: Int, p:Int ?= 0, s ?= "time", o ?= "asc", f ?= "")
 GET     /applications/lsort		                                                        controllers.ApplicationsView.lsort()
 # Add ApplicationsView
 GET     /applications/blank		                                                        controllers.ApplicationsView.blank()

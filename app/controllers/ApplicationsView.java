@@ -2,6 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
+import models.basic.PushedEvent;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Http;
@@ -35,6 +36,11 @@ public class ApplicationsView extends HecticusController {
     @Restrict(@Group(Application.USER_ROLE))
     public static Result list(int page, String sortBy, String order, String filter) {
         return ok(list.render(models.apps.Application.page(page, 10, sortBy, order, filter), sortBy, order, filter, false));
+    }
+
+    @Restrict(@Group(Application.USER_ROLE))
+    public static Result listPushed(int id, int page, String sortBy, String order, String filter) {
+        return ok(listPushed.render(PushedEvent.page(page, 10, sortBy, order, id), id, sortBy, order, filter, false));
     }
 
     @Restrict(@Group(Application.USER_ROLE))

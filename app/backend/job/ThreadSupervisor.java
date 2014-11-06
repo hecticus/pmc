@@ -11,9 +11,7 @@ import utils.Utils;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static java.util.concurrent.TimeUnit.HOURS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 
 /**
  * Created by plesse on 7/10/14.
@@ -27,6 +25,7 @@ public class ThreadSupervisor extends HecticusThread {
     private HecticusThread iosFeedbackChecker = null;
     private HecticusThread rabbitMQFailChecker = null;
     private ActorSystem system = null;
+    private PushedEventsCleaner pushedEventsCleaner =  null;
 
     public ThreadSupervisor(String name, AtomicBoolean run, Cancellable cancellable, ArrayList<HecticusThread> pConsumers, ArrayList<HecticusThread> eConsumers, ArrayList<HecticusThread> analyzers, ActorSystem system, HecticusThread cacheLoader, HecticusThread iosFeedbackChecker, HecticusThread rabbitMQFailChecker) {
         super("ThreadSupervisor-"+name, run, cancellable);
@@ -91,6 +90,7 @@ public class ThreadSupervisor extends HecticusThread {
         checkIosFeedbackChecker();
         checkCacheLoader();
         checkRabbitMQFailChecker();
+        checkPushedEventsCleaner();
     }
 
     private void checkRabbitMQFailChecker() {
@@ -102,6 +102,18 @@ public class ThreadSupervisor extends HecticusThread {
         } else if(rabbitMQFailChecker != null && Config.getInt("allow-RMQFC") == 0){
             rabbitMQFailChecker.cancel();
             rabbitMQFailChecker = null;
+        }
+    }
+
+    private void checkPushedEventsCleaner() {
+        if(pushedEventsCleaner == null && Utils.serverIp != null && Config.getInt("allow-PEC") == 1){
+            Utils.printToLog(ThreadSupervisor.class, null, "Arrancando PushedEventsCleaner", false, null, "support-level-1", Config.LOGGER_INFO);
+            pushedEventsCleaner = new PushedEventsCleaner(getRun());
+            Cancellable cancellable = system.scheduler().schedule(Duration.create(15, SECONDS), Duration.create(1, DAYS), pushedEventsCleaner, system.dispatcher());
+            pushedEventsCleaner.setCancellable(cancellable);
+        } else if(pushedEventsCleaner != null && Config.getInt("allow-PEC") == 0){
+            pushedEventsCleaner.cancel();
+            pushedEventsCleaner = null;
         }
     }
 
@@ -250,6 +262,12 @@ public class ThreadSupervisor extends HecticusThread {
             cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(Config.getInt("RMQFC-sleep"), HOURS), rabbitMQFailChecker, system.dispatcher());
             rabbitMQFailChecker.setCancellable(cancellable);
         }
+        if(Utils.serverIp != null && Config.getInt("allow-PEC") == 1){
+            Utils.printToLog(ThreadSupervisor.class, null, "Arrancando pushedEventsCleaner", false, null, "support-level-1", Config.LOGGER_INFO);
+            pushedEventsCleaner = new PushedEventsCleaner(getRun());
+            cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(1, DAYS), pushedEventsCleaner, system.dispatcher());
+            pushedEventsCleaner.setCancellable(cancellable);
+        }
     }
 
 
@@ -290,6 +308,11 @@ public class ThreadSupervisor extends HecticusThread {
         if(rabbitMQFailChecker != null){
             rabbitMQFailChecker.cancel();
         }
+
+        if(pushedEventsCleaner != null){
+            pushedEventsCleaner.cancel();
+        }
+
 //        try{RabbitMQ.getInstance().closeInstance();}catch(Exception ex){}
     }
 
@@ -331,6 +354,13 @@ public class ThreadSupervisor extends HecticusThread {
             long rabbitMQFCTime = rabbitMQFailChecker.runningTime();
             if(rabbitMQFailChecker.isActive() && rabbitMQFCTime > allowedTime){
                 Utils.printToLog(ThreadSupervisor.class, "Job Bloqueado", "El job " + rabbitMQFailChecker.getName() + " lleva " + rabbitMQFCTime + " sin pasar por un setAlive()", false, null, "support-level-1", Config.LOGGER_ERROR);
+            }
+        }
+
+        if(pushedEventsCleaner != null){
+            long pushedEventsCleanerTime = pushedEventsCleaner.runningTime();
+            if(pushedEventsCleaner.isActive() && pushedEventsCleanerTime > allowedTime){
+                Utils.printToLog(ThreadSupervisor.class, "Job Bloqueado", "El job " + pushedEventsCleaner.getName() + " lleva " + pushedEventsCleanerTime + " sin pasar por un setAlive()", false, null, "support-level-1", Config.LOGGER_ERROR);
             }
         }
     }

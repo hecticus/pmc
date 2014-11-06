@@ -66,3 +66,21 @@ CREATE TABLE `users_user_permission` (
 
 
 ALTER TABLE `pmc`.`configs` CHANGE COLUMN `key` `config_key` VARCHAR(50) NULL DEFAULT '' ;
+
+CREATE TABLE `pmc`.`pushed_events` (
+  `id_pushed_event` INT(11) NOT NULL,
+  `id_app` INT(11) NOT NULL,
+  `message` VARCHAR(100) NOT NULL,
+  `time` BIGINT(20) NOT NULL,
+  `quantity` INT NOT NULL,
+  PRIMARY KEY (`id_pushed_event`),
+  INDEX `fk_app_idx` (`id_app` ASC),
+  CONSTRAINT `fk_app`
+    FOREIGN KEY (`id_app`)
+    REFERENCES `pmc`.`app` (`id_app`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+ALTER TABLE `pmc`.`pushed_events` 
+CHANGE COLUMN `id_pushed_event` `id_pushed_event` INT(11) NOT NULL AUTO_INCREMENT ;

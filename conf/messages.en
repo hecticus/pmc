@@ -307,6 +307,14 @@ applications.java.fileError=Error with File
 applications.java.fileError.iosProduction=Missing file for IOS Production Cerftificate File
 applications.java.fileError.iosSandbox=Missing file for IOS Sandbox Cerftificate File
 
+applications.pushed=Pushed Events
+applications.pushed.list.head=Pushed Events
+applications.pushed.list.title={0,choice,0#There are no Pushed Events|1#One Pushed Event found|1<{0,number,integer} Pushed Events found}
+applications.pushed.list.filter.name=Filter by application name...
+applications.pushed.message=Message
+applications.pushed.date=Date
+applications.pushed.quantity=Quantity
+
 applications.java.created= The Application {0} has been created!
 applications.java.updated= The Application {0} has been updated!
 applications.java.deleted= The Application {0} has been deleted!

@@ -3,6 +3,7 @@ package models.apps;
 import com.avaje.ebean.Page;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.HecticusModel;
+import models.basic.PushedEvent;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import play.i18n.Messages;
@@ -29,6 +30,9 @@ public class Application extends HecticusModel {
     private int active;
     @OneToMany(mappedBy="app", cascade = CascadeType.ALL)
     private List<AppDevice> appDevices;
+
+    @OneToMany(mappedBy="application", cascade = CascadeType.ALL)
+    private List<PushedEvent> pushedEvents;
 
     @Constraints.Required
     private String batchClientsUrl;
@@ -307,6 +311,14 @@ public class Application extends HecticusModel {
 
     public void setAppDevices(List<AppDevice> appDevices) {
         this.appDevices = appDevices;
+    }
+
+    public List<PushedEvent> getPushedEvents() {
+        return pushedEvents;
+    }
+
+    public void setPushedEvents(List<PushedEvent> pushedEvents) {
+        this.pushedEvents = pushedEvents;
     }
 
     public static Page<Application> page(int page, int pageSize, String sortBy, String order, String filter) {
