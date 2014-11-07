@@ -19,8 +19,17 @@ package models;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.db.ebean.Model;
 import be.objectify.deadbolt.core.models.Role;
+import play.libs.Json;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+import scala.collection.mutable.Buffer;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Steve Chaloner (steve@objectify.be)
@@ -48,4 +57,23 @@ public class SecurityRole extends Model implements Role {
 	public static SecurityRole findByRoleName(String roleName) {
 		return find.where().eq("roleName", roleName).findUnique();
 	}
+
+    public static scala.collection.immutable.List<Tuple2<String, String>> toSeq() {
+        List<SecurityRole> securityRoles = SecurityRole.find.all();
+        ArrayList<Tuple2<String, String>> proxy = new ArrayList<>();
+        for(SecurityRole securityRole : securityRoles) {
+            Tuple2<String, String> t = new Tuple2<>(securityRole.id.toString(), securityRole.getName());
+            proxy.add(t);
+        }
+        Buffer<Tuple2<String, String>> roleBuffer = JavaConversions.asScalaBuffer(proxy);
+        scala.collection.immutable.List<Tuple2<String, String>> roleList = roleBuffer.toList();
+        return roleList;
+    }
+
+    public ObjectNode toJson() {
+        ObjectNode response = Json.newObject();
+        response.put("id", id);
+        response.put("roleName", roleName);
+        return response;
+    }
 }

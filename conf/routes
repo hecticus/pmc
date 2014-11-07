@@ -62,6 +62,19 @@ POST    /applications/:id/delete		                                              
 GET     /events/blank		                                                            controllers.EventToPushView.blank()
 POST    /events				                                                            controllers.EventToPushView.submit()
 
+#UsersView
+# UsersView list (look at the default values for pagination parameters)
+GET     /users/list			                                                controllers.UsersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+#GET     /users/lsort		                                                    controllers.UsersView.lsort()
+# Add UsersView
+# Edit existing UsersView
+#GET     /users/sort/:ids	                                                    controllers.UsersView.sort(ids:String)
+GET     /users/:id			                                                    controllers.UsersView.edit(id:Long)
+POST    /users/:id			                                                    controllers.UsersView.update(id:Long)
+# Delete a UsersView
+POST    /users/:id/delete		                                                controllers.UsersView.delete(id:Long)
+
+
 #events
 POST        /events/v1/process                                                          controllers.events.EventsWS.launchProcess(prod:Boolean ?=true)
 POST        /events/v1/push                                                             controllers.events.EventsWS.launchProcess(prod:Boolean ?=false)

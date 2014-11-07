@@ -1,4 +1,4 @@
-.phone_template, .twipsies.well.device_template {
+.phone_template, .twipsies.well.device_template, .twipsies.well.role_template {
     display:none !important;
 }
 

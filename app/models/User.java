@@ -5,6 +5,8 @@ import be.objectify.deadbolt.core.models.Role;
 import be.objectify.deadbolt.core.models.Subject;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Page;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
 import com.feth.play.module.pa.user.AuthUser;
 import com.feth.play.module.pa.user.AuthUserIdentity;
@@ -16,8 +18,10 @@ import models.TokenAction.Type;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
+import play.libs.Json;
 
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -54,17 +58,21 @@ public class User extends Model implements Subject {
 
 	public boolean emailValidated;
 
-	@ManyToMany
-	public List<SecurityRole> roles;
+	@ManyToMany(cascade = CascadeType.ALL)
+	public List<SecurityRole> securityRoles;
 
 	@OneToMany(cascade = CascadeType.ALL)
 	public List<LinkedAccount> linkedAccounts;
 
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.ALL)
 	public List<UserPermission> permissions;
 
 	public static final Finder<Long, User> find = new Finder<Long, User>(
 			Long.class, User.class);
+
+    public static Page<User> page(int page, int pageSize, String sortBy, String order, String filter) {
+        return find.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+    }
 
 	@Override
 	public String getIdentifier()
@@ -74,7 +82,7 @@ public class User extends Model implements Subject {
 
 	@Override
 	public List<? extends Role> getRoles() {
-		return roles;
+		return securityRoles;
 	}
 
 	@Override
@@ -96,7 +104,7 @@ public class User extends Model implements Subject {
     public boolean isAdmin(){
         SecurityRole securityRole = SecurityRole.findByRoleName(Application.ADMIN_ROLE);
         if(securityRole != null){
-            if(roles !=  null && roles.contains(securityRole)){
+            if(securityRoles !=  null && securityRoles.contains(securityRole)){
                 return true;
             }
         }
@@ -145,7 +153,7 @@ public class User extends Model implements Subject {
 
 	public static User create(final AuthUser authUser) {
 		final User user = new User();
-		user.roles = Collections.singletonList(SecurityRole
+		user.securityRoles = Collections.singletonList(SecurityRole
 				.findByRoleName(controllers.Application.USER_ROLE));
 		// user.permissions = new ArrayList<UserPermission>();
 		// user.permissions.add(UserPermission.findByValue("printers.edit"));
@@ -184,7 +192,7 @@ public class User extends Model implements Subject {
 		}
 
 		user.save();
-		user.saveManyToManyAssociations("roles");
+		user.saveManyToManyAssociations("securityRoles");
 		// user.saveManyToManyAssociations("permissions");
 		return user;
 	}
@@ -257,4 +265,26 @@ public class User extends Model implements Subject {
 		this.changePassword(authUser, create);
 		TokenAction.deleteByUser(this, Type.PASSWORD_RESET);
 	}
+
+    public ObjectNode toJson() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        ObjectNode response = Json.newObject();
+        response.put("id", id);
+        response.put("email", email);
+        response.put("firstName", firstName);
+        response.put("lastName", lastName);
+        if(lastLogin != null) {
+            response.put("lastLogin", sdf.format(lastLogin));//sdfasdf
+        }
+        response.put("active", active);
+        response.put("emailValidated", emailValidated);
+        if(securityRoles != null && !securityRoles.isEmpty()){
+            ArrayList<ObjectNode> roles = new ArrayList<>();
+            for(SecurityRole role : securityRoles){
+                roles.add(role.toJson());
+            }
+            response.put("roles", Json.toJson(roles));
+        }
+        return response;
+    }
 }

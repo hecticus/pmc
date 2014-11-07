@@ -229,29 +229,17 @@
                     @subjectPresentOr() {
                         @defining(Application.getLocalUser(session())) { user =>
                             @if(user.isAdmin()){
-                                <a class="navbar-brand" href="@controllers.routes.EventToPushView.blank()">@Messages("main.push")</a>
+                                <li class="dropdown">
+                                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">@Messages("main.admin")<b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="@controllers.routes.ConfigsView.list()">@Messages("main.configurations")</a></li>
+                                        <li><a href="@controllers.routes.InstancesView.list()">@Messages("main.instances")</a></li>
+                                        <li><a href="@controllers.routes.EventToPushView.blank()">@Messages("main.push")</a></li>
+                                        <li><a href="@controllers.routes.UsersView.list()">@Messages("main.users")</a></li>
+                                    </ul>
+                                </li>
                             }
                         }
-                        <li class="dropdown">
-                            <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">@Messages("main.configurations")<b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@controllers.routes.ConfigsView.list()">@Messages("main.list")</a></li>
-                                <li class="divider"></li>
-                                <li class="dropdown-header">@Messages("main.operations")</li>
-                                <li><a href="@controllers.routes.ConfigsView.blank">@Messages("main.create")</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="dropdown">
-                            <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">@Messages("main.instances")<b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@controllers.routes.InstancesView.list()">@Messages("main.list")</a></li>
-                                <li class="divider"></li>
-                                <li class="dropdown-header">@Messages("main.operations")</li>
-                                <li><a href="@controllers.routes.InstancesView.blank">@Messages("main.create")</a></li>
-                            </ul>
-                        </li>
-
                         <li class="dropdown">
                             <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">@Messages("main.applications")<b class="caret"></b></a>
                             <ul class="dropdown-menu">

@@ -89,7 +89,6 @@ public class Application extends Controller {
     }
 
     public static Result doSignup() {
-        System.out.println("Application ESTO SE VE!!!!");
         com.feth.play.module.pa.controllers.Authenticate.noCache(response());
         final Form<MyUsernamePasswordAuthProvider.MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM
                 .bindFromRequest();

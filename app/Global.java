@@ -199,7 +199,7 @@ public class Global extends GlobalSettings {
         String ipString = request.remoteAddress();
         String invoker = actionMethod.getDeclaringClass().getName();
         String[] octetos = ipString.split("\\.");
-        if(invoker.startsWith("controllers.apps") || invoker.startsWith("controllers.Application") || invoker.startsWith("controllers.events") || invoker.startsWith("controllers.Signup") || invoker.startsWith("controllers.Account") || invoker.startsWith("controllers.ConfigsView") || invoker.startsWith("com.feth") || invoker.startsWith("controllers.InstancesView") || invoker.startsWith("controllers.ApplicationsView") || invoker.startsWith("controllers.EventToPushView")){
+        if(invoker.startsWith("controllers.apps") || invoker.startsWith("controllers.Application") || invoker.startsWith("controllers.events") || invoker.startsWith("controllers.Signup") || invoker.startsWith("controllers.Account") || invoker.startsWith("controllers.ConfigsView") || invoker.startsWith("com.feth") || invoker.startsWith("controllers.InstancesView") || invoker.startsWith("controllers.ApplicationsView") || invoker.startsWith("controllers.EventToPushView") || invoker.startsWith("controllers.UsersView")){
             if(ipString.equals("127.0.0.1") || ipString.startsWith("10.0.3")
                     || (ipString.startsWith("10.182.") && Integer.parseInt(octetos[2]) <= 127 )
                     || ipString.startsWith("10.181.")

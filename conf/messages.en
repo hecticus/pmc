@@ -151,10 +151,12 @@ playauthenticate.restricted.secrets=Secrets, everywhere!
 ### --- play-authenticate END
 
 main.start=Start
+main.admin=Administration
 main.configurations=Configurations
 main.instances=Instances
 main.applications=Applications
 main.push=Send Push
+main.users=Users
 
 main.list=List
 main.operations=Operations
@@ -337,3 +339,39 @@ events.receivers=Receivers
 events.receivers.help=Comma-separated list of the Registration IDs to be notified
 events.push=Push
 events.java.pushed= The Notification {0} has been pushed!
+
+users.list.head=Users
+users.list.title={0,choice,0#There are no users|1#One user found|1<{0,number,integer} users found}
+users.list.filter.name=Filter by User name...
+users.list.new=Add new User
+
+users.create=Create User
+users.edit=Edit User
+users.info=User Data
+
+users.active= Active
+users.active.help=Status of this user
+
+users.name=User Name
+users.name.help=user name
+
+users.email=Email
+users.email.help=email to be used as login
+
+users.firstName=First Name
+users.firstName.help=Name of the user
+
+users.lastName=Last Name
+users.lastName.help=Last Name of the user
+
+users.role=Role
+users.role.add=Add Role
+users.role.remove=Remove Role
+
+users.submit.create=Create this User
+users.submit.update=Update this User
+users.submit.delete=Delete this User
+
+users.java.created= The User {0} has been created!
+users.java.updated= The User {0} has been updated!
+users.java.deleted= The User {0} has been deleted!

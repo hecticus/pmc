@@ -149,10 +149,12 @@ playauthenticate.restricted.secrets=¡Secretos y más secretos!
 ### --- play-authenticate END
 
 main.start=Inicio
+main.start=Administracion
 main.configurations=Configuraciones
 main.instances=Instancias
 main.applications=Aplicaciones
 main.push=Enviar Notificacion
+main.users=Usuarios
 
 main.list=Listar
 main.operations=Operaciones
@@ -333,3 +335,39 @@ events.type.help=Tipo de dispositivo al que se enviara la notificacion
 events.receivers=Receptores
 events.receivers.help=Lista separada por coma de los Registration IDs que seran notificados
 events.push=Enviar
+
+users.list.head=Usuarios
+users.list.title={0,choice,0#No hay usuarios|1#Un usuario encontrado|1<{0,number,integer} usuarios encontrados}
+users.list.filter.name=Filtrar por nombre del usuario...
+users.list.new=Agregar nuevo usuario
+
+users.create=Crear usuario
+users.edit=Editar usuario
+users.info=Informacion del usuario
+
+users.active=Activo
+users.active.help=Estatus de este usuario
+
+users.name=Nombre de usuario
+users.name.help=Nombre de usuario
+
+users.email=Correo
+users.email.help=correo a ser usado como login
+
+users.firstName=Nombre
+users.firstName.help=nombre de este usuario
+
+users.lastName=Apellido
+users.lastName.help=Apellido de este usuario
+
+users.role=Rol
+users.role.add=Agregar Rol
+users.role.remove=Eliminar Rol
+
+users.submit.create=Crear este usuario
+users.submit.update=Actualizar este usuario
+users.submit.delete=Eliminar este usuario
+
+users.java.created= El usuario {0} ha sido creado!
+users.java.updated= El usuario {0} ha sido creado!
+users.java.deleted= El usuario {0} ha sido creado!
