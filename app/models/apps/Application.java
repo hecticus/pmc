@@ -322,7 +322,7 @@ public class Application extends HecticusModel {
     }
 
     public static Page<Application> page(int page, int pageSize, String sortBy, String order, String filter) {
-        return finder.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+        return finder.where().ilike("name", "%" + filter + "%").orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
     }
 
     public static scala.collection.immutable.List<Tuple2<String, String>> toSeq() {

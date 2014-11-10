@@ -56,7 +56,25 @@
         <strong>@Messages("generic.list.done")</strong>
     </div>
 
+    <!--ACTIONS-->
+    <div id="actions">
+        <form action='@link(0, "name")' method="GET">
 
+            @if(!sortView) {
+                <div class="col-lg-6">
+                    <input type="search" class="form-control floating-label" id="searchbox" name="f" placeholder=@Messages("configs.list.filter.name")>
+                </div>
+                <div class="col-lg-6">
+                    <input type="submit" id="searchsubmit" value=@Messages("configs.list.filter.name") class="btn btn-info">
+                </div>
+            }
+
+            @if(sortView) {
+                <a class="btn success" id="ajax" href="#" data-url="/garotas/v1/configs/sort/" >@Messages("generic.list.apply")</a>
+            }
+
+        </form>
+    </div>
 
     @if(currentPage.getTotalRowCount == 0) {
 

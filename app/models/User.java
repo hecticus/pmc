@@ -71,7 +71,7 @@ public class User extends Model implements Subject {
 			Long.class, User.class);
 
     public static Page<User> page(int page, int pageSize, String sortBy, String order, String filter) {
-        return find.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+        return find.where().ilike("name", "%" + filter + "%").orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
     }
 
 	@Override

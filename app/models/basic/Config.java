@@ -150,6 +150,6 @@ public class Config extends Model{
 	}
 
     public static Page<Config> page(int page, int pageSize, String sortBy, String order, String filter) {
-        return finder.where().orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+        return finder.where().ilike("configKey", "%" + filter + "%").orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
     }
 }
