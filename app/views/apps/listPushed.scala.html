@@ -81,7 +81,7 @@
                                 <tbody>
                                     @for((pushed, index) <-  currentPage.getList().zipWithIndex) {
                                         <tr>
-                                            <td>@Html(""+index)</td>
+                                            <td>@Html(""+pushed.getIdPushedEvent())</td>
                                             <td>@Html(pushed.getMessage())</td>
                                             <td>@Html(pushed.getFormatedTime())</td>
                                             <td>@Html(""+pushed.getQuantity())</td>
