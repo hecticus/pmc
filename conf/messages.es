@@ -149,7 +149,7 @@ playauthenticate.restricted.secrets=¡Secretos y más secretos!
 ### --- play-authenticate END
 
 main.start=Inicio
-main.start=Administracion
+main.admin=Administracion
 main.configurations=Configuraciones
 main.instances=Instancias
 main.applications=Aplicaciones

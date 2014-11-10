@@ -20,29 +20,29 @@ public class ConfigsView extends HecticusController {
     final static Form<Config> ConfigViewForm = form(Config.class);
     public static Result GO_HOME = redirect(routes.ConfigsView.list(0, "configKey", "asc", ""));
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result index() {
         return GO_HOME;
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result blank() {
         return ok(form.render(ConfigViewForm));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result list(int page, String sortBy, String order, String filter) {
         return ok(list.render(Config.page(page, 25, sortBy, order, filter), sortBy, order, filter, false));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result edit(Long id) {
         Config objBanner = Config.finder.byId(id);
         Form<Config> filledForm = ConfigViewForm.fill(Config.finder.byId(id));
         return ok(edit.render(id, filledForm));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result update(Long id) {
         Form<Config> filledForm = ConfigViewForm.bindFromRequest();
         if(filledForm.hasErrors()) {
@@ -56,7 +56,7 @@ public class ConfigsView extends HecticusController {
 
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result sort(String ids) {
         String[] aids = ids.split(",");
 
@@ -69,12 +69,12 @@ public class ConfigsView extends HecticusController {
         return ok("Fine!");
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result lsort() {
         return ok(list.render(Config.page(0, 0, "configKey", "asc", ""),"date", "asc", "",true));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result delete(Long id) {
         Config config = Config.finder.byId(id);
         config.delete();
@@ -83,7 +83,7 @@ public class ConfigsView extends HecticusController {
 
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result submit() throws IOException {
         Form<Config> filledForm = ConfigViewForm.bindFromRequest();
 

@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import static play.data.Form.form;
 
+import utils.Utils;
 import views.html.instances.*;
 
 /**
@@ -21,29 +22,29 @@ public class InstancesView extends HecticusController {
     final static Form<Instance> InstanceViewForm = form(Instance.class);
     public static Result GO_HOME = redirect(routes.InstancesView.list(0, "name", "asc", ""));
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result index() {
         return GO_HOME;
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result blank() {
         return ok(form.render(InstanceViewForm));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result list(int page, String sortBy, String order, String filter) {
         return ok(list.render(Instance.page(page, 10, sortBy, order, filter), sortBy, order, filter, false));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result edit(Long id) {
         Instance objBanner = Instance.finder.byId(id);
         Form<Instance> filledForm = InstanceViewForm.fill(Instance.finder.byId(id));
         return ok(edit.render(id, filledForm));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result update(Long id) {
         Form<Instance> filledForm = InstanceViewForm.bindFromRequest();
         if(filledForm.hasErrors()) {
@@ -52,12 +53,13 @@ public class InstancesView extends HecticusController {
         }
         Instance gfilledForm = filledForm.get();
         gfilledForm.update(id);
+        Utils.test = gfilledForm.getTest() == 1;
         flash("success", Messages.get("instances.java.updated", gfilledForm.getName()));
         return GO_HOME;
 
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result sort(String ids) {
         String[] aids = ids.split(",");
 
@@ -70,12 +72,12 @@ public class InstancesView extends HecticusController {
         return ok("Fine!");
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result lsort() {
         return ok(list.render(Instance.page(0, 0, "configKey", "asc", ""),"date", "asc", "",true));
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result delete(Long id) {
         Instance instance = Instance.finder.byId(id);
         instance.delete();
@@ -84,7 +86,7 @@ public class InstancesView extends HecticusController {
 
     }
 
-    @Restrict(@Group(Application.USER_ROLE))
+    @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result submit() throws IOException {
         Form<Instance> filledForm = InstanceViewForm.bindFromRequest();
 
