@@ -66,15 +66,15 @@ public class UsersView extends HecticusController {
 
         if(data.containsKey("firstName")){
             String firstName = data.get("firstName");
-            if(!user.firstName.equalsIgnoreCase(firstName)){
+            if(!firstName.isEmpty() && !user.firstName.equalsIgnoreCase(firstName)){
                 user.firstName = firstName;
             }
         }
 
-        if(data.containsKey("firstName")){
-            String firstName = data.get("firstName");
-            if(!user.firstName.equalsIgnoreCase(firstName)){
-                user.firstName = firstName;
+        if(data.containsKey("lastName")){
+            String lastName = data.get("lastName");
+            if(!lastName.isEmpty() && !user.lastName.equalsIgnoreCase(lastName)){
+                user.lastName = lastName;
             }
         }
         user.securityRoles.clear();
