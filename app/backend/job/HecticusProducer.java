@@ -68,20 +68,36 @@ public class HecticusProducer extends HecticusThread{
             int count = 0;
             int total = 0;
             Application app = Application.finder.byId(appID);
+            boolean delimited = event.has("devices_to_send");
+            if(delimited){
+                Iterator<JsonNode> devicesToSend = event.get("devices_to_send").elements();
+                while(devicesToSend.hasNext()){
+                    String next = devicesToSend.next().asText();
+                    if(next.equalsIgnoreCase("android")){
+                        pDroid = true;
+                    } else if(next.equalsIgnoreCase("ios")){
+                        pIOS = true;
+                    } else if(next.equalsIgnoreCase("web")){
+                        pWEB = true;
+                    }
+                }
+                event.remove("devices_to_send");
+            }
             List<AppDevice> appDevices = app.getAppDevices();
-            for(AppDevice ad : appDevices){
-                if(ad.getDev().getName().equalsIgnoreCase("droid") && ad.getStatus() == 1) {
-                    pDroid = true;
-                } else if(ad.getDev().getName().equalsIgnoreCase("ios") && ad.getStatus() == 1) {
-                    pIOS = true;
-                } else if(ad.getDev().getName().equalsIgnoreCase("web") && ad.getStatus() == 1) {
-                    pWEB = true;
-                } else if(ad.getDev().getName().equalsIgnoreCase("msisdn") && ad.getStatus() == 1) {
-                    pMsisdn = true;
+            for (AppDevice ad : appDevices) {
+                if (ad.getDev().getName().equalsIgnoreCase("droid") && ad.getStatus() == 1) {
+                    pDroid = delimited?true&&pDroid:true;
+                } else if (ad.getDev().getName().equalsIgnoreCase("ios") && ad.getStatus() == 1) {
+                    pIOS = delimited?true&&pIOS:true;
+                } else if (ad.getDev().getName().equalsIgnoreCase("web") && ad.getStatus() == 1) {
+                    pWEB = delimited?true&&pWEB:true;
+                } else if (ad.getDev().getName().equalsIgnoreCase("msisdn") && ad.getStatus() == 1) {
+                    pMsisdn = delimited?true&&pMsisdn:true;
                 } else {
 //                    Utils.printToLog(HecticusProducer.class, "Tipo de push desconocido", "El device  " + ad.getDev().getName() + " no se reconoce", false, null, "support-level-1", Config.LOGGER_ERROR);
                 }
             }
+
             while(clients.hasNext()){
                 total++;
                 String key = appID + "-" + clients.next().asText();
@@ -223,6 +239,7 @@ public class HecticusProducer extends HecticusThread{
         finalEvent.put("type", type);
         finalEvent.put("prodTime", System.currentTimeMillis());
         finalEvent.put("regIDs", regIDs);
+        System.out.println(finalEvent.toString());
         try {
             RabbitMQ.getInstance().insertPushLyra(finalEvent.toString());
         } catch (Exception ex) {

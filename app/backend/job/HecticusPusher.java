@@ -146,8 +146,6 @@ public class HecticusPusher extends HecticusThread {
                 String emsg = "Proceso continua. Error en el MailGun, puede ser falta de librerias de jersey o de oauth";
                 Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, t, "support-level-1", Config.LOGGER_ERROR);
             }
-        } else {
-            Utils.printToLog(this, null, "title = " + title+  " message = " + msg + " regIDs = " + regIDs, false, null, "support-level-1", Config.LOGGER_INFO);
         }
     }
 
