@@ -79,6 +79,10 @@ public class Application extends HecticusModel {
 //    @Constraints.Required
     private int iosSandbox;
 
+    @OneToOne
+    @JoinColumn(name = "id_resolver")
+    private Resolver resolver;
+
     public String validate() {
         if(iosPushApnsCertProduction != null && !iosPushApnsCertProduction.isEmpty()){
             if(!iosPushApnsCertProduction.endsWith(".p12")){
@@ -163,6 +167,14 @@ public class Application extends HecticusModel {
 
     public Long getIdApp() {
         return idApp;
+    }
+
+    public Resolver getResolver() {
+        return resolver;
+    }
+
+    public void setResolver(Resolver resolver) {
+        this.resolver = resolver;
     }
 
     public String getName() {

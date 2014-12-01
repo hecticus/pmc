@@ -4,6 +4,7 @@ import backend.apns.JavApns;
 import backend.job.*;
 //import backend.pushy.PushyManager;
 import backend.rabbitmq.RabbitMQ;
+import backend.resolvers.Resolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hecticus.rackspacemailgun.MailGun;
@@ -131,31 +132,14 @@ public class EventsWS extends HecticusController {
         try{
             Application app = Application.finder.byId(idApp);
             String regIDs = event.get("regIDs").asText();
-            String msg = event.get("msg").asText();
             String androidPushUrl = Config.getString("android-push-url");
             String[] registrationIds = regIDs.split(",");
-            ObjectNode message = Json.newObject();
-            message.put("message", msg);
-            message.put("title", app.getTitle());
-            if(app.getSound() != null && !app.getSound().isEmpty()){
-                message.put("sound", app.getSound());
-            }
-            if(event.has("extra_params")){
-                message.put("extra_params", event.get("extra_params"));
-            } else {
-                ObjectNode extraParams = event.deepCopy();
-                extraParams.remove("regIDs");
-                extraParams.remove("emTime");
-                extraParams.remove("prodTime");
-                extraParams.remove("pmTime");
-                extraParams.remove("msg");
-                extraParams.put("pushTime", System.currentTimeMillis());
-                message.put("extra_params", extraParams);
-            }
-            ObjectNode fields = Json.newObject();
+            Class jobClassName = Class.forName(app.getResolver().getClassName().trim());
+            final Resolver resolver = (Resolver) jobClassName.newInstance();
+
+            ObjectNode fields = resolver.resolve(event, app);
             fields.put("registration_ids", Json.toJson(registrationIds));
-            fields.put("data", message);
-            fields.put("collapse_key", app.getName());
+
             System.out.println(fields.toString());
             if(app.getDebug() == 0){
                 F.Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
@@ -176,7 +160,6 @@ public class EventsWS extends HecticusController {
                     }
                     fResponse.put("response", "error de Google " + resp + " exception: " + e.getMessage());
                 }
-//                fResponse.put("response", Json.toJson((ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson()));
                 return fResponse;
             } else {
                 ObjectNode fResponse = Json.newObject();

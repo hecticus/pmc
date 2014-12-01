@@ -107,6 +107,13 @@
                 '_error -> applicationViewForm.globalError
             )
 
+            @select(
+                applicationViewForm("resolver.idResolver"),
+                models.apps.Resolver.toSeq,
+                '_label -> Messages("applications.resolver"),
+                'class -> "form-control"
+            )
+
             <h2>@Messages("applications.ios")</h2>
 
             @**inputText(

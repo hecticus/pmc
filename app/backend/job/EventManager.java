@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import backend.rabbitmq.RabbitMQ;
+import backend.resolvers.Resolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
@@ -171,97 +172,18 @@ public class EventManager extends HecticusThread {
             return false;
         }
         try{
-            boolean sendAlarm = false;
-            int androidSize = Config.getInt("android-payload-max-size");
-            int iosSize = Config.getInt("ios-payload-max-size");
-            msg = URLDecoder.decode(msg, "UTF-8");
-            msg = msg.length() > 100?msg.substring(0, 99):msg;
-            event.put("msg", msg);
-            ObjectNode extraParams = null;
-            int extraParamsInt = 0;
-            if(event.has("extra_params")){
-                Object ep = event.get("extra_params");
-                if(ep instanceof ObjectNode){
-                    extraParams = (ObjectNode) event.get("extra_params");
-                } else{
-                    extraParamsInt = event.get("extra_params").asInt();
-                }
-            } else {
-                extraParams = event.deepCopy();
-                extraParams.remove("regIDs");
-                extraParams.remove("emTime");
-                extraParams.remove("prodTime");
-                extraParams.remove("pmTime");
-                extraParams.remove("msg");
-                extraParams.remove("clients");
-                extraParams.remove("generationTime");
-                extraParams.remove("insertionTime");
-                extraParams.remove("app");
+            Class jobClassName = Class.forName(app.getResolver().getClassName().trim());
+            final Resolver androidResolver = (Resolver) jobClassName.newInstance();
+            ObjectNode android = androidResolver.resolve(event, app);
+
+            jobClassName = Class.forName("backend.resolvers.IOSResolver");
+            final Resolver iosResolver = (Resolver) jobClassName.newInstance();
+            ObjectNode aps = iosResolver.resolve(event, app);
+
+            if(android == null || aps == null){
+                return false;
             }
 
-            //android
-            ObjectNode message = Json.newObject();
-            message.put("message", msg);
-            message.put("title", app.getTitle());
-            if(app.getSound() != null && !app.getSound().isEmpty()){
-                message.put("sound", app.getSound());
-            }
-            if(extraParams != null) {
-                message.put("extra_params", extraParams);
-            } else {
-                message.put("extra_params", extraParamsInt);
-            }
-            int length = message.toString().getBytes().length;
-            while(length >= androidSize){
-                msg = msg.substring(0, msg.length() - 1);
-                message.put("message", msg);
-                length = message.toString().getBytes().length;
-            }
-            if(msg.isEmpty()){
-                msg = event.get("msg").asText();
-                msg = msg.substring(0, 20);
-                message.put("message", msg);
-                sendAlarm = true;
-            }
-            ObjectNode android = Json.newObject();
-            android.put("data", message);
-            android.put("collapse_key", app.getName());
-            if(msg.isEmpty()){
-                msg = event.get("msg").asText();
-                message.put("message", msg);
-            }
-
-            //IOS
-            msg = event.get("msg").asText();
-            ObjectNode payloadToSend = Json.newObject();
-            payloadToSend.put("alert", msg);
-            if(extraParams != null) {
-                payloadToSend.put("extra_params", extraParams.toString());
-            }
-            if(app.getSound() != null && !app.getSound().isEmpty()){
-                payloadToSend.put("sound", app.getSound());
-            }
-            ObjectNode aps = Json.newObject();
-            length = payloadToSend.toString().getBytes().length;
-            while(length >= iosSize){
-                msg = msg.substring(0, msg.length() - 1);
-                payloadToSend.put("alert", msg);
-                length = payloadToSend.toString().getBytes().length;
-            }
-            if(msg.isEmpty()){
-                msg = event.get("msg").asText();
-                msg = msg.substring(0, 20);
-                payloadToSend.put("alert", msg);
-                sendAlarm = true;
-            }
-
-            if(sendAlarm){
-                ObjectNode wrongEvent = event.deepCopy();
-                wrongEvent.remove("clients");
-                Utils.printToLog(EventManager.class, "Payload demasiado grande", "El payload generado es demasiado grande, se cortara el mensaje a 20 chars y se intentara enviar. Evento: " + wrongEvent.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
-            }
-
-            aps.put("aps", payloadToSend);
             event.put("gcm", android);
             event.put("apns", aps);
         }catch (Exception ex){
