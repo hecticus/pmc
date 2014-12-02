@@ -42,15 +42,16 @@ libraryDependencies ++= Seq(
   "javax.activation" % "activation" % "1.1",
   "javax.mail" % "mail" % "1.4.7",
   "com.sun.xml.messaging.saaj" % "saaj-impl" % "1.3",
-  "com.sun.jersey" % "jersey-client" % "1.8",
-  "com.sun.jersey" % "jersey-core" % "1.8",
-  "com.sun.jersey.contribs" % "jersey-multipart" % "1.8",
+  "com.sun.jersey" % "jersey-client" % "1.18",
+  "com.sun.jersey" % "jersey-core" % "1.18",
+  "com.sun.jersey.contribs" % "jersey-multipart" % "1.18",
   "net.jodah" % "lyra" % "0.4.1",
   "bouncycastle" % "bcprov-jdk15" % "140",
   "com.github.fernandospr" % "javapns-jdk16" % "2.2.1",
   "be.objectify"  %% "deadbolt-java"     % "2.3.0-RC1",
   "com.feth"      %% "play-authenticate" % "0.6.5-SNAPSHOT",
-  "org.apache.commons" % "commons-io" % "1.3.2"
+  "org.apache.commons" % "commons-io" % "1.3.2",
+  "org.jvnet.mimepull" % "mimepull" % "1.9.4"
 )
 
 //resolvers += "Maven1 Repository" at "http://repo1.maven.org/maven2/net/vz/mongodb/jackson/play-mongo-jackson-mapper_2.10/1.1.0/"

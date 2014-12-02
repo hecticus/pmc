@@ -183,7 +183,11 @@ public class EventManager extends HecticusThread {
             if(android == null || aps == null){
                 return false;
             }
+            try{
+                msg = URLDecoder.decode(msg, "UTF-8");
+            } catch (Exception ex){
 
+            }
             event.put("gcm", android);
             event.put("apns", aps);
         }catch (Exception ex){
