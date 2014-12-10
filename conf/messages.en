@@ -138,8 +138,8 @@ playauthenticate.profile.session_endless=Your user ID is {0} and your session wi
 playauthenticate.profile.password_change=Change/set a password for your account
 
 # play-authenticate - sample: Index page
-playauthenticate.index.title=Welcome to Play Authenticate
-playauthenticate.index.intro=Play Authenticate sample app
+playauthenticate.index.title=Welcome to PMC
+playauthenticate.index.intro=PMC sample app
 playauthenticate.index.intro_2=This is a template for a simple application with authentication.
 playauthenticate.index.intro_3=Check the main navigation above for simple page examples including supported authentication features.
 playauthenticate.index.heading=Heading

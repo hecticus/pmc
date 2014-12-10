@@ -136,8 +136,8 @@ playauthenticate.profile.session_endless=Su ID de usuario es {0}. Su sesión no 
 playauthenticate.profile.password_change=Cambie/establezca una contraseña para su cuenta
 
 # play-authenticate - sample: Index page
-playauthenticate.index.title=Bienvenido Play Authenticate
-playauthenticate.index.intro=Aplicación de ejemplo de Play Authenticate
+playauthenticate.index.title=Bienvenido PMC
+playauthenticate.index.intro=Aplicación de ejemplo de PMC
 playauthenticate.index.intro_2=Esto es una plantilla para una sencilla aplicación con autentificación y autorización
 playauthenticate.index.intro_3=Mire la barra de navegación superior para ver ejemplos sencillos incluyendo las características soportadas de autentificación.
 playauthenticate.index.heading=Cabecera

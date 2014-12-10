@@ -12,6 +12,7 @@ import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyIdentity;
 import providers.MyUsernamePasswordAuthUser;
 import views.html.account.signup.*;
+import views.html.users.*;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 
@@ -106,7 +107,8 @@ public class Signup extends Controller {
 				}
 			}
 
-			return redirect(routes.Application.index());
+//			return redirect(routes.Application.index());
+            return redirect(routes.UsersView.list(0, "name", "asc", ""));
 		}
 	}
 

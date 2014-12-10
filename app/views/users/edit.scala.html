@@ -28,6 +28,14 @@
         </div>
     }
 
+    @helper.form(routes.Signup.doForgotPassword) {
+
+
+
+        @_emailPartial(userViewForm)
+
+        <input type="submit" value="@Messages("playauthenticate.password.forgot.cta")" class="btn btn-primary">
+    }
 
     @helper.form(controllers.routes.UsersView.update(id), 'enctype -> "multipart/form-data", 'id -> "form") {
 
