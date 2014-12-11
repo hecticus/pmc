@@ -64,21 +64,25 @@ POST    /events				                                                            c
 
 #UsersView
 # UsersView list (look at the default values for pagination parameters)
-GET     /users/list			                                                controllers.UsersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-#GET     /users/lsort		                                                    controllers.UsersView.lsort()
+GET     /users/list			                                                            controllers.UsersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+#GET     /users/lsort		                                                            controllers.UsersView.lsort()
 # Add UsersView
 # Edit existing UsersView
-#GET     /users/sort/:ids	                                                    controllers.UsersView.sort(ids:String)
-GET     /users/:id			                                                    controllers.UsersView.edit(id:Long)
-POST    /users/:id			                                                    controllers.UsersView.update(id:Long)
+#GET     /users/sort/:ids	                                                            controllers.UsersView.sort(ids:String)
+GET     /users/:id			                                                            controllers.UsersView.edit(id:Long)
+POST    /users/:id			                                                            controllers.UsersView.update(id:Long)
 # Delete a UsersView
-POST    /users/:id/delete		                                                controllers.UsersView.delete(id:Long)
+POST    /users/:id/delete		                                                        controllers.UsersView.delete(id:Long)
 
 
 #events
 POST        /events/v1/process                                                          controllers.events.EventsWS.launchProcess(prod:Boolean ?=true)
 POST        /events/v1/push                                                             controllers.events.EventsWS.launchProcess(prod:Boolean ?=false)
+POST        /events/v1/insert/android                                                   controllers.events.EventsWS.insertAndroidEvent()
+POST        /events/v1/insert/ios                                                       controllers.events.EventsWS.insertIosEvent()
+POST        /events/v1/insert/web                                                       controllers.events.EventsWS.insertWebEvent()
 POST        /events/v1/insert                                                           controllers.events.EventsWS.insertEvent()
+
 
 POST        /push/:idApp/:method                                                        controllers.events.EventsWS.sendPush(idApp:Long, method : Integer)
 POST        /push/android/:idApp                                                        controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 0)

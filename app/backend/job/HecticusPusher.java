@@ -126,14 +126,18 @@ public class HecticusPusher extends HecticusThread {
     private void sendWEBPushRequest(Application app) {
         String regIDs = event.get("regIDs").asText();
         String msg = event.get("msg").asText();
+        ObjectNode mail = (ObjectNode) event.get("mail");
         String title = app.getTitle();
         if (app.getDebug() == 0) {
             try {
-                if(event.has("title")){
-                    title = event.get("title").asText();
+                if(mail.has("title")){
+                    title = mail.get("title").asText();
+                }
+                if(mail.has("message")){
+                    msg = mail.get("message").asText();
                 }
                 Map sendSimpleMessage = null;
-                if(event.has("html") && event.get("html").asBoolean()){
+                if(mail.has("html") && mail.get("html").asBoolean()){
                     sendSimpleMessage = MailGun.sendHtmlMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());
                 } else {
                     sendSimpleMessage = MailGun.sendSimpleMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());

@@ -30,6 +30,7 @@ import play.mvc.Results;
 import utils.Utils;
 
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -315,6 +316,90 @@ public class EventsWS extends HecticusController {
     @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
     public static F.Promise<Result> insertEvent() {
         final ObjectNode event = getJson();
+        F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
+                new F.Function0<ObjectNode>() {
+                    public ObjectNode apply() {
+                        return insertEv(event);
+                    }
+                }
+        );
+
+        return promiseOfObjectNode.map(
+                new F.Function<ObjectNode, Result>() {
+                    public Result apply(ObjectNode i) {
+                        if(i.get("error").asInt() == 2){
+                            return forbidden(i);
+                        } else if(i.get("error").asInt() == 1){
+                            return badRequest(i);
+                        }
+                        return ok(i);
+                    }
+                }
+        );
+    }
+
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    public static F.Promise<Result> insertWebEvent() {
+        final ObjectNode event = getJson();
+        ArrayList<String> filter = new ArrayList<>();
+        filter.add("web");
+        event.put("devices_to_send", Json.toJson(filter));
+        F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
+                new F.Function0<ObjectNode>() {
+                    public ObjectNode apply() {
+                        return insertEv(event);
+                    }
+                }
+        );
+
+        return promiseOfObjectNode.map(
+                new F.Function<ObjectNode, Result>() {
+                    public Result apply(ObjectNode i) {
+                        if(i.get("error").asInt() == 2){
+                            return forbidden(i);
+                        } else if(i.get("error").asInt() == 1){
+                            return badRequest(i);
+                        }
+                        return ok(i);
+                    }
+                }
+        );
+    }
+
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    public static F.Promise<Result> insertAndroidEvent() {
+        final ObjectNode event = getJson();
+        ArrayList<String> filter = new ArrayList<>();
+        filter.add("android");
+        event.put("devices_to_send", Json.toJson(filter));
+        F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
+                new F.Function0<ObjectNode>() {
+                    public ObjectNode apply() {
+                        return insertEv(event);
+                    }
+                }
+        );
+
+        return promiseOfObjectNode.map(
+                new F.Function<ObjectNode, Result>() {
+                    public Result apply(ObjectNode i) {
+                        if(i.get("error").asInt() == 2){
+                            return forbidden(i);
+                        } else if(i.get("error").asInt() == 1){
+                            return badRequest(i);
+                        }
+                        return ok(i);
+                    }
+                }
+        );
+    }
+
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    public static F.Promise<Result> insertIosEvent() {
+        final ObjectNode event = getJson();
+        ArrayList<String> filter = new ArrayList<>();
+        filter.add("ios");
+        event.put("devices_to_send", Json.toJson(filter));
         F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
                 new F.Function0<ObjectNode>() {
                     public ObjectNode apply() {

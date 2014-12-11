@@ -180,7 +180,11 @@ public class EventManager extends HecticusThread {
             final Resolver iosResolver = (Resolver) jobClassName.newInstance();
             ObjectNode aps = iosResolver.resolve(event, app);
 
-            if(android == null || aps == null){
+            jobClassName = Class.forName("backend.resolvers.MailResolver");
+            final Resolver mailResolver = (Resolver) jobClassName.newInstance();
+            ObjectNode mail = mailResolver.resolve(event, app);
+
+            if(android == null || aps == null || mail == null){
                 return false;
             }
             try{
@@ -190,6 +194,7 @@ public class EventManager extends HecticusThread {
             }
             event.put("gcm", android);
             event.put("apns", aps);
+            event.put("mail", mail);
         }catch (Exception ex){
             return false;
         }
