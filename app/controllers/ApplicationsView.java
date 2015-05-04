@@ -2,6 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
+import models.basic.Config;
 import models.basic.PushedEvent;
 import play.data.Form;
 import play.i18n.Messages;
@@ -158,59 +159,64 @@ public class ApplicationsView extends HecticusController {
 
     @Restrict(@Group(Application.USER_ROLE))
     public static Result submit() throws IOException {
-        Form<models.apps.Application> filledForm = ApplicationViewForm.bindFromRequest();
+        try {
+            Form<models.apps.Application> filledForm = ApplicationViewForm.bindFromRequest();
 
-        if(filledForm.hasErrors()) {
-            System.out.println(filledForm.toString());
-            return badRequest(form.render(filledForm));
-        }
+            if (filledForm.hasErrors()) {
+                System.out.println(filledForm.toString());
+                return badRequest(form.render(filledForm));
+            }
 
-        String sandbox = null;
-        String production = null;
-        String name = filledForm.data().get("name");
+            String sandbox = null;
+            String production = null;
+            String name = filledForm.data().get("name");
 
-        if (filledForm.data().containsKey("iosPushApnsCertSandbox")) {
-            String certificate = filledForm.data().get("iosPushApnsCertSandbox");
-            if (certificate != null && !certificate.isEmpty()) {
-                Http.MultipartFormData body = request().body().asMultipartFormData();
-                try {
-                    Http.MultipartFormData.FilePart cert = body.getFile("iosPushApnsCertSandbox");
-                    File file = cert.getFile();
-                    sandbox = Utils.uploadCertificate(file, name.replace(" ", ""), certificate);
-                } catch(Exception e){
-                    filledForm.reject(Messages.get("applications.java.fileError"), Messages.get("applications.java.fileError.iosSandbox"));
-                    return badRequest(form.render(filledForm));
+            if (filledForm.data().containsKey("iosPushApnsCertSandbox")) {
+                String certificate = filledForm.data().get("iosPushApnsCertSandbox");
+                if (certificate != null && !certificate.isEmpty()) {
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    try {
+                        Http.MultipartFormData.FilePart cert = body.getFile("iosPushApnsCertSandbox");
+                        File file = cert.getFile();
+                        sandbox = Utils.uploadCertificate(file, name.replace(" ", ""), certificate);
+                    } catch (Exception e) {
+                        filledForm.reject(Messages.get("applications.java.fileError"), Messages.get("applications.java.fileError.iosSandbox"));
+                        return badRequest(form.render(filledForm));
+                    }
                 }
             }
-        }
 
-        if (filledForm.data().containsKey("iosPushApnsCertProduction")) {
-            String certificate = filledForm.data().get("iosPushApnsCertProduction");
-            if (certificate != null && !certificate.isEmpty()) {
-                Http.MultipartFormData body = request().body().asMultipartFormData();
-                try {
-                    Http.MultipartFormData.FilePart cert = body.getFile("iosPushApnsCertProduction");
-                    File file = cert.getFile();
-                    production = Utils.uploadCertificate(file, name.replace(" ", ""), certificate);
-                } catch(Exception e){
-                    filledForm.reject(Messages.get("applications.java.fileError"), Messages.get("applications.java.fileError.iosProduction"));
-                    return badRequest(form.render(filledForm));
+            if (filledForm.data().containsKey("iosPushApnsCertProduction")) {
+                String certificate = filledForm.data().get("iosPushApnsCertProduction");
+                if (certificate != null && !certificate.isEmpty()) {
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    try {
+                        Http.MultipartFormData.FilePart cert = body.getFile("iosPushApnsCertProduction");
+                        File file = cert.getFile();
+                        production = Utils.uploadCertificate(file, name.replace(" ", ""), certificate);
+                    } catch (Exception e) {
+                        filledForm.reject(Messages.get("applications.java.fileError"), Messages.get("applications.java.fileError.iosProduction"));
+                        return badRequest(form.render(filledForm));
+                    }
                 }
             }
+
+            models.apps.Application gfilledForm = filledForm.get();
+
+            if (sandbox != null && !sandbox.isEmpty()) {
+                gfilledForm.setIosPushApnsCertSandbox(sandbox);
+            }
+
+            if (production != null && !production.isEmpty()) {
+                gfilledForm.setIosPushApnsCertProduction(production);
+            }
+
+            gfilledForm.save();
+            flash("success", Messages.get("applications.java.created", gfilledForm.getName()));
+        } catch (Exception e) {
+            Utils.printToLog(ApplicationsView.class, "Error en el ApplicationsView", "Ocurrio un error creando una app", true, e, "support-level-1", Config.LOGGER_ERROR);
+            flash("error", "error");
         }
-
-        models.apps.Application gfilledForm = filledForm.get();
-
-        if(sandbox != null && !sandbox.isEmpty()){
-            gfilledForm.setIosPushApnsCertSandbox(sandbox);
-        }
-
-        if(production != null && !production.isEmpty()){
-            gfilledForm.setIosPushApnsCertProduction(production);
-        }
-
-        gfilledForm.save();
-        flash("success", Messages.get("applications.java.created", gfilledForm.getName()));
         return GO_HOME;
 
     }

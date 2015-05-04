@@ -205,7 +205,7 @@
                 </div>
             </div>
 
-            <div id="localizations">
+            <div id="devices">
 
                 @repeat(applicationViewForm("appDevices")) { appDevice =>
 
@@ -246,7 +246,7 @@
         })
 
         var renumberDevices = function() {
-            $('.localization').each(function(i) {
+            $('.device').each(function(i) {
                 $('select', this).each(function() {
                     $(this).attr('name', $(this).attr('name').replace(/appDevices\[.+?\]/g, 'appDevices[' + i + ']'))
                 })
@@ -257,7 +257,7 @@
         }
 
         $('#form').submit(function() {
-            $('.device_template').remove()
+            $('.device_template').remove();
         })
 
 

@@ -1,6 +1,7 @@
 package backend.resolvers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import models.apps.Application;
 import models.basic.Config;
 import play.libs.Json;
@@ -35,8 +36,10 @@ public class HecticusResolver extends Resolver {
         int extraParamsInt = 0;
         if(event.has("extra_params")){
             Object ep = event.get("extra_params");
-            if(ep instanceof ObjectNode){
+            if(ep instanceof ObjectNode) {
                 extraParams = (ObjectNode) event.get("extra_params");
+            } else if (ep instanceof TextNode){
+                extraParams = (ObjectNode)Json.parse(((TextNode) ep).asText());
             } else{
                 extraParamsInt = event.get("extra_params").asInt();
             }
