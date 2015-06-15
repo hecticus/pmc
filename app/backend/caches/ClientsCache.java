@@ -14,6 +14,7 @@ import utils.Utils;
 
 import javax.xml.ws.http.HTTPException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -67,21 +68,35 @@ public class ClientsCache {
         int index = 0;
         boolean done = false;
         LinkedHashMap<String, Client> clients = new LinkedHashMap<String, Client>();
+        Promise<WSResponse> result = null;
+        WSResponse wsResponse = null;
+        ObjectNode response = null;
+        Iterator<JsonNode> clientsIterator = null;
+        ObjectNode actualClient = null;
         while (invoker.isAlive() && !done) {
             try {
-                Promise<WSResponse> result = WS.url(app.getBatchClientsUrl() + "/" + index + "/" + batchSize).get();
-                ObjectNode response = (ObjectNode) result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
-                if ((response != null) && (!Utils.checkIfResponseIsError(response))) {
-                    done = true;
-                    Iterator<JsonNode> clientsIterator = response.get("response").elements();
-                    while(invoker.isAlive() && clientsIterator.hasNext()){
-                        done = false;
-                        ObjectNode actualClient = (ObjectNode) clientsIterator.next();
-                        clients.put(generateClientKey(app.getIdApp(), actualClient), new Client(actualClient));
+                result = WS.url(app.getBatchClientsUrl() + "/" + index + "/" + batchSize).get();
+                wsResponse = result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS);
+                if (wsResponse.getStatus() == 200) {
+                    response = (ObjectNode) wsResponse.asJson();
+                    if ((response != null) && (!Utils.checkIfResponseIsError(response))) {
+                        done = true;
+                        clientsIterator = response.get("response").elements();
+                        while (invoker.isAlive() && clientsIterator.hasNext()) {
+                            done = false;
+                            actualClient = (ObjectNode) clientsIterator.next();
+                            clients.put(generateClientKey(app.getIdApp(), actualClient), new Client(actualClient));
+                        }
                     }
+                } else {
+                    Utils.printToLog(ClientsCache.class, null, "Error cargando clientes a la cache, app: " + app.getIdApp() + " llamada: " + app.getBatchClientsUrl() + "/" + index + "/" + batchSize, false, null, "support-level-1", Config.LOGGER_ERROR);
+                    break;
                 }
             } catch(Exception e) {
                 Utils.printToLog(ClientsCache.class, null, "Error cargando clientes a la cache, app: " + app.getIdApp() + " llamada: " + app.getBatchClientsUrl() + "/" + index + "/" + batchSize, false, e, "support-level-1", Config.LOGGER_ERROR);
+                if(e instanceof ConnectException) {
+                    break;
+                }
             }
             index+=batchSize;
         }
