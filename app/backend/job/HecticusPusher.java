@@ -82,7 +82,7 @@ public class HecticusPusher extends HecticusThread {
     public void process() {
         try{
             long appID = event.get("app").asLong();
-            long insertionTime = event.get("insertionTime").asLong();
+//            long insertionTime = event.get("insertionTime").asLong();
             String type = event.get("type").asText();
             Application app = Application.finder.byId(appID);
             if(type.equalsIgnoreCase("droid")){
@@ -102,7 +102,7 @@ public class HecticusPusher extends HecticusThread {
             } else {
                 Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El tipo " + type + " no se reconoce. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
             }
-            Utils.printToLog(HecticusPusher.class, "", (app.getDebug() == 1?"DEBUG ":"") + "Tipo " + type + ". Se proceso el evento: " + event.toString() + " en " + (System.currentTimeMillis() - insertionTime) + (event.has("generationTime")?" generado hace " + (System.currentTimeMillis() - event.get("generationTime").asLong()):""), false, null, "support-level-1", Config.LOGGER_INFO);
+//            Utils.printToLog(HecticusPusher.class, "", (app.getDebug() == 1?"DEBUG ":"") + "Tipo " + type + ". Se proceso el evento: " + event.toString() + " en " + (System.currentTimeMillis() - insertionTime) + (event.has("generationTime")?" generado hace " + (System.currentTimeMillis() - event.get("generationTime").asLong()):""), false, null, "support-level-1", Config.LOGGER_INFO);
         }catch (Exception e){
             Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), true, e, "support-level-1", Config.LOGGER_ERROR);
         }
@@ -235,7 +235,7 @@ public class HecticusPusher extends HecticusThread {
             try{
                 r = result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS);
                 ObjectNode response = (ObjectNode) r.asJson();
-                resp = response.toString();
+//                resp = response.toString();
 //                ObjectNode response = (ObjectNode) result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
                 if(response.has("canonical_ids") || (response.has("failure") && response.get("failure").asInt() > 0)){
                     response.put("original_ids", Json.toJson(registrationIds));
