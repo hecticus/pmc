@@ -81,28 +81,33 @@ public class HecticusPusher extends HecticusThread {
     @Override
     public void process() {
         try{
-            long appID = event.get("app").asLong();
-//            long insertionTime = event.get("insertionTime").asLong();
-            String type = event.get("type").asText();
-            Application app = Application.finder.byId(appID);
-            if(type.equalsIgnoreCase("droid")){
-                sendDroidPushRequest(app);
-            } else if(type.equalsIgnoreCase("ios")){
-                int pooled = 1;
-                try {pooled = Config.getInt("apns-pooled");} catch (Exception e){}
-                if(pooled == 1){
-                    sendIOSPushRequestPool(app);
+            if(event != null) {
+                long appID = event.get("app").asLong();
+                String type = event.get("type").asText();
+                Application app = Application.finder.byId(appID);
+                if (type.equalsIgnoreCase("droid")) {
+                    sendDroidPushRequest(app);
+                } else if (type.equalsIgnoreCase("ios")) {
+                    int pooled = 1;
+                    try {
+                        pooled = Config.getInt("apns-pooled");
+                    } catch (Exception e) {
+                    }
+                    if (pooled == 1) {
+                        sendIOSPushRequestPool(app);
+                    } else {
+                        sendIOSPushRequest(app);
+                    }
+                } else if (type.equalsIgnoreCase("web")) {
+                    sendWEBPushRequest(app);
+                } else if (type.equalsIgnoreCase("sms")) {
+                    sendSMSPushRequest(app);
                 } else {
-                    sendIOSPushRequest(app);
+                    Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El tipo " + type + " no se reconoce. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
                 }
-            } else if(type.equalsIgnoreCase("web")){
-                sendWEBPushRequest(app);
-            } else if(type.equalsIgnoreCase("sms")){
-                sendSMSPushRequest(app);
             } else {
-                Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El tipo " + type + " no se reconoce. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
+                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "Llego un evento nulo", true, null, "support-level-1", Config.LOGGER_INFO);
             }
-//            Utils.printToLog(HecticusPusher.class, "", (app.getDebug() == 1?"DEBUG ":"") + "Tipo " + type + ". Se proceso el evento: " + event.toString() + " en " + (System.currentTimeMillis() - insertionTime) + (event.has("generationTime")?" generado hace " + (System.currentTimeMillis() - event.get("generationTime").asLong()):""), false, null, "support-level-1", Config.LOGGER_INFO);
         }catch (Exception e){
             Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), true, e, "support-level-1", Config.LOGGER_ERROR);
         }
