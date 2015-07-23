@@ -42,10 +42,10 @@ public class AppsWS extends HecticusController {
             Application app = Application.finder.byId(idApp);
             if(app != null){
                 if(jsonInfo.has("debug")){
-                    app.setDebug(jsonInfo.get("debug").asInt());
+                    app.setDebug(jsonInfo.get("debug").asBoolean());
                 }
                 if(jsonInfo.has("active")){
-                    app.setActive(jsonInfo.get("active").asInt());
+                    app.setActive(jsonInfo.get("active").asBoolean());
                 }
                 if(jsonInfo.has("batch-url")){
                     app.setBatchClientsUrl(jsonInfo.get("batch-url").asText());

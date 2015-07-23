@@ -1,5 +1,6 @@
 package backend.resolvers;
 
+import backend.Constants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.*;
 import models.basic.Config;
@@ -14,61 +15,60 @@ public class IOSResolver extends Resolver {
 
     @Override
     public ObjectNode resolve(ObjectNode event, Application app) {
-        String msg = event.get("msg").asText();
+        String msg = event.get(Constants.MSG).asText();
         int iosSize = Config.getInt("ios-payload-max-size");
         try{
-            msg = URLDecoder.decode(msg, "UTF-8");
+            msg = URLDecoder.decode(msg, Constants.ENCODING_UTF_8);
         } catch (Exception ex){
             return null;
         }
-        msg = msg.length() > 100?msg.substring(0, 99):msg;
+        msg = msg.length() > Constants.PUSH_MAX_LENGTH?msg.substring(0, Constants.PUSH_MAX_LENGTH-1):msg;
 
         ObjectNode payloadToSend = Json.newObject();
-        payloadToSend.put("alert", msg);
+        payloadToSend.put(Constants.ALERT, msg);
 
         ObjectNode extraParams = null;
         int extraParamsInt = 0;
 
-        if(event.has("extra_params")){
-            Object ep = event.get("extra_params");
+        if(event.has(Constants.EXTRA_PARAMS)){
+            Object ep = event.get(Constants.EXTRA_PARAMS);
             if(ep instanceof ObjectNode){
-                extraParams = (ObjectNode) event.get("extra_params");
+                extraParams = (ObjectNode) event.get(Constants.EXTRA_PARAMS);
             } else{
-                extraParamsInt = event.get("extra_params").asInt();
+                extraParamsInt = event.get(Constants.EXTRA_PARAMS).asInt();
             }
         } else {
             extraParams = event.deepCopy();
-            extraParams.remove("regIDs");
-            extraParams.remove("emTime");
-            extraParams.remove("prodTime");
-            extraParams.remove("pmTime");
-            extraParams.remove("msg");
-            extraParams.remove("clients");
-            extraParams.remove("generationTime");
-            extraParams.remove("insertionTime");
-            extraParams.remove("app");
+            extraParams.remove(Constants.REG_IDS);
+            extraParams.remove(Constants.EM_TIME);
+            extraParams.remove(Constants.PROD_TIME);
+            extraParams.remove(Constants.PM_TIME);
+            extraParams.remove(Constants.MSG);
+            extraParams.remove(Constants.CLIENTS);
+            extraParams.remove(Constants.GENERATION_TIME);
+            extraParams.remove(Constants.INSERTION_TIME);
+            extraParams.remove(Constants.APP);
         }
         if(extraParams != null) {
-            payloadToSend.put("extra_params", extraParams.toString());
+            payloadToSend.put(Constants.EXTRA_PARAMS, extraParams.toString());
         }
         if(app.getSound() != null && !app.getSound().isEmpty()){
-            payloadToSend.put("sound", app.getSound());
+            payloadToSend.put(Constants.SOUND, app.getSound());
         }
         ObjectNode aps = Json.newObject();
         int length = payloadToSend.toString().getBytes().length;
         while(length >= iosSize){
             msg = msg.substring(0, msg.length() - 1);
-            payloadToSend.put("alert", msg);
+            payloadToSend.put(Constants.ALERT, msg);
             length = payloadToSend.toString().getBytes().length;
         }
         if(msg.isEmpty()){
-            msg = event.get("msg").asText();
+            msg = event.get(Constants.MSG).asText();
             msg = msg.substring(0, 20);
-            payloadToSend.put("alert", msg);
+            payloadToSend.put(Constants.ALERT, msg);
         }
 
-        aps.put("aps", payloadToSend);
-
+        aps.put(Constants.APS, payloadToSend);
 
         return aps;
     }

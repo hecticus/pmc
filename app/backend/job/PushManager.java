@@ -1,6 +1,7 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.basic.Config;
@@ -41,7 +42,7 @@ public class PushManager extends HecticusThread {
             String eventString = RabbitMQ.getInstance().getNextPushLyra();
             if(eventString != null){
                 ObjectNode event = (ObjectNode) Json.parse(eventString);
-                event.put("pmTime", System.currentTimeMillis());
+                event.put(Constants.PM_TIME, System.currentTimeMillis());
                 sendPushRequest(event);
             }
         } catch (Exception ex) {
@@ -56,7 +57,7 @@ public class PushManager extends HecticusThread {
      */
     private void sendPushRequest(ObjectNode event) {
         try{
-            F.Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/push").post(event);
+            F.Promise<WSResponse> result = WS.url(String.format(Constants.WS_PUSH_EVENT, Config.getDaemonHost())).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
         }catch (Exception ex){
             Utils.printToLog(PushManager.class, null, "Error en el WS de distribucion de eventos", false, ex, "support-level-1", Config.LOGGER_ERROR);

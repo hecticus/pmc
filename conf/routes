@@ -5,130 +5,188 @@
 # Home page
 #GET     /                                                                              controllers.Application.index()
 
-GET     /                      		                                                    controllers.Application.index()
-GET     /index                                                                          controllers.Application.index()
+GET         /                                      controllers.Application.index()
+GET         /index                                 controllers.Application.index()
 
 
-GET     /check/*name                                                                    controllers.Application.checkFile(name: String)
+GET         /check/*name                           controllers.Application.checkFile(name: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                                                                   controllers.Assets.at(path="/public", file)
+GET         /assets/*file                          controllers.Assets.at(path="/public", file)
 
 #ConfigsView
 # ConfigsView list (look at the default values for pagination parameters)
-GET     /configurations/list			                                                controllers.ConfigsView.list(p:Int ?= 0, s ?= "configKey", o ?= "asc", f ?= "")
-GET     /configurations/lsort		                                                    controllers.ConfigsView.lsort()
+GET         /configurations/list                   controllers.ConfigsView.list(p:Int ?= 0, s ?= "configKey", o ?= "asc", f ?= "")
+GET         /configurations/lsort                  controllers.ConfigsView.lsort()
 # Add ConfigsView
-GET     /configurations/blank		                                                    controllers.ConfigsView.blank()
-POST    /configurations				                                                    controllers.ConfigsView.submit()
+GET         /configurations/blank                  controllers.ConfigsView.blank()
+POST        /configurations                        controllers.ConfigsView.submit()
 # Edit existing ConfigsView
-GET     /configurations/sort/:ids	                                                    controllers.ConfigsView.sort(ids:String)
-GET     /configurations/:id			                                                    controllers.ConfigsView.edit(id:Long)
-POST    /configurations/:id			                                                    controllers.ConfigsView.update(id:Long)
+GET         /configurations/sort/:ids              controllers.ConfigsView.sort(ids:String)
+GET         /configurations/:id                    controllers.ConfigsView.edit(id:Long)
+POST        /configurations/:id                    controllers.ConfigsView.update(id:Long)
 # Delete a ConfigsView
-POST    /configurations/:id/delete		                                                controllers.ConfigsView.delete(id:Long)
+POST        /configurations/:id/delete             controllers.ConfigsView.delete(id:Long)
 
 #InstancesView
 # InstancesView list (look at the default values for pagination parameters)
-GET     /instances/list			                                                        controllers.InstancesView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET     /instances/lsort		                                                        controllers.InstancesView.lsort()
+GET         /instances/list                        controllers.InstancesView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /instances/lsort                       controllers.InstancesView.lsort()
 # Add InstancesView
-GET     /instances/blank		                                                        controllers.InstancesView.blank()
-POST    /instances				                                                        controllers.InstancesView.submit()
+GET         /instances/blank                       controllers.InstancesView.blank()
+POST        /instances                             controllers.InstancesView.submit()
 # Edit existing InstancesView
-GET     /instances/sort/:ids	                                                        controllers.InstancesView.sort(ids:String)
-GET     /instances/:id			                                                        controllers.InstancesView.edit(id:Long)
-POST    /instances/:id			                                                        controllers.InstancesView.update(id:Long)
+GET         /instances/sort/:ids                   controllers.InstancesView.sort(ids:String)
+GET         /instances/:id                         controllers.InstancesView.edit(id:Long)
+POST        /instances/:id                         controllers.InstancesView.update(id:Long)
 # Delete a InstancesView
-POST    /instances/:id/delete		                                                    controllers.InstancesView.delete(id:Long)
+POST        /instances/:id/delete                  controllers.InstancesView.delete(id:Long)
 
 #ApplicationsView
 # ApplicationsView list (look at the default values for pagination parameters)
-GET     /applications/list			                                                    controllers.ApplicationsView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET     /applications/pushed/list/:id			                                        controllers.ApplicationsView.listPushed(id: Int, p:Int ?= 0, s ?= "time", o ?= "desc", f ?= "")
-GET     /applications/lsort		                                                        controllers.ApplicationsView.lsort()
+GET         /applications/list                     controllers.ApplicationsView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /applications/pushed/list/:id          controllers.ApplicationsView.listPushed(id: Int, p:Int ?= 0, s ?= "time", o ?= "desc", f ?= "")
+GET         /applications/lsort                    controllers.ApplicationsView.lsort()
 # Add ApplicationsView
-GET     /applications/blank		                                                        controllers.ApplicationsView.blank()
-POST    /applications				                                                    controllers.ApplicationsView.submit()
+GET         /applications/blank                    controllers.ApplicationsView.blank()
+POST        /applications                          controllers.ApplicationsView.submit()
 # Edit existing ApplicationsView
-GET     /applications/sort/:ids	                                                        controllers.ApplicationsView.sort(ids:String)
-GET     /applications/:id			                                                    controllers.ApplicationsView.edit(id:Long)
-POST    /applications/:id			                                                    controllers.ApplicationsView.update(id:Long)
+GET         /applications/sort/:ids                controllers.ApplicationsView.sort(ids:String)
+GET         /applications/:id                      controllers.ApplicationsView.edit(id:Long)
+POST        /applications/:id                      controllers.ApplicationsView.update(id:Long)
 # Delete a ApplicationsView
-POST    /applications/:id/delete		                                                controllers.ApplicationsView.delete(id:Long)
+POST        /applications/:id/delete               controllers.ApplicationsView.delete(id:Long)
 
 #EventToPushView
 # Add EventToPushView
-GET     /events/blank		                                                            controllers.EventToPushView.blank()
-POST    /events				                                                            controllers.EventToPushView.submit()
+GET         /events/blank                          controllers.EventToPushView.blank()
+POST        /events                                controllers.EventToPushView.submit()
 
 #UsersView
 # UsersView list (look at the default values for pagination parameters)
-GET     /users/list			                                                            controllers.UsersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /users/list                            controllers.UsersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
 #GET     /users/lsort		                                                            controllers.UsersView.lsort()
 # Add UsersView
 # Edit existing UsersView
 #GET     /users/sort/:ids	                                                            controllers.UsersView.sort(ids:String)
-GET     /users/:id			                                                            controllers.UsersView.edit(id:Long)
-POST    /users/:id			                                                            controllers.UsersView.update(id:Long)
+GET         /users/:id                             controllers.UsersView.edit(id:Long)
+POST        /users/:id                             controllers.UsersView.update(id:Long)
 # Delete a UsersView
-POST    /users/:id/delete		                                                        controllers.UsersView.delete(id:Long)
+POST        /users/:id/delete                      controllers.UsersView.delete(id:Long)
+
+#DevicesView
+# DevicesView list (look at the default values for pagination parameters)
+GET         /devices/list                          controllers.DevicesView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /devices/lsort                         controllers.DevicesView.lsort()
+# Add InstancesView
+GET         /devices/blank                         controllers.DevicesView.blank()
+POST        /devices                               controllers.DevicesView.submit()
+# Edit existing InstancesView
+GET         /devices/sort/:ids                     controllers.DevicesView.sort(ids:String)
+GET         /devices/:id                           controllers.DevicesView.edit(id:Long)
+POST        /devices/:id                           controllers.DevicesView.update(id:Long)
+# Delete a InstancesView
+POST        /devices/:id/delete                    controllers.DevicesView.delete(id:Long)
+
+
+#ResolversView
+# ResolversView list (look at the default values for pagination parameters)
+GET         /resolvers/list                          controllers.ResolversView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /resolvers/lsort                         controllers.ResolversView.lsort()
+# Add InstancesView
+GET         /resolvers/blank                         controllers.ResolversView.blank()
+POST        /resolvers                               controllers.ResolversView.submit()
+# Edit existing InstancesView
+GET         /resolvers/sort/:ids                     controllers.ResolversView.sort(ids:String)
+GET         /resolvers/:id                           controllers.ResolversView.edit(id:Long)
+POST        /resolvers/:id                           controllers.ResolversView.update(id:Long)
+# Delete a InstancesView
+POST        /resolvers/:id/delete                    controllers.ResolversView.delete(id:Long)
+
+
+#PushersView
+# PushersView list (look at the default values for pagination parameters)
+GET     /pushers/list			                   controllers.PushersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET     /pushers/lsort		                       controllers.PushersView.lsort()
+# Add InstancesView
+GET     /pushers/blank		                       controllers.PushersView.blank()
+POST    /pushers				                   controllers.PushersView.submit()
+# Edit existing InstancesView
+GET     /pushers/sort/:ids	                       controllers.PushersView.sort(ids:String)
+GET     /pushers/:id			                   controllers.PushersView.edit(id:Long)
+POST    /pushers/:id			                   controllers.PushersView.update(id:Long)
+# Delete a InstancesView
+POST    /pushers/:id/delete		                   controllers.PushersView.delete(id:Long)
+
+#CleanersView
+# CleanersView list (look at the default values for pagination parameters)
+GET         /cleaners/list                          controllers.CleanersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /cleaners/lsort                         controllers.CleanersView.lsort()
+# Add CleanersView
+GET         /cleaners/blank                         controllers.CleanersView.blank()
+POST        /cleaners                               controllers.CleanersView.submit()
+# Edit existing CleanersView
+GET         /cleaners/sort/:ids                     controllers.CleanersView.sort(ids:String)
+GET         /cleaners/:id                           controllers.CleanersView.edit(id:Long)
+POST        /cleaners/:id                           controllers.CleanersView.update(id:Long)
+# Delete a CleanersView
+POST        /cleaners/:id/delete                    controllers.CleanersView.delete(id:Long)
 
 
 #events
-POST        /events/v1/process                                                          controllers.events.EventsWS.launchProcess(prod:Boolean ?=true)
-POST        /events/v1/push                                                             controllers.events.EventsWS.launchProcess(prod:Boolean ?=false)
-POST        /events/v1/insert/android                                                   controllers.events.EventsWS.insertAndroidEvent()
-POST        /events/v1/insert/ios                                                       controllers.events.EventsWS.insertIosEvent()
-POST        /events/v1/insert/web                                                       controllers.events.EventsWS.insertWebEvent()
-POST        /events/v1/insert                                                           controllers.events.EventsWS.insertEvent()
+POST        /events/v1/process                     controllers.events.EventsWS.launchProcess(prod:Boolean ?=true)
+POST        /events/v1/push                        controllers.events.EventsWS.launchProcess(prod:Boolean ?=false)
+POST        /events/v1/insert/android              controllers.events.EventsWS.insertAndroidEvent()
+POST        /events/v1/insert/ios                  controllers.events.EventsWS.insertIosEvent()
+POST        /events/v1/insert/web                  controllers.events.EventsWS.insertWebEvent()
+POST        /events/v1/insert                      controllers.events.EventsWS.insertEvent()
 
 
-POST        /push/:idApp/:method                                                        controllers.events.EventsWS.sendPush(idApp:Long, method : Integer)
-POST        /push/android/:idApp                                                        controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 0)
-POST        /push/web/:idApp                                                            controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 1)
-POST        /push/ios/:idApp                                                            controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 2)
+POST        /push/android/:idApp                   controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 0)
+POST        /push/web/:idApp                       controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 1)
+POST        /push/ios/:idApp                       controllers.events.EventsWS.sendPush(idApp:Long, method : Integer ?= 2)
+POST        /push/:idApp/:method                   controllers.events.EventsWS.sendPush(idApp:Long, method : Integer)
 
-POST         /apps/update/:idApp                                                        controllers.apps.AppsWS.update(idApp : Long)
+POST        /apps/update/:idApp                    controllers.apps.AppsWS.update(idApp : Long)
 
 # Authenticate
-GET     /restricted                                                                     controllers.Application.restricted
-GET     /assets/javascript/routes.js                                                    controllers.Application.jsRoutes
+GET         /restricted                            controllers.Application.restricted
+GET         /assets/javascript/routes.js           controllers.Application.jsRoutes
 
-GET     /profile                                                                        controllers.Application.profile
+GET         /profile                               controllers.Application.profile
 
-GET     /login                                                                          controllers.Application.login
-POST    /login                                                                          controllers.Application.doLogin
+GET         /login                                 controllers.Application.login
+POST        /login                                 controllers.Application.doLogin
 
-GET     /logout                                                                         com.feth.play.module.pa.controllers.Authenticate.logout
-GET     /authenticate/:provider                                                         com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
+GET         /logout                                com.feth.play.module.pa.controllers.Authenticate.logout
+GET         /authenticate/:provider                com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
 
-GET     /signup                                                                         controllers.Application.signup
-POST    /signup                                                                         controllers.Application.doSignup
+GET         /signup                                controllers.Application.signup
+POST        /signup                                controllers.Application.doSignup
 
-GET     /accounts/unverified        		                                            controllers.Signup.unverified
-GET     /authenticate/:provider/denied    	                                            controllers.Signup.oAuthDenied(provider: String)
+GET         /accounts/unverified                   controllers.Signup.unverified
+GET         /authenticate/:provider/denied         controllers.Signup.oAuthDenied(provider: String)
 
-GET     /accounts/verify/:token                                                         controllers.Signup.verify(token: String)
-GET     /accounts/exists                                                                controllers.Signup.exists
+GET         /accounts/verify/:token                controllers.Signup.verify(token: String)
+GET         /accounts/exists                       controllers.Signup.exists
 
-GET     /accounts/password/reset/:token                                                 controllers.Signup.resetPassword(token: String)
-POST    /accounts/password/reset                                                        controllers.Signup.doResetPassword
+GET         /accounts/password/reset/:token        controllers.Signup.resetPassword(token: String)
+POST        /accounts/password/reset               controllers.Signup.doResetPassword
 
-GET    /accounts/password/change                                                        controllers.Account.changePassword
-POST   /accounts/password/change                                                        controllers.Account.doChangePassword
+GET         /accounts/password/change              controllers.Account.changePassword
+POST        /accounts/password/change              controllers.Account.doChangePassword
 
-GET     /accounts/verify                                                                controllers.Account.verifyEmail
+GET         /accounts/verify                       controllers.Account.verifyEmail
 
-GET     /accounts/add                                                                   controllers.Account.link
+GET         /accounts/add                          controllers.Account.link
 
-GET     /accounts/link                                                                  controllers.Account.askLink
-POST    /accounts/link                                                                  controllers.Account.doLink
+GET         /accounts/link                         controllers.Account.askLink
+POST        /accounts/link                         controllers.Account.doLink
 
-GET     /accounts/merge                                                                 controllers.Account.askMerge
-POST    /accounts/merge                                                                 controllers.Account.doMerge
+GET         /accounts/merge                        controllers.Account.askMerge
+POST        /accounts/merge                        controllers.Account.doMerge
 
-GET     /login/password/forgot                                                          controllers.Signup.forgotPassword(email: String ?= "")
-POST    /login/password/forgot                                                          controllers.Signup.doForgotPassword
+GET         /login/password/forgot                 controllers.Signup.forgotPassword(email: String ?= "")
+POST        /login/password/forgot                 controllers.Signup.doForgotPassword
 
 

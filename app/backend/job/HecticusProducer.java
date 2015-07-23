@@ -1,6 +1,7 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
 import backend.caches.Client;
 import backend.caches.ClientsCache;
 import backend.rabbitmq.RabbitMQ;
@@ -24,10 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HecticusProducer extends HecticusThread{
 
     private ObjectNode event;
-    private boolean pDroid = false;
-    private boolean pIOS = false;
-    private boolean pWEB = false;
-    private boolean pMsisdn = false;
+    private ArrayList<AppDevice> allowedDevices;
     public HecticusProducer(String name, AtomicBoolean run, Cancellable cancellable) {
         super("HecticusProducer-"+name, run, cancellable);
     }
@@ -55,175 +53,56 @@ public class HecticusProducer extends HecticusThread{
     @Override
     public void process() {
         try{
-            long appID = event.get("app").asLong();
-            String msg = event.get("msg").asText();
+            allowedDevices = new ArrayList<>();
+            long appID = event.get(Constants.APP).asLong();
+            String msg = event.get(Constants.MSG).asText();
             int pushSize = Config.getInt("push-size");
-            Iterator<JsonNode> clients = event.get("clients").elements();
-            event.remove("clients");
+            Iterator<JsonNode> clients = event.get(Constants.CLIENTS).elements();
+            event.remove(Constants.CLIENTS);
             ClientsCache cc = ClientsCache.getInstance();
-            StringBuilder droidIDs = new StringBuilder();
-            StringBuilder iosIDs = new StringBuilder();
-            StringBuilder webIDs = new StringBuilder();
-            StringBuilder msisdnIDs = new StringBuilder();
             int count = 0;
-            int total = 0;
             Application app = Application.finder.byId(appID);
-            boolean delimited = event.has("devices_to_send");
+            boolean delimited = event.has(Constants.DEVICES_TO_SEND);
             if(delimited){
-                Iterator<JsonNode> devicesToSend = event.get("devices_to_send").elements();
+                Iterator<JsonNode> devicesToSend = event.get(Constants.DEVICES_TO_SEND).elements();
+                String next;
+                AppDevice device;
                 while(devicesToSend.hasNext()){
-                    String next = devicesToSend.next().asText();
-                    if(next.equalsIgnoreCase("android")){
-                        pDroid = true;
-                    } else if(next.equalsIgnoreCase("ios")){
-                        pIOS = true;
-                    } else if(next.equalsIgnoreCase("web")){
-                        pWEB = true;
+                    next = devicesToSend.next().asText();
+                    device = app.getDevice(next);
+                    if(device != null && device.getStatus()){
+                        allowedDevices.add(device);
                     }
                 }
-                event.remove("devices_to_send");
-            }
-            List<AppDevice> appDevices = app.getAppDevices();
-            for (AppDevice ad : appDevices) {
-                if (ad.getDev().getName().equalsIgnoreCase("droid") && ad.getStatus() == 1) {
-                    pDroid = delimited?true&&pDroid:true;
-                } else if (ad.getDev().getName().equalsIgnoreCase("ios") && ad.getStatus() == 1) {
-                    pIOS = delimited?true&&pIOS:true;
-                } else if (ad.getDev().getName().equalsIgnoreCase("web") && ad.getStatus() == 1) {
-                    pWEB = delimited?true&&pWEB:true;
-                } else if (ad.getDev().getName().equalsIgnoreCase("msisdn") && ad.getStatus() == 1) {
-                    pMsisdn = delimited?true&&pMsisdn:true;
-                } else {
-//                    Utils.printToLog(HecticusProducer.class, "Tipo de push desconocido", "El device  " + ad.getDev().getName() + " no se reconoce", false, null, "support-level-1", Config.LOGGER_ERROR);
+                event.remove(Constants.DEVICES_TO_SEND);
+            } else {
+                for(AppDevice device : app.getAppDevices()){
+                    if(device.getStatus()){
+                        allowedDevices.add(device);
+                    }
                 }
             }
-
             while(clients.hasNext()){
-                total++;
-                String key = appID + "-" + clients.next().asText();
+                String key = String.format(Constants.CLIENT_CACHE_KEY_TEMPLATE, appID, clients.next().asText());
                 try {
                     Client client = cc.getClient(key);
-                    if(count < pushSize){
-                        sortClientRegIDs(client, droidIDs, iosIDs, webIDs, msisdnIDs);
-                        count++;
-                    } else {
-                        if(!droidIDs.toString().isEmpty()){
-                            generateEvent("DROID", event,  droidIDs.toString());
-                            droidIDs.delete(0, droidIDs.length());
+                    if(client != null) {
+                        if (count < pushSize) {
+                            client.sortRegIDs(allowedDevices);
+                            ++count;
+                        } else {
+                            processEvent();
+                            client.sortRegIDs(allowedDevices);
+                            count = 1;
                         }
-
-                        if(!iosIDs.toString().isEmpty()){
-                            generateEvent("IOS", event,  iosIDs.toString());
-                            iosIDs.delete(0, iosIDs.length());
-                        }
-
-                        if(!webIDs.toString().isEmpty()){
-                            generateEvent("WEB", event,  webIDs.toString());
-                            webIDs.delete(0, webIDs.length());
-                        }
-
-                        if(!msisdnIDs.toString().isEmpty()){
-                            generateEvent("SMS", event,  msisdnIDs.toString());
-                            msisdnIDs.delete(0, msisdnIDs.length());
-                        }
-                        count = 0;
-                        sortClientRegIDs(client, droidIDs, iosIDs, webIDs, msisdnIDs);
-                        count++;
                     }
                 } catch (Exception ex) {
-                    Utils.printToLog(HecticusProducer.class, null, "No se enviara el evento \"" + msg + "\" al cliente " + key, false, null, "support-level-1", Config.LOGGER_ERROR);
+                    Utils.printToLog(HecticusProducer.class, null, "No se enviara el evento \"" + msg + "\" al cliente " + key, false, ex, "support-level-1", Config.LOGGER_ERROR);
                 }
-
             }
-            if(!droidIDs.toString().isEmpty()){
-                generateEvent("DROID", event,  droidIDs.toString());
-                droidIDs.delete(0, droidIDs.length());
-            }
-
-            if(!iosIDs.toString().isEmpty()){
-                generateEvent("IOS", event,  iosIDs.toString());
-                iosIDs.delete(0, iosIDs.length());
-            }
-
-            if(!webIDs.toString().isEmpty()){
-                generateEvent("WEB", event,  webIDs.toString());
-                webIDs.delete(0, webIDs.length());
-            }
-
-            if(!msisdnIDs.toString().isEmpty()){
-                generateEvent("SMS", event,  msisdnIDs.toString());
-                msisdnIDs.delete(0, msisdnIDs.length());
-            }
+            processEvent();
         }catch (Exception e){
             Utils.printToLog(HecticusProducer.class, "Error en el HecticusProducer", "Ocurrio un error en el HecticusProducer procesando el evento: " + event.toString(), true, e, "support-level-1", Config.LOGGER_ERROR);
-        }
-    }
-
-    /**
-     * Metodo para organizar los RegistrationIDs de un cliente por tipo
-     *
-     * @param client        Client con los RegistrationIDs
-     * @param droidIDs      string donde se anexaran los RegistrationIDs tipo droid del cliente (CSV)
-     * @param iosIDs        string donde se anexaran los RegistrationIDs tipo ios del cliente (CSV)
-     * @param webIDs        string donde se anexaran los RegistrationIDs tipo web del cliente (CSV)
-     * @param msisdnIDs     string donde se anexaran los RegistrationIDs tipo msisdn del cliente (CSV)
-     */
-    private void sortClientRegIDs(Client client, StringBuilder droidIDs, StringBuilder iosIDs, StringBuilder webIDs, StringBuilder msisdnIDs) {
-        if(client != null){
-            ArrayList<String> droid = client.getDroid();
-            if(pDroid && droid != null && !droid.isEmpty()){
-                for(String id : droid){
-                    if(id != null && !id.isEmpty()){
-                        droidIDs.append(id).append(",");
-                    }
-                }
-            }
-            ArrayList<String> ios = client.getIos();
-            if(pIOS && ios != null && !ios.isEmpty()){
-                for(String id : ios){
-                    if(id != null && !id.isEmpty()){
-                        iosIDs.append(id).append(",");
-                    }
-                }
-            }
-            ArrayList<String> web = client.getWeb();
-            if(pWEB && web != null && !web.isEmpty()){
-                for(String id : web){
-                    if(id != null && !id.isEmpty()){
-                        webIDs.append(id).append(",");
-                    }
-                }
-            }
-            String msisdn = client.getMsisdn();
-            if(pMsisdn && msisdn != null && !msisdn.isEmpty()){
-                msisdnIDs.append(msisdn).append(",");
-            }
-        }
-    }
-
-    /**
-     * Metodo para generar en insertar un evento de push en la cola PUSH
-     *
-     * @param type              tipo de dispositivo de los RegistrationIDs (droid, ops, web,etc)
-     * @param msg               mensaje a enviar
-     * @param app               id del app asociada al evento
-     * @param insertionTime     epoch en el que se inserto el evento en la cola EVENTS
-     * @param emTime            epoch en el que el EventManager proceso el evento
-     * @param regIDs            String CSV con los RegistrationIDs del tipo type
-     */
-    private void generateEvent(String type, String msg, long app, long insertionTime, long emTime, String regIDs) {
-        ObjectNode event = Json.newObject();
-        event.put("msg", msg);
-        event.put("app", app);
-        event.put("type", type);
-        event.put("insertionTime", insertionTime);
-        event.put("emTime", emTime);
-        event.put("prodTime", System.currentTimeMillis());
-        event.put("regIDs", regIDs);
-        try {
-            RabbitMQ.getInstance().insertPushLyra(event.toString());
-        } catch (Exception ex) {
-            Utils.printToLog(HecticusProducer.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
         }
     }
 
@@ -236,14 +115,26 @@ public class HecticusProducer extends HecticusThread{
      */
     private void generateEvent(String type, ObjectNode event, String regIDs){
         ObjectNode finalEvent = event.deepCopy();
-        finalEvent.put("type", type);
-        finalEvent.put("prodTime", System.currentTimeMillis());
-        finalEvent.put("regIDs", regIDs);
-        System.out.println(finalEvent.toString());
+        finalEvent.put(Constants.PUSH_TYPE, type);
+        finalEvent.put(Constants.PROD_TIME, System.currentTimeMillis());
+        finalEvent.put(Constants.REG_IDS, regIDs);
         try {
             RabbitMQ.getInstance().insertPushLyra(finalEvent.toString());
         } catch (Exception ex) {
             Utils.printToLog(HecticusProducer.class, null, "error", false, ex, "support-level-1", Config.LOGGER_ERROR);
+        }
+    }
+
+    private void processEvent(){
+        for (AppDevice allowedDevice : allowedDevices){
+            StringBuilder idsBuilder = allowedDevice.getIds();
+            if(idsBuilder != null){
+                String ids = idsBuilder.toString();
+                if(ids != null && !ids.isEmpty()){
+                    generateEvent(allowedDevice.getDev().getName(), event, ids);
+                    allowedDevice.clearIds();
+                }
+            }
         }
     }
 

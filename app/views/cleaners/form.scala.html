@@ -1,0 +1,63 @@
+@(cleanerViewForm: Form[models.apps.Cleaner])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@main(title = Messages("cleaners.create"), nav = "create") {
+
+    @if(flash.containsKey("success")) {
+        <div class="alert-message warning">
+            <strong>Error!</strong> @flash.get("success")
+        </div>
+    }
+
+    @if(cleanerViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@cleanerViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(action = controllers.routes.CleanersView.submit) {
+
+        <fieldset>
+            <legend>@Messages("cleaners.info")</legend>
+
+            @inputText(
+                cleanerViewForm("name"),
+                '_label -> Messages("cleaners.name"),
+                '_help -> Messages("cleaners.name.help"),
+                'class -> "form-control",
+                '_error -> cleanerViewForm.globalError
+            )
+
+            @inputText(
+                cleanerViewForm("className"),
+                '_label -> Messages("cleaners.className"),
+                '_help -> Messages("cleaners.className.help"),
+                'class -> "form-control",
+                '_error -> cleanerViewForm.globalError
+            )
+
+            @select(
+                cleanerViewForm("device.idDevice"),
+                models.apps.Device.toSeq,
+                '_label -> Messages("cleaners.device"),
+                'class -> "form-control"
+            )
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" class="btn btn-success" value=@Messages("cleaners.submit.create")>
+            <a href="@controllers.routes.CleanersView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+}

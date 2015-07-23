@@ -13,3 +13,5 @@ dist
 /.project
 /RUNNING_PID
 /.settings
+/certificate
+.DS_Store

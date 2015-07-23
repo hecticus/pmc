@@ -2,9 +2,10 @@ package backend.caches;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.apps.AppDevice;
+import models.apps.Device;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Created by plesse on 7/14/14.
@@ -12,59 +13,25 @@ import java.util.Iterator;
 public class Client {
     private long idClient;
     private long app;
-    private ArrayList<String> droid;
-    private ArrayList<String> ios;
-    private ArrayList<String> web;
-    private String msisdn;
-
-    public Client(long idClient, long app, ArrayList<String> droid, ArrayList<String> ios, ArrayList<String> web, String msisdn) {
-        this.idClient = idClient;
-        this.app = app;
-        this.droid = droid;
-        this.ios = ios;
-        this.web = web;
-        this.msisdn = msisdn;
-    }
+    private Map<Long, ArrayList<String>> deviceRelation;
 
     public Client(ObjectNode client) {
+        deviceRelation = new HashMap<>();
         this.idClient = client.get("idClient").asLong();
         this.app = client.get("app").asLong();
-        if(client.has("droid")){
-            Iterator<JsonNode> droidIDs = client.get("droid").elements();
-            droid = new ArrayList<>();
-            while(droidIDs.hasNext()) {
-                droid.add(droidIDs.next().asText());
+        Iterator<JsonNode> ids;
+        ArrayList<String> finalIds = new ArrayList<>();
+        List<Device> devices = Device.finder.all();
+        for(Device device : devices){
+            if(client.has(device.getName())){
+                ids = client.get(device.getName()).elements();
+                while(ids.hasNext()) {
+                    finalIds.add(ids.next().asText());
+                }
+                deviceRelation.put(device.getIdDevice(), (ArrayList<String>) finalIds.clone());
+                finalIds.clear();
             }
-        } else {
-            this.droid = null;
         }
-
-        if(client.has("ios")){
-            Iterator<JsonNode> iosIDs = client.get("ios").elements();
-            ios = new ArrayList<>();
-            while(iosIDs.hasNext()) {
-                ios.add(iosIDs.next().asText());
-            }
-        } else {
-            this.ios = null;
-        }
-
-        if(client.has("web")){
-            Iterator<JsonNode> webIDs = client.get("web").elements();
-            web = new ArrayList<>();
-            while(webIDs.hasNext()) {
-                web.add(webIDs.next().asText());
-            }
-        } else {
-            this.web = null;
-        }
-
-        if(client.has("msisdn")){
-            this.msisdn = client.get("msisdn").asText();
-        } else {
-            this.msisdn = null;
-        }
-
     }
 
     public long getIdClient() {
@@ -75,32 +42,15 @@ public class Client {
         return app;
     }
 
-    public ArrayList<String> getDroid() {
-        return droid;
-    }
-
-    public ArrayList<String> getIos() {
-        return ios;
-    }
-
-    public ArrayList<String> getWeb() {
-        return web;
-    }
-
-    public String getMsisdn() {
-        return msisdn;
-    }
-
-    @Override
-    public String toString() {
-        return "Client{" +
-                "idClient=" + idClient +
-                ", app=" + app +
-                ", droid=" + droid +
-                ", ios=" + ios +
-                ", web=" + web +
-                ", msisdn='" + msisdn + '\'' +
-                '}';
+    public void sortRegIDs(ArrayList<AppDevice> allowedDevices) {
+        for (AppDevice allowedDevice : allowedDevices){
+            ArrayList<String> regIDs = deviceRelation.get(allowedDevice.getDev().getIdDevice());
+            if(regIDs != null && !regIDs.isEmpty()){
+                for (String regId : regIDs){
+                    allowedDevice.appendId(regId);
+                }
+            }
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
 import models.basic.Config;
 import models.basic.PushedEvent;
 import utils.Utils;
@@ -36,10 +37,6 @@ public class PushedEventsCleaner extends HecticusThread {
             Calendar actualDate = new GregorianCalendar(tz);
             actualDate.add(Calendar.DAY_OF_MONTH, -Config.getInt("clean-window"));
             List<PushedEvent> eventsToDelete = PushedEvent.finder.where().le("time", actualDate.getTimeInMillis()).findList();
-
-//            SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
-//            System.out.println("a borrar = " + eventsToDelete.size() + " " + sf.format(actualDate.getTime()) + " " + actualDate.getTimeInMillis());
-
             for(PushedEvent pushedEvent : eventsToDelete) {
                 pushedEvent.delete();
             }

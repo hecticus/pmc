@@ -1,0 +1,48 @@
+@(instanceViewForm: Form[models.apps.Device])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@main(title = Messages("devices.create"), nav = "create") {
+
+    @if(flash.containsKey("success")) {
+        <div class="alert-message warning">
+            <strong>Error!</strong> @flash.get("success")
+        </div>
+    }
+
+    @if(instanceViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@instanceViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(action = controllers.routes.DevicesView.submit) {
+
+        <fieldset>
+            <legend>@Messages("devices.info")</legend>
+
+            @inputText(
+                instanceViewForm("name"),
+                '_label -> Messages("devices.name"),
+                '_help -> Messages("devices.name.help"),
+                'class -> "form-control",
+                '_error -> instanceViewForm.globalError
+            )
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" class="btn btn-success" value=@Messages("devices.submit.create")>
+            <a href="@controllers.routes.DevicesView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+}

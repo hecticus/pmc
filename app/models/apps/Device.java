@@ -1,5 +1,6 @@
 package models.apps;
 
+import com.avaje.ebean.Page;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.HecticusModel;
 import play.data.validation.Constraints;
@@ -80,4 +81,9 @@ public class Device extends HecticusModel {
         scala.collection.immutable.List<Tuple2<String, String>> deviceList = deviceBuffer.toList();
         return deviceList;
     }
+
+    public static Page<Device> page(int page, int pageSize, String sortBy, String order, String filter) {
+        return finder.where().ilike("name", "%" + filter + "%").orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+    }
+
 }

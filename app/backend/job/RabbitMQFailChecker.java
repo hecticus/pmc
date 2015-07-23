@@ -1,6 +1,7 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
 import backend.rabbitmq.RabbitMQ;
 import models.basic.Config;
 import models.basic.Event;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by plesse on 8/1/14.
  */
 public class RabbitMQFailChecker extends HecticusThread {
+
     private int maxRetry;
     public RabbitMQFailChecker(String name, AtomicBoolean run, Cancellable cancellable) {
         super("RabbitMQFailChecker-"+name, run, cancellable);
@@ -52,14 +54,13 @@ public class RabbitMQFailChecker extends HecticusThread {
 
                     }
                 }
-//                String body = URLDecoder.decode(e.getEvent(),"UTF-8");
                 if(body != null && !body.isEmpty()){
                     boolean result = false;
-                    if(e.getType().equalsIgnoreCase("event")){
+                    if(e.getType().equalsIgnoreCase(Constants.EVENT)){
                         result = RabbitMQ.getInstance().insertEventLyraWithResult(body);
-                    } else if(e.getType().equalsIgnoreCase("push")){
+                    } else if(e.getType().equalsIgnoreCase(Constants.PUSH)){
                         result = RabbitMQ.getInstance().insertPushLyraWithResult(body);
-                    } else if(e.getType().equalsIgnoreCase("result")){
+                    } else if(e.getType().equalsIgnoreCase(Constants.RESULT)){
                         result = RabbitMQ.getInstance().insertPushResultLyraWithResult(body);
                     }
                     if(result){

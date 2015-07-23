@@ -2,6 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
+import models.apps.AppDevice;
 import models.basic.Config;
 import models.basic.PushedEvent;
 import play.data.Form;
@@ -53,7 +54,6 @@ public class ApplicationsView extends HecticusController {
     @Restrict(@Group(Application.USER_ROLE))
     public static Result update(Long id) {
         Form<models.apps.Application> filledForm = ApplicationViewForm.bindFromRequest();
-//        System.out.println(filledForm.toString());
         if(filledForm.hasErrors()) {
             return badRequest(edit.render(id, filledForm));
         }
@@ -118,6 +118,9 @@ public class ApplicationsView extends HecticusController {
         if(production != null && !production.isEmpty()){
             gfilledForm.setIosPushApnsCertProduction(production);
         }
+
+        gfilledForm.setActive(filledForm.data().containsKey("active"));
+        gfilledForm.setDebug(filledForm.data().containsKey("debug"));
 
         gfilledForm.update(id);
         flash("success", Messages.get("applications.java.updated", gfilledForm.getName()));

@@ -3,20 +3,20 @@ package backend.job;
 import akka.actor.Cancellable;
 
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import backend.Constants;
 import backend.rabbitmq.RabbitMQ;
 import backend.resolvers.Resolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.apps.AppDevice;
 import models.apps.Application;
 import models.basic.Config;
 import models.basic.PushedEvent;
-import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.*;
 import play.libs.F.Promise;
@@ -67,8 +67,8 @@ public class EventManager extends HecticusThread {
      * @param event     evento a picar
      */
     private void splitAndSendProcessRequest(ObjectNode event) {
-        Iterator<JsonNode> clients = event.get("clients").elements();
-        event.remove("clients");
+        Iterator<JsonNode> clients = event.get(Constants.CLIENTS).elements();
+        event.remove(Constants.CLIENTS);
         int packagesSize = Config.getInt("packages-size");
         int count = 0;
         ArrayList<JsonNode> clientsPage = new ArrayList<>(packagesSize);
@@ -105,13 +105,11 @@ public class EventManager extends HecticusThread {
      */
     private ObjectNode generateEvent(long appID, String msg, long insertionTime, ArrayList<JsonNode> clients) {
         ObjectNode finalEvent = Json.newObject();
-        finalEvent.put("app", appID);
-        finalEvent.put("msg", msg);
-        finalEvent.put("insertionTime", insertionTime);
-        finalEvent.put("emTime", System.currentTimeMillis());
-        finalEvent.put("clients", Json.toJson(clients));
-        finalEvent.put("emTime", System.currentTimeMillis());
-        finalEvent.put("clients", Json.toJson(clients));
+        finalEvent.put(Constants.APP, appID);
+        finalEvent.put(Constants.MSG, msg);
+        finalEvent.put(Constants.INSERTION_TIME, insertionTime);
+        finalEvent.put(Constants.EM_TIME, System.currentTimeMillis());
+        finalEvent.put(Constants.CLIENTS, Json.toJson(clients));
         return finalEvent;
     }
 
@@ -124,8 +122,8 @@ public class EventManager extends HecticusThread {
      */
     private ObjectNode generateEvent(ObjectNode event, ArrayList<JsonNode> clients){
         ObjectNode finalEvent = event.deepCopy();
-        finalEvent.put("emTime", System.currentTimeMillis());
-        finalEvent.put("clients", Json.toJson(clients));
+        finalEvent.put(Constants.EM_TIME, System.currentTimeMillis());
+        finalEvent.put(Constants.CLIENTS, Json.toJson(clients));
         return finalEvent;
     }
 
@@ -136,7 +134,7 @@ public class EventManager extends HecticusThread {
      */
     private void sendProcessRequest(ObjectNode event) {
         try{
-            Promise<WSResponse> result = WS.url("http://" + Config.getDaemonHost() + "/events/v1/process").post(event);
+            Promise<WSResponse> result = WS.url(String.format(Constants.WS_PROCESS_EVENT, Config.getDaemonHost())).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
             setAlive();
         }catch (Exception ex){
@@ -156,50 +154,46 @@ public class EventManager extends HecticusThread {
      * @return          true si puede ser enviado
      */
     private boolean validateEvent(ObjectNode event) {
-        if(!event.has("app") || !event.has("msg") || !event.has("clients")){
+        if(!event.has(Constants.APP) || !event.has(Constants.MSG) || !event.has(Constants.CLIENTS)){
             return false;
         }
-        long appID = event.get("app").asLong();
-        String msg = event.get("msg").asText();
-        Application app = Application.finder.byId(appID);
+        long appID = event.get(Constants.APP).asLong();
+        String msg = event.get(Constants.MSG).asText();
+        models.apps.Application app = models.apps.Application.finder.byId(appID);
         if(app == null){
             return false;
         }
-        if(app.getActive() == 0){
+        if(!app.isActive()){
             return false;
         }
         if(msg.isEmpty()){
             return false;
         }
         try{
-            Class jobClassName = Class.forName(app.getResolver().getClassName().trim());
-            final Resolver androidResolver = (Resolver) jobClassName.newInstance();
-            ObjectNode android = androidResolver.resolve(event, app);
-
-            jobClassName = Class.forName("backend.resolvers.IOSResolver");
-            final Resolver iosResolver = (Resolver) jobClassName.newInstance();
-            ObjectNode aps = iosResolver.resolve(event, app);
-
-            jobClassName = Class.forName("backend.resolvers.MailResolver");
-            final Resolver mailResolver = (Resolver) jobClassName.newInstance();
-            ObjectNode mail = mailResolver.resolve(event, app);
-
-            if(android == null || aps == null || mail == null){
-                return false;
+            Class resolverClassName;
+            Resolver resolver;
+            ObjectNode resolved;
+            for(AppDevice appDevice : app.getAppDevices()){
+                resolverClassName = Class.forName(appDevice.getResolver().getClassName().trim());
+                resolver = (Resolver) resolverClassName.newInstance();
+                resolved = resolver.resolve(event, app);
+                if(resolved != null){
+                    event.put(appDevice.getDev().getName(), resolved);
+                } else {
+                    return false;
+                }
             }
+
             try{
-                msg = URLDecoder.decode(msg, "UTF-8");
+                msg = URLDecoder.decode(msg, Constants.ENCODING_UTF_8);
             } catch (Exception ex){
 
             }
-            event.put("gcm", android);
-            event.put("apns", aps);
-            event.put("mail", mail);
         }catch (Exception ex){
             return false;
         }
 
-        PushedEvent pushedEvent = new PushedEvent(app, msg, System.currentTimeMillis(), event.get("clients").size());
+        PushedEvent pushedEvent = new PushedEvent(app, msg, System.currentTimeMillis(), event.get(Constants.CLIENTS).size());
         pushedEvent.save();
         return true;
     }

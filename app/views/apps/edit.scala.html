@@ -2,19 +2,59 @@
 
 @import helper._
 @import helper.twitterBootstrap._
+@import tags._
 
 @title = {}
 
 @deviceGroup(field: Field, className: String = "device") = {
     <div class="twipsies well @className">
-        <a class="removeDevice btn btn-primary danger pull-right">@Messages("applications.device.remove")</a>
-        @select(
-            field("dev.idDevice"),
-            models.apps.Device.toSeq,
-            '_label -> Messages("applications.device"),
-            'class -> "form-control"
-        )
-        @inputText(field("status"), '_label -> Messages("applications.device.active"), '_help -> Messages("applications.device.active.help"), '_error -> applicationViewForm.globalError, 'class -> "form-control")
+        <div class="row">
+            <div class="col-lg-8">
+                @select(
+                    field("dev.idDevice"),
+                    models.apps.Device.toSeq,
+                    '_label -> Messages("applications.device"),
+                    'class -> "form-control"
+                )
+            </div>
+            <div class="col-lg-1">
+                @materialCheckbox(
+                    field("status"),
+                    '_label -> Messages("applications.device.active"),
+                    '_error -> applicationViewForm.globalError,
+                    'class -> "allCheckbox"
+                )
+            </div>
+            <div class="col-lg-3">
+                <a class="removeDevice btn btn-primary danger pull-right">@Messages("applications.device.remove")</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4">
+                @select(
+                    field("pusher.idPusher"),
+                    models.apps.Pusher.toSeqP(field("dev.idDevice").value.getOrElse("0").toInt),
+                    '_label -> Messages("applications.device.pusher"),
+                    'class -> "form-control"
+                )
+            </div>
+            <div class="col-lg-4">
+                @select(
+                    field("resolver.idResolver"),
+                    models.apps.Resolver.toSeqP(field("dev.idDevice").value.getOrElse("0").toInt),
+                    '_label -> Messages("applications.device.resolver"),
+                    'class -> "form-control"
+                )
+            </div>
+            <div class="col-lg-4">
+                @select(
+                    field("cleaner.idCleaner"),
+                    models.apps.Cleaner.toSeqP(field("dev.idDevice").value.getOrElse("0").toInt),
+                    '_label -> Messages("applications.device.cleaner"),
+                    'class -> "form-control"
+                )
+            </div>
+        </div>
     </div>
 }
 
@@ -34,21 +74,56 @@
         <fieldset>
             <legend>@Messages("applications.info")</legend>
 
-            @inputText(
-                applicationViewForm("name"),
-                '_label -> Messages("applications.name"),
-                '_help -> Messages("applications.name.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
+            <div class="row">
+                <div class="col-lg-8">
+                    @inputText(
+                        applicationViewForm("name"),
+                        '_label -> Messages("applications.name"),
+                        '_help -> Messages("applications.name.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+                <div class="col-lg-2">
+                    @materialCheckbox(
+                        applicationViewForm("active"),
+                        '_label -> Messages("applications.device.active"),
+                        '_help -> Messages("applications.device.active.help"),
+                        '_error -> applicationViewForm.globalError,
+                        'class -> "allCheckbox"
+                    )
+                </div>
+                <div class="col-lg-2">
+                    @materialCheckbox(
+                        applicationViewForm("debug"),
+                        '_label -> Messages("applications.debug"),
+                        '_help -> Messages("applications.debug.help"),
+                        '_error -> applicationViewForm.globalError,
+                        'class -> "allCheckbox"
+                    )
+                </div>
+            </div>
 
-            @inputText(
-                applicationViewForm("active"),
-                '_label -> Messages("applications.active"),
-                '_help -> Messages("applications.active.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
+            <div class="row">
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("title"),
+                        '_label -> Messages("applications.title"),
+                        '_help -> Messages("applications.title.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("sound"),
+                        '_label -> Messages("applications.sound"),
+                        '_help -> Messages("applications.sound.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+            </div>
 
             @inputText(
                 applicationViewForm("batchClientsUrl"),
@@ -73,29 +148,6 @@
                 'class -> "form-control",
                 '_error -> applicationViewForm.globalError
             )
-            @inputText(
-                applicationViewForm("title"),
-                '_label -> Messages("applications.title"),
-                '_help -> Messages("applications.title.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
-
-            @inputText(
-                applicationViewForm("sound"),
-                '_label -> Messages("applications.sound"),
-                '_help -> Messages("applications.sound.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
-
-            @inputText(
-                applicationViewForm("debug"),
-                '_label -> Messages("applications.debug"),
-                '_help -> Messages("applications.debug.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
 
             <h2>@Messages("applications.android")</h2>
 
@@ -107,91 +159,87 @@
                 '_error -> applicationViewForm.globalError
             )
 
-            @select(
-                applicationViewForm("resolver.idResolver"),
-                models.apps.Resolver.toSeq,
-                '_label -> Messages("applications.resolver"),
-                'class -> "form-control"
-            )
-
             <h2>@Messages("applications.ios")</h2>
 
-            @**inputText(
-                applicationViewForm("iosPushApnsCertProduction"),
-                '_label -> Messages("applications.iosPushApnsCertProduction"),
-                '_help -> Messages("applications.iosPushApnsCertProduction.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )*@
+            <div class="row">
+                <div class="col-lg-6">
+                    @input(applicationViewForm("iosPushApnsCertProduction"), '_label -> Messages("applications.iosPushApnsCertProduction"),'_help -> Messages("applications.iosPushApnsCertProduction.help")) { (id, name, value, _) =>
+                        <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
+                        <input type="file" name="@name" value="@value" id="iosProdFile" multiple="">
+                    }
+                </div>
+                <div class="col-lg-6">
+                    @input(applicationViewForm("iosPushApnsCertSandbox"), '_label -> Messages("applications.iosPushApnsCertSandbox"),'_help -> Messages("applications.iosPushApnsCertSandbox.help")) { (id, name, value, _) =>
+                        <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
+                        <input type="file" name="@name" value="@value" id="iosSandFile" multiple="">
+                    }
+                </div>
+            </div>
 
-
-            @input(applicationViewForm("iosPushApnsCertProduction"), '_label -> Messages("applications.iosPushApnsCertProduction"),'_help -> Messages("applications.iosPushApnsCertProduction.help")) { (id, name, value, _) =>
-                <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
-                <input type="file" name="@name" value="@value" id="iosProdFile" multiple="">
-            }
-
-            @input(applicationViewForm("iosPushApnsCertSandbox"), '_label -> Messages("applications.iosPushApnsCertSandbox"),'_help -> Messages("applications.iosPushApnsCertSandbox.help")) { (id, name, value, _) =>
-                <input type="text" name="@name" value="@value" readonly="" class="form-control floating-label" placeholder="">
-                <input type="file" name="@name" value="@value" id="iosSandFile" multiple="">
-            }
-
-            @**inputText(
-                applicationViewForm("iosPushApnsCertSandbox"),
-                '_label -> Messages("applications.iosPushApnsCertSandbox"),
-                '_help -> Messages("applications.iosPushApnsCertSandbox.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )*@
-
-            @inputText(
-                applicationViewForm("iosPushApnsPassphrase"),
-                '_label -> Messages("applications.iosPushApnsPassphrase"),
-                '_help -> Messages("applications.iosPushApnsPassphrase.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
-
-            @inputText(
-                applicationViewForm("iosSandbox"),
-                '_label -> Messages("applications.iosSandbox"),
-                '_help -> Messages("applications.iosSandbox.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
+            <div class="row">
+                <div class="col-lg-10">
+                    @inputText(
+                        applicationViewForm("iosPushApnsPassphrase"),
+                        '_label -> Messages("applications.iosPushApnsPassphrase"),
+                        '_help -> Messages("applications.iosPushApnsPassphrase.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+                <div class="col-lg-2">
+                    @materialCheckbox(
+                        applicationViewForm("iosSandbox"),
+                        '_label -> Messages("applications.iosSandbox"),
+                        '_help -> Messages("applications.iosSandbox.help"),
+                        '_error -> applicationViewForm.globalError,
+                        'class -> "allCheckbox"
+                    )
+                </div>
+            </div>
 
             <h2>@Messages("applications.mailgun")</h2>
 
-            @inputText(
-                applicationViewForm("mailgunApikey"),
-                '_label -> Messages("applications.mailgunApikey"),
-                '_help -> Messages("applications.mailgunApikey.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
+            <div class="row">
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("mailgunApikey"),
+                        '_label -> Messages("applications.mailgunApikey"),
+                        '_help -> Messages("applications.mailgunApikey.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("mailgunApiurl"),
+                        '_label -> Messages("applications.mailgunApiurl"),
+                        '_help -> Messages("applications.mailgunApiurl.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+            </div>
 
-            @inputText(
-                applicationViewForm("mailgunApiurl"),
-                '_label -> Messages("applications.mailgunApiurl"),
-                '_help -> Messages("applications.mailgunApiurl.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
-
-            @inputText(
-                applicationViewForm("mailgunFrom"),
-                '_label -> Messages("applications.mailgunFrom"),
-                '_help -> Messages("applications.mailgunFrom.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
-
-            @inputText(
-                applicationViewForm("mailgunTo"),
-                '_label -> Messages("applications.mailgunTo"),
-                '_help -> Messages("applications.mailgunTo.help"),
-                'class -> "form-control",
-                '_error -> applicationViewForm.globalError
-            )
+            <div class="row">
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("mailgunFrom"),
+                        '_label -> Messages("applications.mailgunFrom"),
+                        '_help -> Messages("applications.mailgunFrom.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+                <div class="col-lg-6">
+                    @inputText(
+                        applicationViewForm("mailgunTo"),
+                        '_label -> Messages("applications.mailgunTo"),
+                        '_help -> Messages("applications.mailgunTo.help"),
+                        'class -> "form-control",
+                        '_error -> applicationViewForm.globalError
+                    )
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-lg-12">

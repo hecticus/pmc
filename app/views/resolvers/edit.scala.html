@@ -1,0 +1,61 @@
+@(id: Long, resolverViewForm: Form[models.apps.Resolver])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@main(title = Messages("resolvers.edit"), nav = "create") {
+
+    @if(resolverViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@resolverViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(controllers.routes.ResolversView.update(id), 'enctype -> "multipart/form-data") {
+
+        <fieldset>
+            <legend>@Messages("resolvers.info")</legend>
+
+            @inputText(
+                resolverViewForm("name"),
+                '_label -> Messages("resolvers.name"),
+                '_help -> Messages("resolvers.name.help"),
+                'class -> "form-control",
+                '_error -> resolverViewForm.globalError
+            )
+
+            @inputText(
+                resolverViewForm("className"),
+                '_label -> Messages("resolvers.className"),
+                '_help -> Messages("resolvers.className.help"),
+                'class -> "form-control",
+                '_error -> resolverViewForm.globalError
+            )
+
+            @select(
+                resolverViewForm("device.idDevice"),
+                models.apps.Device.toSeq,
+                '_label -> Messages("resolvers.device"),
+                'class -> "form-control"
+            )
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value=@Messages("resolvers.submit.update") class="btn btn-success">
+            <a href="@controllers.routes.ResolversView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+    @form(controllers.routes.ResolversView.delete(id), 'class -> "topRight") {
+        <input type="submit" value=@Messages("resolvers.submit.delete") class="btn btn-danger">
+
+    }
+
+}

@@ -1,7 +1,9 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
 import backend.apns.JavApns;
+import backend.pushers.*;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hecticus.rackspacemailgun.MailGun;
@@ -9,10 +11,9 @@ import javapns.Push;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
-import javapns.notification.ResponsePacket;
+import models.apps.AppDevice;
 import models.apps.Application;
 import models.basic.Config;
-import play.Play;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -82,28 +83,31 @@ public class HecticusPusher extends HecticusThread {
     public void process() {
         try{
             if(event != null) {
-                long appID = event.get("app").asLong();
-                String type = event.get("type").asText();
+                long appID = event.get(Constants.APP).asLong();
+                String type = event.get(Constants.PUSH_TYPE).asText();
                 Application app = Application.finder.byId(appID);
-                if (type.equalsIgnoreCase("droid")) {
-                    sendDroidPushRequest(app);
-                } else if (type.equalsIgnoreCase("ios")) {
-                    int pooled = 1;
-                    try {
-                        pooled = Config.getInt("apns-pooled");
-                    } catch (Exception e) {
-                    }
-                    if (pooled == 1) {
-                        sendIOSPushRequestPool(app);
+                if(app != null) {
+                    AppDevice device = app.getDevice(type);
+                    if (device != null) {
+                        Class pusherClassName = Class.forName(device.getPusher().getClassName().trim());
+                        if (pusherClassName != null) {
+                            Pusher pusher = (Pusher) pusherClassName.newInstance();
+                            if (pusher != null) {
+                                pusher.setParams(device.getPusher().getParsedParams());
+                                pusher.setDevice(device.getDev());
+                                pusher.setInsertResult(true);
+                                pusher.push(event, app);
+                            } else {
+                                Utils.printToLog(HecticusPusher.class, "No hay pusher para el evento", "El tipo " + type + " no tiene pusher. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
+                            }
+                        } else {
+                            Utils.printToLog(HecticusPusher.class, "No hay pusher para el evento", "El tipo " + type + " no tiene pusher. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
+                        }
                     } else {
-                        sendIOSPushRequest(app);
+                        Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El app no dispone del " + type + " no se reconoce. Evento: " + event.toString(), false, null, "support-level-1", Config.LOGGER_ERROR);
                     }
-                } else if (type.equalsIgnoreCase("web")) {
-                    sendWEBPushRequest(app);
-                } else if (type.equalsIgnoreCase("sms")) {
-                    sendSMSPushRequest(app);
                 } else {
-                    Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El tipo " + type + " no se reconoce. Evento: " + event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
+                    Utils.printToLog(HecticusPusher.class, "Tipo de push desconocido", "El app no no se reconoce. Evento: " + event.toString(), false, null, "support-level-1", Config.LOGGER_ERROR);
                 }
             } else {
                 Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "Llego un evento nulo", true, null, "support-level-1", Config.LOGGER_INFO);
@@ -112,187 +116,4 @@ public class HecticusPusher extends HecticusThread {
             Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), true, e, "support-level-1", Config.LOGGER_ERROR);
         }
     }
-
-    /**
-     * Metodo para hacer push de un evento por SMS (No esta implementado)
-     *
-     *
-     * @param app   aplicacion asociada al evento de push
-     */
-    private void sendSMSPushRequest(Application app) {
-        throw new UnsupportedOperationException("El metodo SMS no ha sido implementado");
-    }
-
-    /**
-     * Metodo para hacer push de un evento por mailgun
-     *
-     * @param app   aplicacion asociada al evento de push
-     */
-    private void sendWEBPushRequest(Application app) {
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        ObjectNode mail = (ObjectNode) event.get("mail");
-        String title = app.getTitle();
-        if (app.getDebug() == 0) {
-            try {
-                if(mail.has("title")){
-                    title = mail.get("title").asText();
-                }
-                if(mail.has("message")){
-                    msg = mail.get("message").asText();
-                }
-                Map sendSimpleMessage = null;
-                if(mail.has("html") && mail.get("html").asBoolean()){
-                    sendSimpleMessage = MailGun.sendHtmlMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());
-                } else {
-                    sendSimpleMessage = MailGun.sendSimpleMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());
-                }
-                if (sendSimpleMessage != null && (Integer) sendSimpleMessage.get("status") != 200) {
-                    String emsg = "error en MailGun en el HecticusPusher, MailGun respondio " + sendSimpleMessage.toString();
-                    Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, null, "support-level-1", Config.LOGGER_ERROR);
-                }
-            } catch (Throwable t) {
-                String emsg = "Proceso continua. Error en el MailGun, puede ser falta de librerias de jersey o de oauth";
-                Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, t, "support-level-1", Config.LOGGER_ERROR);
-            }
-        }
-    }
-
-    /**
-     * Metodo para hacer push de un evento a IOS
-     *
-     * @param app   aplicacion asociada al evento de push
-     */
-    private void sendIOSPushRequest(Application app) {
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String[] registrationIds = regIDs.split(",");
-        if(app.getDebug() == 0){
-            try {
-                PushedNotifications result = null;
-//                File cert  = new File(Play.application().path().getAbsolutePath() + "/" + (app.getIosSandbox() == 0 ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
-                File cert  = new File((app.getIosSandbox() == 0 ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
-                if(app.getSound() != null && !app.getSound().isEmpty()){
-                    result = Push.combined(msg, 0, app.getSound(), cert, app.getIosPushApnsPassphrase(), app.getIosSandbox() == 0, registrationIds);
-                } else {
-                    result = Push.alert(msg, cert, app.getIosPushApnsPassphrase(), app.getIosSandbox()==0, registrationIds);
-                }
-                PushNotificationPayload payload = PushNotificationPayload.alert(msg);
-                if(app.getSound() != null && !app.getSound().isEmpty()){
-                    payload.addSound(app.getSound());
-                }
-                JavApns.getInstance().enqueue(app, payload, registrationIds);
-                ArrayList<String> failedIds = new ArrayList<>();
-                if(result != null){
-                    for (PushedNotification notification : result) {
-                        if(!notification.isSuccessful()) {
-                            String invalidToken = notification.getDevice().getToken();
-                            failedIds.add(invalidToken);
-                        }
-                    }
-                }
-                if(!failedIds.isEmpty()){
-                    ObjectNode response = Json.newObject();
-                    response.put("original_ids", Json.toJson(registrationIds));
-                    response.put("type", "IOS");
-                    response.put("failed_ids", Json.toJson(failedIds));
-                    long emTime = event.get("emTime").asLong();
-                    long prodTime = event.get("prodTime").asLong();
-                    long pmTime = event.get("pmTime").asLong();
-                    long insertionTime = event.get("insertionTime").asLong();
-                    response.put("emTime", emTime);
-                    response.put("prodTime", prodTime);
-                    response.put("pmTime", pmTime);
-                    if(event.has("generationTime")) {
-                        response.put("generationTime", event.get("generationTime").asLong());
-                    }
-                    response.put("insertionTime", insertionTime);
-                    response.put("app", app.getIdApp());
-                    try {
-                        RabbitMQ.getInstance().insertPushResultLyra(response.toString());
-                    } catch (Exception e) {
-                        String emsg = "Proceso continua. Error insertando resultado de push en rabbit, response = " + response.toString();
-                        Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, e, "support-level-1", Config.LOGGER_ERROR);
-                    }
-                }
-            } catch (Exception e) {
-                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
-            }
-        }
-    }
-
-    /**
-     * Metodo para hacer push de un evento a Android
-     *
-     * @param app   aplicacion asociada al evento de push
-     */
-    private void sendDroidPushRequest(Application app) {
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String androidPushUrl = Config.getString("android-push-url");
-        String[] registrationIds = regIDs.split(",");
-        ObjectNode gcm = (ObjectNode) event.get("gcm");
-        gcm.put("registration_ids", Json.toJson(registrationIds));
-        if(app.getDebug() == 0){
-            Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(gcm);
-            WSResponse r = null;
-            String resp = null;
-            try{
-                r = result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS);
-                ObjectNode response = (ObjectNode) r.asJson();
-//                resp = response.toString();
-//                ObjectNode response = (ObjectNode) result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
-                if(response.has("canonical_ids") || (response.has("failure") && response.get("failure").asInt() > 0)){
-                    response.put("original_ids", Json.toJson(registrationIds));
-                    response.put("type", "DROID");
-                    long emTime = event.get("emTime").asLong();
-                    long prodTime = event.get("prodTime").asLong();
-                    long pmTime = event.get("pmTime").asLong();
-                    long insertionTime = event.get("insertionTime").asLong();
-                    response.put("emTime", emTime);
-                    response.put("prodTime", prodTime);
-                    response.put("pmTime", pmTime);
-                    if(event.has("generationTime")) {
-                        response.put("generationTime", event.get("generationTime").asLong());
-                    }
-                    response.put("insertionTime", insertionTime);
-                    response.put("app", app.getIdApp());
-                    try {
-                        RabbitMQ.getInstance().insertPushResultLyra(response.toString());
-                    } catch (Exception e) {
-                        String emsg = "Proceso continua. Error insertando resultado de push en rabbit, response = " + response.toString();
-                        Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, e, "support-level-1", Config.LOGGER_ERROR);
-                    }
-                }
-            } catch (Exception e){
-                try{
-                    resp = r.asXml().toString();
-                } catch(Exception e1){
-                    resp = "la respuesta no es casteable a Json ni a XML";
-                }
-                Utils.printToLog(HecticusPusher.class, null, "Error en la respuesta de Google, resp: " + resp, false, e, "support-level-1", Config.LOGGER_ERROR);
-            }
-        }
-    }
-
-    /**
-     * Metodo para hacer push de un evento a IOS usando el pool de conexiones
-     *
-     * @param app   aplicacion asociada al evento de push
-     */
-    private void sendIOSPushRequestPool(Application app) {
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String[] registrationIds = regIDs.split(",");
-        if(app.getDebug() == 0){
-            try {
-                ObjectNode apns = (ObjectNode) event.get("apns");
-                PushNotificationPayload payload = PushNotificationPayload.fromJSON(apns.toString());
-                JavApns.getInstance().enqueue(app, payload, registrationIds);
-            } catch (Exception e) {
-                Utils.printToLog(HecticusPusher.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
-            }
-        }
-    }
-
 }
