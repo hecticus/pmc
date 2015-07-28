@@ -1,25 +1,14 @@
 package controllers.apps;
 
-import backend.job.HecticusProducer;
-import backend.job.HecticusThread;
-import backend.job.ThreadSupervisor;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.HecticusController;
+import models.Config;
 import models.apps.Application;
-import models.basic.Config;
-import play.api.DefaultGlobal;
-import play.libs.F;
-import play.libs.F.*;
 import play.libs.Json;
-import play.libs.ws.WS;
-import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results;
 import utils.Utils;
 
 import javax.persistence.PersistenceException;
-import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by plesse on 7/11/14.

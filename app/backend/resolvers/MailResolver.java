@@ -3,7 +3,6 @@ package backend.resolvers;
 import backend.Constants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
-import models.basic.Config;
 import play.libs.Json;
 
 import java.net.URLDecoder;

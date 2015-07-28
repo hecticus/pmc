@@ -3,7 +3,7 @@ package controllers;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 import models.apps.AppDevice;
-import models.basic.Config;
+import models.Config;
 import models.basic.PushedEvent;
 import play.data.Form;
 import play.i18n.Messages;

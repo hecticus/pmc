@@ -3,7 +3,7 @@ package backend.resolvers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 
 import java.net.URLDecoder;

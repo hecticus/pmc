@@ -2,15 +2,17 @@ package backend.job;
 
 import akka.actor.Cancellable;
 import backend.Constants;
+import backend.HecticusThread;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.AppDevice;
 import models.apps.Application;
 import models.apps.Cleaner;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import utils.Utils;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -19,6 +21,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by plesse on 7/25/14.
  */
 public class ResultAnalyzer extends HecticusThread {
+
+    public ResultAnalyzer() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("ResultAnalyzer-" + System.currentTimeMillis());
+    }
+
     public ResultAnalyzer(String name, AtomicBoolean run, Cancellable cancellable) {
         super("ResultAnalyzer-"+name, run, cancellable);
     }
@@ -35,7 +46,7 @@ public class ResultAnalyzer extends HecticusThread {
      * Metodo que consume eventos de PUSH_RESULT y dependiendo de su type los trata
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             String eventString = RabbitMQ.getInstance().getNextPushResultLyra();
             if(eventString != null){

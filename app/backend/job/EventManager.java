@@ -1,32 +1,41 @@
 package backend.job;
 
 import akka.actor.Cancellable;
-
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import backend.Constants;
+import backend.HecticusThread;
 import backend.rabbitmq.RabbitMQ;
 import backend.resolvers.Resolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.Config;
 import models.apps.AppDevice;
-import models.apps.Application;
-import models.basic.Config;
 import models.basic.PushedEvent;
-import play.libs.Json;
-import play.libs.ws.*;
 import play.libs.F.Promise;
+import play.libs.Json;
+import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 import utils.Utils;
+
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Clase para tratar los eventos de la cola EVENTS
  * Created by plesse on 7/10/14.
  */
 public class EventManager extends HecticusThread {
+
+    public EventManager() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("EventManager-" + System.currentTimeMillis());
+    }
 
     public EventManager(String name, AtomicBoolean run, Cancellable cancellable) {
         super("EventManager-"+name, run, cancellable);
@@ -44,7 +53,7 @@ public class EventManager extends HecticusThread {
      * Metodo para obtener un evento de la cola EVENTS, validarlo, picarlo y enviarlo a un @{HecticusThread}.HecticusProducer
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             String eventString = RabbitMQ.getInstance().getNextEventLyra();
             if(eventString != null){
@@ -134,7 +143,7 @@ public class EventManager extends HecticusThread {
      */
     private void sendProcessRequest(ObjectNode event) {
         try{
-            Promise<WSResponse> result = WS.url(String.format(Constants.WS_PROCESS_EVENT, Config.getDaemonHost())).post(event);
+            Promise<WSResponse> result = WS.url(String.format(Constants.WS_PROCESS_EVENT, Config.getPMCHost())).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
             setAlive();
         }catch (Exception ex){

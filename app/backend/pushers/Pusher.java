@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
 import models.apps.Device;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 
 import java.util.Map;

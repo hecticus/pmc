@@ -8,6 +8,7 @@
 GET         /                                      controllers.Application.index()
 GET         /index                                 controllers.Application.index()
 
+OPTIONS     /*url                                  controllers.Application.options(url: String)
 
 GET         /check/*name                           controllers.Application.checkFile(name: String)
 
@@ -37,10 +38,24 @@ GET         /instances/blank                       controllers.InstancesView.bla
 POST        /instances                             controllers.InstancesView.submit()
 # Edit existing InstancesView
 GET         /instances/sort/:ids                   controllers.InstancesView.sort(ids:String)
-GET         /instances/:id                         controllers.InstancesView.edit(id:Long)
-POST        /instances/:id                         controllers.InstancesView.update(id:Long)
+GET         /instances/:id                         controllers.InstancesView.edit(id:Integer)
+POST        /instances/:id                         controllers.InstancesView.update(id:Integer)
 # Delete a InstancesView
-POST        /instances/:id/delete                  controllers.InstancesView.delete(id:Long)
+POST        /instances/:id/delete                  controllers.InstancesView.delete(id:Integer)
+
+#JobsView
+# JobsView list (look at the default values for pagination parameters)
+GET             /jobs/list                                                                      controllers.JobsView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET             /jobs/lsort                                                                     controllers.JobsView.lsort()
+# Add JobsView
+GET             /jobs/blank                                                                     controllers.JobsView.blank()
+POST            /jobs                                                                           controllers.JobsView.submit()
+# Edit existing JobsView
+GET             /jobs/sort/:ids                                                                 controllers.JobsView.sort(ids:String)
+GET             /jobs/:id                                                                       controllers.JobsView.edit(id:Long)
+POST            /jobs/:id                                                                       controllers.JobsView.update(id:Long)
+# Delete a JobsView
+POST            /jobs/:id/delete                                                                controllers.JobsView.delete(id:Long)
 
 #ApplicationsView
 # ApplicationsView list (look at the default values for pagination parameters)
@@ -91,46 +106,46 @@ POST        /devices/:id/delete                    controllers.DevicesView.delet
 
 #ResolversView
 # ResolversView list (look at the default values for pagination parameters)
-GET         /resolvers/list                          controllers.ResolversView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET         /resolvers/lsort                         controllers.ResolversView.lsort()
+GET         /resolvers/list                        controllers.ResolversView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /resolvers/lsort                       controllers.ResolversView.lsort()
 # Add InstancesView
-GET         /resolvers/blank                         controllers.ResolversView.blank()
-POST        /resolvers                               controllers.ResolversView.submit()
+GET         /resolvers/blank                       controllers.ResolversView.blank()
+POST        /resolvers                             controllers.ResolversView.submit()
 # Edit existing InstancesView
-GET         /resolvers/sort/:ids                     controllers.ResolversView.sort(ids:String)
-GET         /resolvers/:id                           controllers.ResolversView.edit(id:Long)
-POST        /resolvers/:id                           controllers.ResolversView.update(id:Long)
+GET         /resolvers/sort/:ids                   controllers.ResolversView.sort(ids:String)
+GET         /resolvers/:id                         controllers.ResolversView.edit(id:Long)
+POST        /resolvers/:id                         controllers.ResolversView.update(id:Long)
 # Delete a InstancesView
-POST        /resolvers/:id/delete                    controllers.ResolversView.delete(id:Long)
+POST        /resolvers/:id/delete                  controllers.ResolversView.delete(id:Long)
 
 
 #PushersView
 # PushersView list (look at the default values for pagination parameters)
-GET     /pushers/list			                   controllers.PushersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET     /pushers/lsort		                       controllers.PushersView.lsort()
+GET         /pushers/list                          controllers.PushersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /pushers/lsort                         controllers.PushersView.lsort()
 # Add InstancesView
-GET     /pushers/blank		                       controllers.PushersView.blank()
-POST    /pushers				                   controllers.PushersView.submit()
+GET         /pushers/blank                         controllers.PushersView.blank()
+POST        /pushers                               controllers.PushersView.submit()
 # Edit existing InstancesView
-GET     /pushers/sort/:ids	                       controllers.PushersView.sort(ids:String)
-GET     /pushers/:id			                   controllers.PushersView.edit(id:Long)
-POST    /pushers/:id			                   controllers.PushersView.update(id:Long)
+GET         /pushers/sort/:ids                     controllers.PushersView.sort(ids:String)
+GET         /pushers/:id                           controllers.PushersView.edit(id:Long)
+POST        /pushers/:id                           controllers.PushersView.update(id:Long)
 # Delete a InstancesView
-POST    /pushers/:id/delete		                   controllers.PushersView.delete(id:Long)
+POST        /pushers/:id/delete                    controllers.PushersView.delete(id:Long)
 
 #CleanersView
 # CleanersView list (look at the default values for pagination parameters)
-GET         /cleaners/list                          controllers.CleanersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
-GET         /cleaners/lsort                         controllers.CleanersView.lsort()
+GET         /cleaners/list                         controllers.CleanersView.list(p:Int ?= 0, s ?= "name", o ?= "asc", f ?= "")
+GET         /cleaners/lsort                        controllers.CleanersView.lsort()
 # Add CleanersView
-GET         /cleaners/blank                         controllers.CleanersView.blank()
-POST        /cleaners                               controllers.CleanersView.submit()
+GET         /cleaners/blank                        controllers.CleanersView.blank()
+POST        /cleaners                              controllers.CleanersView.submit()
 # Edit existing CleanersView
-GET         /cleaners/sort/:ids                     controllers.CleanersView.sort(ids:String)
-GET         /cleaners/:id                           controllers.CleanersView.edit(id:Long)
-POST        /cleaners/:id                           controllers.CleanersView.update(id:Long)
+GET         /cleaners/sort/:ids                    controllers.CleanersView.sort(ids:String)
+GET         /cleaners/:id                          controllers.CleanersView.edit(id:Long)
+POST        /cleaners/:id                          controllers.CleanersView.update(id:Long)
 # Delete a CleanersView
-POST        /cleaners/:id/delete                    controllers.CleanersView.delete(id:Long)
+POST        /cleaners/:id/delete                   controllers.CleanersView.delete(id:Long)
 
 
 #events
@@ -189,4 +204,4 @@ POST        /accounts/merge                        controllers.Account.doMerge
 GET         /login/password/forgot                 controllers.Signup.forgotPassword(email: String ?= "")
 POST        /login/password/forgot                 controllers.Signup.doForgotPassword
 
-
+->          /jobcore                               JobCore.Routes

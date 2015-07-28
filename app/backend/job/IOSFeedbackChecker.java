@@ -2,6 +2,7 @@ package backend.job;
 
 import akka.actor.Cancellable;
 import backend.Constants;
+import backend.HecticusThread;
 import backend.apns.JavApns;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import javapns.Push;
@@ -9,7 +10,7 @@ import javapns.devices.Device;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -19,6 +20,7 @@ import utils.Utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,7 +30,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class IOSFeedbackChecker extends HecticusThread {
 
-
+    public IOSFeedbackChecker() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("IOSFeedbackChecker-" + System.currentTimeMillis());
+    }
 
     public IOSFeedbackChecker(String name, AtomicBoolean run, Cancellable cancellable) {
         super("IOSFeedbackChecker-"+name, run, cancellable);
@@ -46,7 +54,7 @@ public class IOSFeedbackChecker extends HecticusThread {
      * Metodo para Limpiar los RegistrationIDs de todas las aplicaciones existentes en el PMC
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             List<Application> apps = Application.finder.all();
             for(int i = 0; isAlive() && i < apps.size(); ++i){

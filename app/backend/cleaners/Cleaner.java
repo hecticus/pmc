@@ -1,6 +1,6 @@
 package backend.cleaners;
 
-import backend.job.HecticusThread;
+import backend.HecticusThread;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
 import models.apps.Device;

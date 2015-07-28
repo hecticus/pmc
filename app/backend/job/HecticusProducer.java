@@ -2,30 +2,39 @@ package backend.job;
 
 import akka.actor.Cancellable;
 import backend.Constants;
+import backend.HecticusThread;
 import backend.caches.Client;
 import backend.caches.ClientsCache;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.Config;
 import models.apps.AppDevice;
 import models.apps.Application;
-import models.basic.Config;
-import play.libs.Json;
 import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Clase que genera subeventos con los RegistrationIDs y los inserta en la cola PUSH
  * Created by plesse on 7/10/14.
  */
-public class HecticusProducer extends HecticusThread{
+public class HecticusProducer extends HecticusThread {
 
     private ObjectNode event;
     private ArrayList<AppDevice> allowedDevices;
+
+    public HecticusProducer() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("HecticusProducer-" + System.currentTimeMillis());
+    }
+
     public HecticusProducer(String name, AtomicBoolean run, Cancellable cancellable) {
         super("HecticusProducer-"+name, run, cancellable);
     }
@@ -51,7 +60,7 @@ public class HecticusProducer extends HecticusThread{
      * Metodo que recibe un evento de clientes, lo pica en sub eventos de RegistrationIDs y lo inserta en PUSH
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             allowedDevices = new ArrayList<>();
             long appID = event.get(Constants.APP).asLong();
@@ -83,7 +92,8 @@ public class HecticusProducer extends HecticusThread{
                 }
             }
             while(clients.hasNext()){
-                String key = String.format(Constants.CLIENT_CACHE_KEY_TEMPLATE, appID, clients.next().asText());
+                JsonNode clientID = clients.next();
+                String key = String.format(Constants.CLIENT_CACHE_KEY_TEMPLATE, appID, clientID.asText());
                 try {
                     Client client = cc.getClient(key);
                     if(client != null) {

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.AppDevice;
 import models.apps.Device;
-import models.basic.Config;
+import models.Config;
 import models.basic.EventToPush;
 import play.data.Form;
 import play.i18n.Messages;
@@ -87,7 +87,7 @@ public class EventToPushView extends HecticusController {
             }
             System.out.println(clients.isEmpty() + " " + clients.size());
             if(!clients.isEmpty()){
-                url = "http://" + Config.getDaemonHost() + "/events/v1/insert";
+                url = "http://" + Config.getPMCHost() + "/events/v1/insert";
                 event.remove("regIDs");
                 event.put("clients", Json.toJson(clients));
             }
@@ -95,7 +95,7 @@ public class EventToPushView extends HecticusController {
             Device device = Device.finder.where().eq("name", eventToPush.getType().intValue() == 0?"droid":"ios").findUnique();
             AppDevice allow = AppDevice.finder.where().eq("app.idApp", application.getIdApp()).eq("dev.idDevice", device.getIdDevice()).findUnique();
             if(allow != null){
-                url = "http://" + Config.getDaemonHost() + "/push/" + application.getIdApp() + "/" + eventToPush.getType().intValue();
+                url = "http://" + Config.getPMCHost() + "/push/" + application.getIdApp() + "/" + eventToPush.getType().intValue();
             }
         }
         if(url != null){

@@ -2,7 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
-import models.basic.Config;
+import models.Config;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Result;

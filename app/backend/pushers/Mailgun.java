@@ -4,7 +4,7 @@ import backend.Constants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hecticus.rackspacemailgun.MailGun;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import utils.Utils;
 

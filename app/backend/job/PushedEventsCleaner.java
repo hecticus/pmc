@@ -1,22 +1,26 @@
 package backend.job;
 
 import akka.actor.Cancellable;
-import backend.Constants;
-import models.basic.Config;
+import backend.HecticusThread;
+import models.Config;
 import models.basic.PushedEvent;
 import utils.Utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by plesse on 11/6/14.
  */
 public class PushedEventsCleaner extends HecticusThread {
+
+    public PushedEventsCleaner() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("PushedEventsCleaner-" + System.currentTimeMillis());
+    }
 
     protected PushedEventsCleaner(String name, AtomicBoolean run, Cancellable cancellable) {
         super("PushedEventsCleaner-"+name, run, cancellable);
@@ -31,7 +35,7 @@ public class PushedEventsCleaner extends HecticusThread {
     }
 
     @Override
-    public void process() {
+    public void process(Map args) {
         try {
             TimeZone tz = TimeZone.getDefault();
             Calendar actualDate = new GregorianCalendar(tz);

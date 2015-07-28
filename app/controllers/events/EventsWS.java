@@ -1,36 +1,32 @@
 package controllers.events;
 
-import backend.apns.JavApns;
-import backend.job.*;
-//import backend.pushy.PushyManager;
-import backend.pushers.*;
+import backend.HecticusThread;
+import backend.ServerInstance;
+import backend.job.HecticusProducer;
+import backend.job.HecticusPusher;
+import backend.pushers.Pusher;
 import backend.rabbitmq.RabbitMQ;
 import backend.resolvers.Resolver;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.hecticus.rackspacemailgun.MailGun;
-//import com.relayrides.pushy.apns.*;
-//import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
-//import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
-//import com.relayrides.pushy.apns.util.TokenUtil;
 import controllers.HecticusController;
-import javapns.Push;
-import javapns.notification.*;
+import models.Config;
 import models.apps.AppDevice;
 import models.apps.Application;
-import models.basic.Config;
 import play.libs.F;
 import play.libs.Json;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 import play.mvc.BodyParser;
 import play.mvc.Result;
 import play.mvc.Results;
 import utils.Utils;
 
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+//import backend.pushy.PushyManager;
+//import com.relayrides.pushy.apns.*;
+//import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
+//import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
+//import com.relayrides.pushy.apns.util.TokenUtil;
 
 
 /**
@@ -61,10 +57,11 @@ public class EventsWS extends HecticusController {
     private static ObjectNode launchProc(ObjectNode event, boolean producerFlag){
         try{
             HecticusThread process = null;
+            AtomicBoolean instanceRun = ServerInstance.getInstance().isInstanceRun();
             if(producerFlag){
-                process = new HecticusProducer("WS", Utils.run, event);
+                process = new HecticusProducer("WS", instanceRun, event);
             } else {
-                process = new HecticusPusher("WS", Utils.run, event);
+                process = new HecticusPusher("WS", instanceRun, event);
             }
             Thread th = new Thread(process);
             th.start();
@@ -83,7 +80,8 @@ public class EventsWS extends HecticusController {
     public static Result launchProducerOld() {
         try{
             ObjectNode event = getJson();
-            HecticusThread producer = new HecticusProducer("WS",Utils.run, event);
+            AtomicBoolean instanceRun = ServerInstance.getInstance().isInstanceRun();
+            HecticusThread producer = new HecticusProducer("WS", instanceRun, event);
             Thread th = new Thread(producer);
             th.start();
             ObjectNode response = Json.newObject();

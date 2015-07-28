@@ -4,7 +4,7 @@ import backend.Constants;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;

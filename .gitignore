@@ -15,3 +15,4 @@ dist
 /.settings
 /certificate
 .DS_Store
+modules

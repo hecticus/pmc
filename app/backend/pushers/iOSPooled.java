@@ -5,7 +5,7 @@ import backend.apns.JavApns;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import javapns.notification.PushNotificationPayload;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import utils.Utils;
 

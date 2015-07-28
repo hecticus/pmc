@@ -42,14 +42,22 @@
                                         <li class="dropdown">
                                             <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">@Messages("main.admin")<b class="caret"></b></a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="@controllers.routes.ConfigsView.list()">@Messages("main.configurations")</a></li>
+                                                <li class="dropdown-header">@Messages("main.servers")</li>
                                                 <li><a href="@controllers.routes.InstancesView.list()">@Messages("main.instances")</a></li>
+                                                <li><a href="@controllers.routes.JobsView.list()">@Messages("main.jobs")</a></li>
+                                                <li class="divider"></li>
+                                                <li class="dropdown-header">@Messages("main.devices")</li>
                                                 <li><a href="@controllers.routes.DevicesView.list()">@Messages("main.devices")</a></li>
                                                 <li><a href="@controllers.routes.ResolversView.list()">@Messages("main.resolvers")</a></li>
                                                 <li><a href="@controllers.routes.CleanersView.list()">@Messages("main.cleaners")</a></li>
                                                 <li><a href="@controllers.routes.PushersView.list()">@Messages("main.pushers")</a></li>
+                                                <li class="divider"></li>
+                                                <li class="dropdown-header">@Messages("main.operations")</li>
                                                 <li><a href="@controllers.routes.EventToPushView.blank()">@Messages("main.push")</a></li>
+                                                <li class="divider"></li>
+                                                <li class="dropdown-header">@Messages("main.basic")</li>
                                                 <li><a href="@controllers.routes.UsersView.list()">@Messages("main.users")</a></li>
+                                                <li><a href="@controllers.routes.ConfigsView.list()">@Messages("main.configurations")</a></li>
                                             </ul>
                                         </li>
                                     }

@@ -2,7 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
-import models.basic.Instance;
+import models.Instance;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Result;
@@ -38,14 +38,14 @@ public class InstancesView extends HecticusController {
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
-    public static Result edit(Long id) {
-        Instance objBanner = Instance.finder.byId(id);
-        Form<Instance> filledForm = InstanceViewForm.fill(Instance.finder.byId(id));
+    public static Result edit(Integer id) {
+        Instance objBanner = Instance.getByID(id);
+        Form<Instance> filledForm = InstanceViewForm.fill(objBanner);
         return ok(edit.render(id, filledForm));
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
-    public static Result update(Long id) {
+    public static Result update(Integer id) {
         Form<Instance> filledForm = InstanceViewForm.bindFromRequest();
         if(filledForm.hasErrors()) {
             System.out.println(filledForm.toString());
@@ -53,7 +53,6 @@ public class InstancesView extends HecticusController {
         }
         Instance gfilledForm = filledForm.get();
         gfilledForm.update(id);
-        Utils.test = gfilledForm.getTest() == 1;
         flash("success", Messages.get("instances.java.updated", gfilledForm.getName()));
         return GO_HOME;
 
@@ -64,7 +63,7 @@ public class InstancesView extends HecticusController {
         String[] aids = ids.split(",");
 
         for (int i=0; i<aids.length; i++) {
-            Instance oPost = Instance.finder.byId(Long.parseLong(aids[i]));
+            Instance oPost = Instance.getByID(Integer.parseInt(aids[i]));
             //oWoman.setSort(i);
             oPost.save();
         }
@@ -78,8 +77,8 @@ public class InstancesView extends HecticusController {
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
-    public static Result delete(Long id) {
-        Instance instance = Instance.finder.byId(id);
+    public static Result delete(Integer id) {
+        Instance instance = Instance.getByID(id);
         instance.delete();
         flash("success", Messages.get("instances.java.deleted", instance.getName()));
         return GO_HOME;

@@ -9,7 +9,7 @@ import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import utils.Utils;
 

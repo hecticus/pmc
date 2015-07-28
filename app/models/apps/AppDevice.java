@@ -22,7 +22,7 @@ public class AppDevice  extends HecticusModel {
     Application app;
     @ManyToOne
     @JoinColumn(name = "id_device")
-    Device dev;
+    private Device dev;
     @OneToOne
     @JoinColumn(name = "id_pusher")
     private Pusher pusher;

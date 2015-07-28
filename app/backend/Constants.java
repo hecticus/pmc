@@ -43,7 +43,7 @@ public class Constants {
     public static final String TICKER = "ticker";
     public static final String CONTENT_TITLE = "content_title";
     public static final String CONTENT_TEXT = "content_text";
-    public static final String CLIENT_CACHE_KEY_TEMPLATE = "%l-%s";
+    public static final String CLIENT_CACHE_KEY_TEMPLATE = "%d-%s";
     public static final String DEVICES_TO_SEND = "devices_to_send";
 
     public static final String OPERATION = "operation";

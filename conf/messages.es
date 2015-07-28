@@ -155,10 +155,10 @@ main.instances=Instancias
 main.applications=Aplicaciones
 main.push=Enviar Notificacion
 main.users=Usuarios
-
 main.list=Listar
 main.operations=Operaciones
 main.create=Crear
+main.jobs=Tareas Programadas
 
 generic.error.title=Error
 generic.error.content=Revise los errores y haga la solicitud de nuevo
@@ -449,3 +449,62 @@ cleaners.java.updated=El cleaner {0} ha sido actualizado\!
 cleaners.java.deleted=El cleaner {0} ha sido eliminado\!
 main.cleaners=Cleaners
 applications.device.cleaner=Cleaner
+
+jobs.list.head=Tareas
+jobs.list.title={0,choice,0#No hay Tareas|1#Una Tarea encontrada|1<{0,number,integer} Tareas encontradas}
+jobs.list.filter.name=Filtrar por nombre de la Tarea...
+jobs.list.new=Agregar nueva Tarea
+
+jobs.create=Crear Tarea
+jobs.edit=Editar Tarea
+jobs.info=Informacion de la Tarea
+
+jobs.status=Estatus
+jobs.status.help=0 -> Apagado, 1 -> Agendado, 2 -> Corriendo
+
+jobs.status.on=Prendido
+jobs.status.off=Apagado
+jobs.status.running=Corriendo
+
+jobs.name=Nombre
+jobs.name.help=Nombre de la tarea
+
+jobs.className=Nombre de la Clase
+jobs.className.help=Clase a ser instanciada
+
+jobs.params=Parametros
+jobs.params.help=JSON con los parametrosde la tarea
+
+jobs.daemon=Demonio
+jobs.daemon.help=Esta tarea es demonio
+jobs.daemon.frequency=Tiempo de sleep del demonio
+jobs.daemon.frequency.help=Tiempo entre ejecuciones del demonio
+
+jobs.timeParams=Momento de ejecucion
+
+jobs.nextTimestamp=Proximo Timestamp
+jobs.nextTimestamp.help=Epoch de la proxima ejecucion
+
+jobs.frequency=Frequencia
+jobs.frequency.help=Frequencia de la ejecucion
+jobs.frequency.once=Una Vez
+jobs.frequency.year=Anual
+jobs.frequency.month=Mensual
+jobs.frequency.week=Semanal
+jobs.frequency.day=DIARIO
+
+jobs.submit.create=Crear esta tarea
+jobs.submit.update=Actualizar esta tarea
+jobs.submit.delete=Eliminar esta tarea
+
+jobs.java.created= La tarea {0} ha sido creada!
+jobs.java.updated= La tarea {0} ha sido actualizada!
+jobs.java.deleted= La tarea {0} ha sido eliminada!
+instances.master=Maestro
+instances.ping=Ping
+main.servers=Servidor
+main.basic=Basico
+jobs.multiinstance=Multi Instancia
+jobs.multiinstance.help=esta tarea corre multiples instancias en un servidor
+jobs.multiinstance.quantity=Cantidad
+jobs.multiinstance.quantity.help=numero de instancias

@@ -1,11 +1,11 @@
 package backend.cleaners;
 
 import backend.Constants;
-import backend.job.HecticusThread;
+import backend.HecticusThread;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -57,6 +57,8 @@ public class DroidCleaner extends Cleaner{
             }
             operations.put(Constants.OPERATIONS, Json.toJson(toClean));
             try {
+                System.out.println("operations = " + operations);
+                System.out.println("app.getCleanDeviceUrl() = " + app.getCleanDeviceUrl());
                 F.Promise<WSResponse> resultWS = WS.url(app.getCleanDeviceUrl()).post(operations);
                 ObjectNode response = (ObjectNode)resultWS.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
             } catch (Exception ex) {

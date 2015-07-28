@@ -2,28 +2,15 @@ package backend.job;
 
 import akka.actor.Cancellable;
 import backend.Constants;
-import backend.apns.JavApns;
-import backend.pushers.*;
-import backend.rabbitmq.RabbitMQ;
+import backend.HecticusThread;
+import backend.pushers.Pusher;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.hecticus.rackspacemailgun.MailGun;
-import javapns.Push;
-import javapns.notification.PushNotificationPayload;
-import javapns.notification.PushedNotification;
-import javapns.notification.PushedNotifications;
 import models.apps.AppDevice;
 import models.apps.Application;
-import models.basic.Config;
-import play.libs.F.Promise;
-import play.libs.Json;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
+import models.Config;
 import utils.Utils;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -37,6 +24,15 @@ public class HecticusPusher extends HecticusThread {
      * Evento a enviar por push
      */
     private ObjectNode event;
+
+    public HecticusPusher() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("HecticusPusher-" + System.currentTimeMillis());
+    }
+
     public HecticusPusher(String name, AtomicBoolean run, Cancellable cancellable) {
         super("HecticusPusher-"+name, run, cancellable);
     }
@@ -80,7 +76,7 @@ public class HecticusPusher extends HecticusThread {
      *
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             if(event != null) {
                 long appID = event.get(Constants.APP).asLong();

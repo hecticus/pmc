@@ -4,7 +4,7 @@ import backend.Constants;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -75,6 +75,8 @@ public class GCM3 extends Pusher{
                     fResponse = buildErrorResponse(-1, Constants.ERROR, e);
                     Utils.printToLog(GCM2.class, null, "Error llamando a Google", false, e, "support-level-1", Config.LOGGER_ERROR);
                 }
+            } else {
+                fResponse = buildBasicResponse(0, "App en debug");
             }
         } else {
             fResponse = buildBasicResponse(2, String.format(Constants.ERROR_EXTRA, "Se necesitan parametros para este Pusher"));

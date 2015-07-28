@@ -2,15 +2,17 @@ package backend.job;
 
 import akka.actor.Cancellable;
 import backend.Constants;
+import backend.HecticusThread;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import models.basic.Config;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import utils.Utils;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,6 +22,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by plesse on 7/10/14.
  */
 public class PushManager extends HecticusThread {
+
+    public PushManager() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("PushManager-" + System.currentTimeMillis());
+    }
 
     public PushManager(String name, AtomicBoolean run, Cancellable cancellable) {
         super("PushManager"+name, run, cancellable);
@@ -37,7 +47,7 @@ public class PushManager extends HecticusThread {
      * Metodo que toma un evento de la cola PUSH y lo envia a un HecticusPusher
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             String eventString = RabbitMQ.getInstance().getNextPushLyra();
             if(eventString != null){
@@ -57,7 +67,7 @@ public class PushManager extends HecticusThread {
      */
     private void sendPushRequest(ObjectNode event) {
         try{
-            F.Promise<WSResponse> result = WS.url(String.format(Constants.WS_PUSH_EVENT, Config.getDaemonHost())).post(event);
+            F.Promise<WSResponse> result = WS.url(String.format(Constants.WS_PUSH_EVENT, Config.getPMCHost())).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
         }catch (Exception ex){
             Utils.printToLog(PushManager.class, null, "Error en el WS de distribucion de eventos", false, ex, "support-level-1", Config.LOGGER_ERROR);
