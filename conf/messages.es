@@ -480,6 +480,8 @@ jobs.daemon.help=Esta tarea es demonio
 jobs.daemon.frequency=Tiempo de sleep del demonio
 jobs.daemon.frequency.help=Tiempo entre ejecuciones del demonio
 
+jobs.scheduled=Agendado
+
 jobs.timeParams=Momento de ejecucion
 
 jobs.nextTimestamp=Proximo Timestamp

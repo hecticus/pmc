@@ -522,6 +522,8 @@ jobs.daemon.help=This job is a daemon
 jobs.daemon.frequency=Daemon sleep time
 jobs.daemon.frequency.help=Time between Daemon runs
 
+jobs.scheduled=Scheduled
+
 jobs.timeParams=Execution Time
 
 jobs.nextTimestamp=Next Timestamp
