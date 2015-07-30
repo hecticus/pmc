@@ -150,15 +150,13 @@ playauthenticate.restricted.secrets=¡Secretos y más secretos!
 
 main.start=Inicio
 main.admin=Administracion
-main.configurations=Configuraciones
-main.instances=Instancias
 main.applications=Aplicaciones
 main.push=Enviar Notificacion
 main.users=Usuarios
 main.list=Listar
 main.operations=Operaciones
 main.create=Crear
-main.jobs=Tareas Programadas
+
 
 generic.error.title=Error
 generic.error.content=Revise los errores y haga la solicitud de nuevo
@@ -173,60 +171,7 @@ generic.list.listing=Listando del
 generic.list.through=al
 generic.list.of=de
 
-configs.list.head=Configuraciones
-configs.list.title={0,choice,0#No hay confguraciones|1#Una configuracion encontrada|1<{0,number,integer} configuraciones encontradas}
-configs.list.filter.name=Filtrar por nombre de la configuracion...
-configs.list.new=Agregar nueva configuracion
 
-configs.create=Crear configuracion
-configs.edit=Editar configuracion
-configs.info=Informacion de la configuracion
-
-configs.key=Clave
-configs.key.help=String para buscar la configuracion
-
-configs.value=Valor
-configs.value.help=Valor de la configuracion
-
-configs.description=Descripcion
-configs.description.help=utilidad de la configuracion
-
-configs.submit.create=Crear esta configuracion
-configs.submit.update=Actualizar esta configuracion
-configs.submit.delete=Eliminar esta configuracion
-
-configs.java.created= La configuracion {0} ha sido creada!
-configs.java.updated= La configuracion {0} ha sido actualizada!
-configs.java.deleted= La configuracion {0} ha sido eliminada!
-
-instances.list.head=Instancias
-instances.list.title={0,choice,0#No hay instancias|1#Una instancia encontrada|1<{0,number,integer} instancias encontradas}
-instances.list.filter.name=Filtrar por nombre de la instancia...
-instances.list.new=Agregar nueva instancia
-
-instances.create=Crear instancia
-instances.edit=Editar instancia
-instances.info=Informacion de la instancia
-
-instances.ip=Direccion IP
-instances.ip.help=IP del servidor
-
-instances.name=Nombre
-instances.name.help=Nombre de la instancia
-
-instances.running=Activa
-instances.running.help=estado de la instancia
-
-instances.test=Prueba
-instances.test.help=mode de prueba
-
-instances.submit.create=Crear esta instancia
-instances.submit.update=Actualizar esta instancia
-instances.submit.delete=Eliminar esta instancia
-
-instances.java.created= La instancia {0} ha sido creada!
-instances.java.updated= La instancia {0} ha sido actualizada!
-instances.java.deleted= La instancia {0} ha sido eliminada!
 
 applications.list.head=Aplicaciones
 applications.list.title={0,choice,0#No hay aplicaciones|1#Una aplicacion encontrada|1<{0,number,integer} aplicacion encontradas}
@@ -450,63 +395,4 @@ cleaners.java.deleted=El cleaner {0} ha sido eliminado\!
 main.cleaners=Cleaners
 applications.device.cleaner=Cleaner
 
-jobs.list.head=Tareas
-jobs.list.title={0,choice,0#No hay Tareas|1#Una Tarea encontrada|1<{0,number,integer} Tareas encontradas}
-jobs.list.filter.name=Filtrar por nombre de la Tarea...
-jobs.list.new=Agregar nueva Tarea
 
-jobs.create=Crear Tarea
-jobs.edit=Editar Tarea
-jobs.info=Informacion de la Tarea
-
-jobs.status=Estatus
-jobs.status.help=0 -> Apagado, 1 -> Agendado, 2 -> Corriendo
-
-jobs.status.on=Prendido
-jobs.status.off=Apagado
-jobs.status.running=Corriendo
-
-jobs.name=Nombre
-jobs.name.help=Nombre de la tarea
-
-jobs.className=Nombre de la Clase
-jobs.className.help=Clase a ser instanciada
-
-jobs.params=Parametros
-jobs.params.help=JSON con los parametrosde la tarea
-
-jobs.daemon=Demonio
-jobs.daemon.help=Esta tarea es demonio
-jobs.daemon.frequency=Tiempo de sleep del demonio
-jobs.daemon.frequency.help=Tiempo entre ejecuciones del demonio
-
-jobs.scheduled=Agendado
-
-jobs.timeParams=Momento de ejecucion
-
-jobs.nextTimestamp=Proximo Timestamp
-jobs.nextTimestamp.help=Epoch de la proxima ejecucion
-
-jobs.frequency=Frequencia
-jobs.frequency.help=Frequencia de la ejecucion
-jobs.frequency.once=Una Vez
-jobs.frequency.year=Anual
-jobs.frequency.month=Mensual
-jobs.frequency.week=Semanal
-jobs.frequency.day=DIARIO
-
-jobs.submit.create=Crear esta tarea
-jobs.submit.update=Actualizar esta tarea
-jobs.submit.delete=Eliminar esta tarea
-
-jobs.java.created= La tarea {0} ha sido creada!
-jobs.java.updated= La tarea {0} ha sido actualizada!
-jobs.java.deleted= La tarea {0} ha sido eliminada!
-instances.master=Maestro
-instances.ping=Ping
-main.servers=Servidor
-main.basic=Basico
-jobs.multiinstance=Multi Instancia
-jobs.multiinstance.help=esta tarea corre multiples instancias en un servidor
-jobs.multiinstance.quantity=Cantidad
-jobs.multiinstance.quantity.help=numero de instancias
