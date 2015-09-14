@@ -12,6 +12,7 @@ import play.mvc.Result;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import static play.data.Form.form;
 
@@ -172,6 +173,7 @@ public class ApplicationsView extends HecticusController {
 
             String sandbox = null;
             String production = null;
+            Map<String, String> data = filledForm.data();
             String name = filledForm.data().get("name");
 
             if (filledForm.data().containsKey("iosPushApnsCertSandbox")) {
@@ -213,6 +215,8 @@ public class ApplicationsView extends HecticusController {
             if (production != null && !production.isEmpty()) {
                 gfilledForm.setIosPushApnsCertProduction(production);
             }
+
+            gfilledForm.setActive(data.containsKey("active"));
 
             gfilledForm.save();
             flash("success", Messages.get("applications.java.created", gfilledForm.getName()));
