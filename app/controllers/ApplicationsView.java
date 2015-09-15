@@ -217,6 +217,7 @@ public class ApplicationsView extends HecticusController {
             }
 
             gfilledForm.setActive(data.containsKey("active"));
+            gfilledForm.setDebug(data.containsKey("debug"));
 
             gfilledForm.save();
             flash("success", Messages.get("applications.java.created", gfilledForm.getName()));
