@@ -1,5 +1,6 @@
 package controllers;
 
+import backend.Constants;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -87,15 +88,15 @@ public class EventToPushView extends HecticusController {
             }
             System.out.println(clients.isEmpty() + " " + clients.size());
             if(!clients.isEmpty()){
-                url = "http://" + Config.getPMCHost() + "/events/v1/insert";
-                event.remove("regIDs");
-                event.put("clients", Json.toJson(clients));
+                url = String.format(Constants.WS_INSERT_EVENT, Config.getPMCHost());
+                event.remove(Constants.REG_IDS);
+                event.put(Constants.CLIENTS, Json.toJson(clients));
             }
         } else {
             Device device = Device.finder.where().eq("name", eventToPush.getType().intValue() == 0?"droid":"ios").findUnique();
             AppDevice allow = AppDevice.finder.where().eq("app.idApp", application.getIdApp()).eq("dev.idDevice", device.getIdDevice()).findUnique();
             if(allow != null){
-                url = "http://" + Config.getPMCHost() + "/push/" + application.getIdApp() + "/" + eventToPush.getType().intValue();
+                url = String.format(Constants.WS_PUSH_EVENT_INTEFACE, Config.getPMCHost(), application.getIdApp(), eventToPush.getType().intValue());
             }
         }
         if(url != null){

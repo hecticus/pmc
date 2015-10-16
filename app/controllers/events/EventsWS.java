@@ -168,7 +168,7 @@ public class EventsWS extends HecticusController {
         );
     }
 
-    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024 * 1024)
     public static F.Promise<Result> insertEvent() {
         final ObjectNode event = getJson();
         F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
@@ -193,7 +193,7 @@ public class EventsWS extends HecticusController {
         );
     }
 
-    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024 * 1024)
     public static F.Promise<Result> insertWebEvent() {
         final ObjectNode event = getJson();
         ArrayList<String> filter = new ArrayList<>();

@@ -63,6 +63,11 @@ public class Constants {
 
     public static final String WS_PROCESS_EVENT = "http://%s/events/v1/process";
     public static final String WS_PUSH_EVENT = "http://%s/events/v1/push";
+    public static final String WS_PUSH_EVENT_INTEFACE = "http://%s/push/%d/%d";
+    public static final String WS_INSERT_EVENT = "http://%s/events/v1/insert";
+
+
+
 
 
 
