@@ -150,15 +150,13 @@ playauthenticate.restricted.secrets=¡Secretos y más secretos!
 
 main.start=Inicio
 main.admin=Administracion
-main.configurations=Configuraciones
-main.instances=Instancias
 main.applications=Aplicaciones
 main.push=Enviar Notificacion
 main.users=Usuarios
-
 main.list=Listar
 main.operations=Operaciones
 main.create=Crear
+
 
 generic.error.title=Error
 generic.error.content=Revise los errores y haga la solicitud de nuevo
@@ -173,60 +171,7 @@ generic.list.listing=Listando del
 generic.list.through=al
 generic.list.of=de
 
-configs.list.head=Configuraciones
-configs.list.title={0,choice,0#No hay confguraciones|1#Una configuracion encontrada|1<{0,number,integer} configuraciones encontradas}
-configs.list.filter.name=Filtrar por nombre de la configuracion...
-configs.list.new=Agregar nueva configuracion
 
-configs.create=Crear configuracion
-configs.edit=Editar configuracion
-configs.info=Informacion de la configuracion
-
-configs.key=Clave
-configs.key.help=String para buscar la configuracion
-
-configs.value=Valor
-configs.value.help=Valor de la configuracion
-
-configs.description=Descripcion
-configs.description.help=utilidad de la configuracion
-
-configs.submit.create=Crear esta configuracion
-configs.submit.update=Actualizar esta configuracion
-configs.submit.delete=Eliminar esta configuracion
-
-configs.java.created= La configuracion {0} ha sido creada!
-configs.java.updated= La configuracion {0} ha sido actualizada!
-configs.java.deleted= La configuracion {0} ha sido eliminada!
-
-instances.list.head=Instancias
-instances.list.title={0,choice,0#No hay instancias|1#Una instancia encontrada|1<{0,number,integer} instancias encontradas}
-instances.list.filter.name=Filtrar por nombre de la instancia...
-instances.list.new=Agregar nueva instancia
-
-instances.create=Crear instancia
-instances.edit=Editar instancia
-instances.info=Informacion de la instancia
-
-instances.ip=Direccion IP
-instances.ip.help=IP del servidor
-
-instances.name=Nombre
-instances.name.help=Nombre de la instancia
-
-instances.running=Activa
-instances.running.help=estado de la instancia
-
-instances.test=Prueba
-instances.test.help=mode de prueba
-
-instances.submit.create=Crear esta instancia
-instances.submit.update=Actualizar esta instancia
-instances.submit.delete=Eliminar esta instancia
-
-instances.java.created= La instancia {0} ha sido creada!
-instances.java.updated= La instancia {0} ha sido actualizada!
-instances.java.deleted= La instancia {0} ha sido eliminada!
 
 applications.list.head=Aplicaciones
 applications.list.title={0,choice,0#No hay aplicaciones|1#Una aplicacion encontrada|1<{0,number,integer} aplicacion encontradas}
@@ -296,7 +241,6 @@ applications.device=Dispositivo
 applications.device.add=Agregar Dispositivo
 applications.device.remove=Eliminar Dispositivo
 applications.device.active=Activo
-applications.device.active.help=Permiso para enviar a este device. 0 or 1
 
 applications.submit.create=Crear esta aplicacion
 applications.submit.update=Actualizar esta aplicacion
@@ -371,3 +315,84 @@ users.submit.delete=Eliminar este usuario
 users.java.created= El usuario {0} ha sido creado!
 users.java.updated= El usuario {0} ha sido creado!
 users.java.deleted= El usuario {0} ha sido creado!
+events.java.pushed=La Notificacion {0} ha sido enviada\!
+applications.device.pusher=Pusher
+applications.device.resolver=Resolver
+devices.list.head=Dispositivos
+devices.list.title={0,choice,0\#No hay dispositivos|1\#Un dispositivo encontrado|1<{0,number,integer} dispositivos Encontrados}
+devices.list.filter.name=Filtrar por nombre del dispositivo...
+devices.list.new=Agregar nuevo Dispositivo
+devices.create=Crear Dispositivo
+devices.edit=Editar Dispositivo
+devices.info=Informacion del Dispositivo
+devices.name=Nombre
+devices.name.help=Nombre del Dispositivo
+devices.submit.create=Crear este Dispositivo
+devices.submit.update=Actualizar este Dispositivo
+devices.submit.delete=Eliminar este Dispositivo
+devices.java.created=El dispositivo {0} ha sido creado\!
+devices.java.updated=El dispositivo {0} ha sido actualizado\!
+devices.java.deleted=El dispositivo {0} ha sido eliminado\!
+resolvers.java.created=El resolver {0} ha sido creado\!
+resolvers.java.updated=El resolver {0} ha sido actualizado\!
+resolvers.java.deleted=El resolver {0} ha sido eliminado\!
+pushers.java.created=El pusher {0} ha sido creado\!
+pushers.java.updated=El pusher {0} ha sido actualizado\!
+pushers.java.deleted=El pusher {0} ha sido eliminado\!
+resolvers.list.head=Resolvers
+resolvers.list.title={0,choice,0\#No hay resolvers|1\#Un resolver encontrado|1<{0,number,integer} resolvers Encontrados}
+resolvers.list.filter.name=Filtrar por nombre del resolver...
+resolvers.list.new=Agregar nuevo Resolver
+resolvers.create=Crear Resolver
+resolvers.edit=Editar Resolver
+resolvers.info=Informacion del Resolver
+resolvers.name=Nombre
+resolvers.name.help=Nombre del Resolver
+resolvers.className=Nombre de la Clase
+resolvers.className.help=Nombre de la Clase del Resolver
+resolvers.device=Dispositivo
+resolvers.submit.create=Crear este Resolver
+resolvers.submit.update=Actualizar este Resolver
+resolvers.submit.delete=Eliminar este Resolver
+pushers.list.head=Pushers
+pushers.list.title={0,choice,0\#No hay pushers|1\#Un pusher encontrado|1<{0,number,integer} pushers Encontrados}
+pushers.list.filter.name=Filtrar por nombre del pusher...
+pushers.list.new=Agregar nuevo Pusher
+pushers.create=Crear Pusher
+pushers.edit=Editar Pusher
+pushers.info=Informacion del Pusher
+pushers.name=Nombre
+pushers.name.help=Nombre del Pusher
+pushers.className=Nombre de la Clase
+pushers.className.help=Nombre de la Clase del Pusher
+pushers.params=Parametros
+pushers.params.help=Json de parametros del Pusher
+pushers.device=Dispositivo
+pushers.submit.create=Crear este Pusher
+pushers.submit.update=Actualizar este Pusher
+pushers.submit.delete=Eliminar este Pusher
+main.devices=Dispositivos
+main.resolvers=Resolvers
+main.pushers=Pushers
+cleaners.list.head=Cleaners
+cleaners.list.title={0,choice,0\#No hay cleaners|1\#Un cleaner encontrado|1<{0,number,integer} cleaners Encontrados}
+cleaners.list.filter.name=Filtrar por nombre del cleaner...
+cleaners.list.new=Agregar nuevo Cleaner
+cleaners.create=Crear Cleaner
+cleaners.edit=Editar Cleaner
+cleaners.info=Informacion del Cleaner
+cleaners.name=Nombre
+cleaners.name.help=Nombre del cleaner
+cleaners.className=Nombre de la Clase
+cleaners.className.help=Nombre de la Clase del cleaner
+cleaners.device=Dispositivo
+cleaners.submit.create=Crear este Cleaner
+cleaners.submit.update=Actualizar este Cleaner
+cleaners.submit.delete=Eliminar este Cleaner
+cleaners.java.created=El cleaner {0} ha sido creado\!
+cleaners.java.updated=El cleaner {0} ha sido actualizado\!
+cleaners.java.deleted=El cleaner {0} ha sido eliminado\!
+main.cleaners=Cleaners
+applications.device.cleaner=Cleaner
+
+

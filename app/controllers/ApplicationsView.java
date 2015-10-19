@@ -2,7 +2,8 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
-import models.basic.Config;
+import models.apps.AppDevice;
+import models.Config;
 import models.basic.PushedEvent;
 import play.data.Form;
 import play.i18n.Messages;
@@ -11,6 +12,7 @@ import play.mvc.Result;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import static play.data.Form.form;
 
@@ -53,7 +55,6 @@ public class ApplicationsView extends HecticusController {
     @Restrict(@Group(Application.USER_ROLE))
     public static Result update(Long id) {
         Form<models.apps.Application> filledForm = ApplicationViewForm.bindFromRequest();
-//        System.out.println(filledForm.toString());
         if(filledForm.hasErrors()) {
             return badRequest(edit.render(id, filledForm));
         }
@@ -119,6 +120,9 @@ public class ApplicationsView extends HecticusController {
             gfilledForm.setIosPushApnsCertProduction(production);
         }
 
+        gfilledForm.setActive(filledForm.data().containsKey("active"));
+        gfilledForm.setDebug(filledForm.data().containsKey("debug"));
+
         gfilledForm.update(id);
         flash("success", Messages.get("applications.java.updated", gfilledForm.getName()));
         return GO_HOME;
@@ -169,6 +173,7 @@ public class ApplicationsView extends HecticusController {
 
             String sandbox = null;
             String production = null;
+            Map<String, String> data = filledForm.data();
             String name = filledForm.data().get("name");
 
             if (filledForm.data().containsKey("iosPushApnsCertSandbox")) {
@@ -210,6 +215,9 @@ public class ApplicationsView extends HecticusController {
             if (production != null && !production.isEmpty()) {
                 gfilledForm.setIosPushApnsCertProduction(production);
             }
+
+            gfilledForm.setActive(data.containsKey("active"));
+            gfilledForm.setDebug(data.containsKey("debug"));
 
             gfilledForm.save();
             flash("success", Messages.get("applications.java.created", gfilledForm.getName()));

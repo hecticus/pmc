@@ -1,38 +1,32 @@
 package controllers.events;
 
-import backend.apns.JavApns;
-import backend.job.*;
-//import backend.pushy.PushyManager;
+import backend.HecticusThread;
+import backend.ServerInstance;
+import backend.job.HecticusProducer;
+import backend.job.HecticusPusher;
+import backend.pushers.Pusher;
 import backend.rabbitmq.RabbitMQ;
 import backend.resolvers.Resolver;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.hecticus.rackspacemailgun.MailGun;
-//import com.relayrides.pushy.apns.*;
-//import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
-//import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
-//import com.relayrides.pushy.apns.util.TokenUtil;
 import controllers.HecticusController;
-import javapns.Push;
-import javapns.notification.*;
+import models.Config;
+import models.apps.AppDevice;
 import models.apps.Application;
-import models.basic.Config;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PasswordFinder;
 import play.libs.F;
 import play.libs.Json;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 import play.mvc.BodyParser;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import utils.Utils;
 
-import java.security.KeyStore;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+//import backend.pushy.PushyManager;
+//import com.relayrides.pushy.apns.*;
+//import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
+//import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
+//import com.relayrides.pushy.apns.util.TokenUtil;
 
 
 /**
@@ -63,10 +57,11 @@ public class EventsWS extends HecticusController {
     private static ObjectNode launchProc(ObjectNode event, boolean producerFlag){
         try{
             HecticusThread process = null;
+            AtomicBoolean instanceRun = ServerInstance.getInstance().isInstanceRun();
             if(producerFlag){
-                process = new HecticusProducer("WS", Utils.run, event);
+                process = new HecticusProducer("WS", instanceRun, event);
             } else {
-                process = new HecticusPusher("WS", Utils.run, event);
+                process = new HecticusPusher("WS", instanceRun, event);
             }
             Thread th = new Thread(process);
             th.start();
@@ -85,7 +80,8 @@ public class EventsWS extends HecticusController {
     public static Result launchProducerOld() {
         try{
             ObjectNode event = getJson();
-            HecticusThread producer = new HecticusProducer("WS",Utils.run, event);
+            AtomicBoolean instanceRun = ServerInstance.getInstance().isInstanceRun();
+            HecticusThread producer = new HecticusProducer("WS", instanceRun, event);
             Thread th = new Thread(producer);
             th.start();
             ObjectNode response = Json.newObject();
@@ -102,22 +98,65 @@ public class EventsWS extends HecticusController {
 
     public static F.Promise<Result> sendPush(Long idApp, Integer method) {
         final ObjectNode event = getJson();
-        final Long idAppF = idApp;
+        final Application app = Application.finder.byId(idApp);
         final Integer methodF = method;
         F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
-                new F.Function0<ObjectNode>() {
-                    public ObjectNode apply() {
+            new F.Function0<ObjectNode>() {
+                public ObjectNode apply() {
+                    try {
+                        AppDevice device = null;
                         if(methodF == 0){
-                            return sendDroidPushRequest(event, idAppF);
+                            device = app.getDevice("droid");
                         } else if(methodF == 1) {
-                            return sendWEBPushRequest(event, idAppF);
+                            device = app.getDevice("web");
                         } else if(methodF == 2) {
-                            return sendIOSPushRequest(event, idAppF);
+                            device = app.getDevice("ios");
                         } else {
-                            return sendIOSPushRequestPool(event, idAppF);
+                            return buildBasicResponse(1, "Error: El metodo " + methodF + " no esta disponible para el app" + app.getName());
                         }
+
+                        if (device != null) {
+                            ObjectNode resolved;
+                            Class resolverClassName = Class.forName(device.getResolver().getClassName().trim());
+                            if(resolverClassName != null){
+                                Resolver resolver = (Resolver) resolverClassName.newInstance();
+                                if(resolver != null){
+                                    resolved = resolver.resolve(event, app);
+                                    if(resolved != null){
+                                        event.put(device.getDev().getName(), resolved);
+                                    } else {
+                                        return buildBasicResponse(3, "Error: no se pudo resolver el mensaje");
+                                    }
+                                } else {
+                                    return buildBasicResponse(2, "Error: no se consiguio el resolver");
+                                }
+                            } else {
+                                return buildBasicResponse(1, "Error: no se consiguio el resolver");
+                            }
+
+                            Class pusherClassName = Class.forName(device.getPusher().getClassName().trim());
+                            if (pusherClassName != null) {
+                                Pusher pusher = (Pusher) pusherClassName.newInstance();
+                                if (pusher != null) {
+                                    pusher.setDevice(device.getDev());
+                                    pusher.setParams(device.getPusher().getParsedParams());
+                                    pusher.setInsertResult(false);
+                                    return pusher.push(event, app);
+                                } else {
+                                    return buildBasicResponse(6, "Error: no se pudo cargar el pusher");
+                                }
+                            } else {
+                                return buildBasicResponse(5, "Error: no existe el pusher");
+                            }
+                        } else {
+                            return buildBasicResponse(4, "Error: no existe el device");
+                        }
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        return buildBasicResponse(-1, "Error", e);
                     }
                 }
+            }
         );
 
         return promiseOfObjectNode.map(
@@ -129,191 +168,7 @@ public class EventsWS extends HecticusController {
         );
     }
 
-    private static ObjectNode sendDroidPushRequest(ObjectNode event, long idApp) {
-        try{
-            Application app = Application.finder.byId(idApp);
-            String regIDs = event.get("regIDs").asText();
-            String androidPushUrl = Config.getString("android-push-url");
-            String[] registrationIds = regIDs.split(",");
-            Class jobClassName = Class.forName(app.getResolver().getClassName().trim());
-            final Resolver resolver = (Resolver) jobClassName.newInstance();
-
-            ObjectNode fields = resolver.resolve(event, app);
-            fields.put("registration_ids", Json.toJson(registrationIds));
-
-            System.out.println(fields.toString());
-            if(app.getDebug() == 0){
-                F.Promise<WSResponse> result = WS.url(androidPushUrl).setContentType("application/json").setHeader("Authorization","key="+app.getGoogleApiKey()).post(fields);
-                ObjectNode fResponse = Json.newObject();
-
-                WSResponse r = null;
-                String resp = null;
-                try{
-                    r = result.get(Config.getLong("external-ws-timeout-millis"), TimeUnit.MILLISECONDS);
-                    ObjectNode response = (ObjectNode) r.asJson();
-                    resp = response.toString();
-                    fResponse.put("response", Json.toJson(response));
-                } catch(Exception e){
-                    try{
-                        resp = r.asXml().toString();
-                    } catch(Exception e1){
-                        System.out.println("e1 " + e1.getMessage());
-                    }
-                    fResponse.put("response", "error de Google " + resp + " exception: " + e.getMessage());
-                }
-                return fResponse;
-            } else {
-                ObjectNode fResponse = Json.newObject();
-                fResponse.put("response", Json.toJson("call " + androidPushUrl + " with "+ fields.toString() + " and " + app.getGoogleApiKey()));
-                return fResponse;
-            }
-        } catch (Exception ex) {
-            ObjectNode response = Json.newObject();
-            response.put("error", 1);
-            response.put("description", ex.getMessage());
-            return response;
-        }
-
-    }
-
-    private static ObjectNode sendWEBPushRequest(ObjectNode event, long idApp) {
-        Application app = Application.finder.byId(idApp);
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String title = app.getTitle();
-        if (app.getDebug() == 0) {
-            ObjectNode fResponse = Json.newObject();
-            try {
-                if(event.has("title")){
-                    title = event.get("title").asText();
-                }
-                Map sendSimpleMessage = null;
-                if(event.has("html") && event.get("html").asBoolean()){
-                    sendSimpleMessage = MailGun.sendHtmlMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());
-                } else {
-                    sendSimpleMessage = MailGun.sendSimpleMessage(app.getMailgunFrom(), app.getMailgunTo(), null, regIDs, title, msg, app.getMailgunApikey(), app.getMailgunApiurl());
-                }
-                if (sendSimpleMessage != null && (Integer) sendSimpleMessage.get("status") != 200) {
-                    String emsg = "error en MailGun en el HecticusPusher, MailGun respondio " + sendSimpleMessage.toString();
-                    Utils.printToLog(EventsWS.class, "Error en el HecticusPusher", emsg, true, null, "support-level-1", Config.LOGGER_ERROR);
-                }
-                fResponse.put("response", Json.toJson(sendSimpleMessage));
-            } catch (Throwable t) {
-                String emsg = "Proceso continua. Error en el MailGun, puede ser falta de librerias de jersey o de oauth";
-                Utils.printToLog(EventsWS.class, "Error en el HecticusPusher", emsg, true, t, "support-level-1", Config.LOGGER_ERROR);
-                fResponse.put("error", 1);
-                fResponse.put("description", t.getMessage());
-            } finally {
-                return fResponse;
-            }
-        } else {
-            ObjectNode fResponse = Json.newObject();
-            fResponse.put("response", Json.toJson("title = " + title+  " message = " + msg + " regIDs = " + regIDs));
-            return fResponse;
-        }
-    }
-
-    private static ObjectNode sendIOSPushRequest(ObjectNode event, long idApp) {
-        Application app = Application.finder.byId(idApp);
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String[] registrationIds = regIDs.split(",");
-        if(app.getDebug() == 0){
-            ObjectNode fResponse = Json.newObject();
-            try {
-                fResponse.put("error", 0);
-                fResponse.put("description", "");
-                PushedNotifications result = null;
-                if(app.getSound() != null && !app.getSound().isEmpty()){
-                    result = Push.combined(msg, 0, app.getSound(), app.getIosSandbox()==0?app.getIosPushApnsCertProduction():app.getIosPushApnsCertSandbox(), app.getIosPushApnsPassphrase(), app.getIosSandbox()==0, registrationIds);
-                } else {
-                    result = Push.alert(msg, app.getIosSandbox()==0?app.getIosPushApnsCertProduction():app.getIosPushApnsCertSandbox(), app.getIosPushApnsPassphrase(), app.getIosSandbox()==0, registrationIds);
-                }
-                if(result != null){
-                    for (PushedNotification notification : result) {
-                        if(notification.isSuccessful()) {
-                            System.out.println("Push notification sent successfully to: " + notification.getDevice().getToken());
-                        } else {
-                            String invalidToken = notification.getDevice().getToken();
-                            System.out.println("Push notification sent FAILED to: " + invalidToken);
-                            Exception theProblem = notification.getException();
-                            theProblem.printStackTrace();
-                            ResponsePacket theErrorResponse = notification.getResponse();
-                            if (theErrorResponse != null) {
-                                System.out.println(theErrorResponse.getMessage());
-                            }
-                        }
-                    }
-                }
-                return fResponse;
-            } catch (Exception e) {
-                Utils.printToLog(EventsWS.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
-                fResponse.put("error", 1);
-                fResponse.put("description", e.getMessage());
-            } finally {
-                return fResponse;
-            }
-        } else {
-
-            ObjectNode fResponse = Json.newObject();
-            fResponse.put("response", "pushing " + msg + " to " + regIDs);
-            return fResponse;
-        }
-    }
-
-    private static ObjectNode sendIOSPushRequestPool(ObjectNode event, long idApp) {
-        Application app = Application.finder.byId(idApp);
-        String regIDs = event.get("regIDs").asText();
-        String msg = event.get("msg").asText();
-        String[] registrationIds = regIDs.split(",");
-        if(app.getDebug() == 0){
-            ObjectNode fResponse = Json.newObject();
-            try {
-                fResponse.put("error", 0);
-                fResponse.put("description", "");
-                PushedNotifications result = null;
-                ObjectNode payloadToSend = Json.newObject();
-                payloadToSend.put("alert", msg);
-                if(event.has("extra_params")){
-                    payloadToSend.put("extra_params", event.get("extra_params").asText());
-                } else {
-                    ObjectNode extraParams = event.deepCopy();
-                    extraParams.remove("regIDs");
-                    extraParams.remove("emTime");
-                    extraParams.remove("prodTime");
-                    extraParams.remove("pmTime");
-                    extraParams.remove("msg");
-                    extraParams.put("pushTime", System.currentTimeMillis());
-                    payloadToSend.put("extra_params", extraParams.toString());
-                }
-                ObjectNode aps = Json.newObject();
-                aps.put("aps", payloadToSend);
-                PushNotificationPayload payload = PushNotificationPayload.fromJSON(aps.toString());
-                if(app.getSound() != null && !app.getSound().isEmpty()){
-                    payload.addSound(app.getSound());
-                }
-                fResponse.put("payload", payload.toString());
-                fResponse.put("payload_bytes", payload.toString().getBytes().length);
-                fResponse.put("app", app.toJson());
-                System.out.println(payload.toString() + " size = " + payload.toString().getBytes().length);
-                JavApns.getInstance().enqueue(app, payload, registrationIds);
-                return fResponse;
-            } catch (Exception e) {
-                Utils.printToLog(EventsWS.class, "Error en el sendIOSPushRequestPool", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
-                fResponse.put("error", 1);
-                fResponse.put("description", e.getMessage());
-            } finally {
-                return fResponse;
-            }
-        } else {
-
-            ObjectNode fResponse = Json.newObject();
-            fResponse.put("response", "pushing " + msg + " to " + regIDs);
-            return fResponse;
-        }
-    }
-
-    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024 * 1024)
     public static F.Promise<Result> insertEvent() {
         final ObjectNode event = getJson();
         F.Promise<ObjectNode> promiseOfObjectNode = F.Promise.promise(
@@ -325,20 +180,20 @@ public class EventsWS extends HecticusController {
         );
 
         return promiseOfObjectNode.map(
-                new F.Function<ObjectNode, Result>() {
-                    public Result apply(ObjectNode i) {
-                        if(i.get("error").asInt() == 2){
-                            return forbidden(i);
-                        } else if(i.get("error").asInt() == 1){
-                            return badRequest(i);
-                        }
-                        return ok(i);
+            new F.Function<ObjectNode, Result>() {
+                public Result apply(ObjectNode i) {
+                    if(i.get("error").asInt() == 2){
+                        return forbidden(i);
+                    } else if(i.get("error").asInt() == 1){
+                        return badRequest(i);
                     }
+                    return ok(i);
                 }
+            }
         );
     }
 
-    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024)
+    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 1024 * 1024 * 1024)
     public static F.Promise<Result> insertWebEvent() {
         final ObjectNode event = getJson();
         ArrayList<String> filter = new ArrayList<>();

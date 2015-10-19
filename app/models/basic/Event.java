@@ -4,13 +4,13 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.HecticusModel;
+import models.Instance;
+import models.apps.Device;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import play.libs.Json;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Created by plesse on 7/31/14.
@@ -27,23 +27,24 @@ public class Event extends HecticusModel {
     private String event;
     @Constraints.Required
     private int retry;
-    @Constraints.Required
-    private String server;
+    @ManyToOne
+    @JoinColumn(name = "id_instance")
+    private Instance instance;
 
-    public static Model.Finder<Long, Event> finder = new Model.Finder<Long, Event>(Long.class, Event.class);
+    public static Model.Finder<Long, Event> finder = new Model.Finder<>(Long.class, Event.class);
 
-    public Event(String type, String event, int retry, String server) {
+    public Event(String type, String event, int retry, Instance instance) {
         this.type = type;
         this.event = event;
         this.retry = retry;
-        this.server = server;
+        this.instance = instance;
     }
 
-    public Event(String type, String event, String server) {
+    public Event(String type, String event, Instance instance) {
         this.type = type;
         this.event = event;
         this.retry = 0;
-        this.server = server;
+        this.instance = instance;
     }
 
     public Long getIdEvent() {
@@ -78,12 +79,12 @@ public class Event extends HecticusModel {
         this.retry = retry;
     }
 
-    public String getServer() {
-        return server;
+    public Instance getInstance() {
+        return instance;
     }
 
-    public void setServer(String server) {
-        this.server = server;
+    public void setInstance(Instance instance) {
+        this.instance = instance;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class Event extends HecticusModel {
         response.put("type", type);
         response.put("event", event);
         response.put("retry", retry);
-        response.put("server", server);
+        response.put("instance", instance.toJson());
         return response;
     }
 

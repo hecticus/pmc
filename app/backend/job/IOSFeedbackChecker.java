@@ -1,6 +1,8 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
+import backend.HecticusThread;
 import backend.apns.JavApns;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import javapns.Push;
@@ -8,8 +10,7 @@ import javapns.devices.Device;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
 import models.apps.Application;
-import models.basic.Config;
-import play.Play;
+import models.Config;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.ws.WS;
@@ -19,6 +20,7 @@ import utils.Utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +29,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by plesse on 7/25/14.
  */
 public class IOSFeedbackChecker extends HecticusThread {
+
+    public IOSFeedbackChecker() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("IOSFeedbackChecker-" + System.currentTimeMillis());
+    }
 
     public IOSFeedbackChecker(String name, AtomicBoolean run, Cancellable cancellable) {
         super("IOSFeedbackChecker-"+name, run, cancellable);
@@ -44,7 +54,7 @@ public class IOSFeedbackChecker extends HecticusThread {
      * Metodo para Limpiar los RegistrationIDs de todas las aplicaciones existentes en el PMC
      */
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             List<Application> apps = Application.finder.all();
             for(int i = 0; isAlive() && i < apps.size(); ++i){
@@ -72,16 +82,16 @@ public class IOSFeedbackChecker extends HecticusThread {
      */
     private void checkIOSFeedback(Application application) {
         try{
-            if(application.getActive() == 1 && application.getDebug() == 0 && application.getIosPushApnsCertProduction() != null && !application.getIosPushApnsCertProduction().isEmpty() && application.getIosPushApnsCertSandbox() != null && !application.getIosPushApnsCertSandbox().isEmpty() && application.getIosPushApnsPassphrase() != null && !application.getIosPushApnsPassphrase().isEmpty()){
-//                File cert  = new File(Play.application().path().getAbsolutePath() + "/" + (application.getIosSandbox() == 0 ? application.getIosPushApnsCertProduction() : application.getIosPushApnsCertSandbox()));
-                File cert  = new File((application.getIosSandbox() == 0 ? application.getIosPushApnsCertProduction() : application.getIosPushApnsCertSandbox()));
-                List<Device> devices = Push.feedback(cert, application.getIosPushApnsPassphrase(), application.getIosSandbox() == 0);
+            if(application.isActive() && !application.isDebug() && application.getIosPushApnsCertProduction() != null && !application.getIosPushApnsCertProduction().isEmpty() && application.getIosPushApnsCertSandbox() != null && !application.getIosPushApnsCertSandbox().isEmpty() && application.getIosPushApnsPassphrase() != null && !application.getIosPushApnsPassphrase().isEmpty()){
+//                File cert  = new File(Play.application().path().getAbsolutePath() + "/" + (application.isIosSandbox() == 0 ? application.getIosPushApnsCertProduction() : application.getIosPushApnsCertSandbox()));
+                File cert  = new File((!application.isIosSandbox() ? application.getIosPushApnsCertProduction() : application.getIosPushApnsCertSandbox()));
+                List<Device> devices = Push.feedback(cert, application.getIosPushApnsPassphrase(), !application.isIosSandbox());
                 ArrayList<ObjectNode> toClean = new ArrayList<>();
                 for (Device device : devices) {
                     ObjectNode operation = Json.newObject();
-                    operation.put("operation", "DELETE");
-                    operation.put("actual_id", device.getToken());
-                    operation.put("type", "ios");
+                    operation.put(Constants.OPERATION, Constants.DELETE);
+                    operation.put(Constants.ACTUAL_ID, device.getToken());
+                    operation.put(Constants.PUSH_TYPE, "ios");
                     toClean.add(operation);
                 }
                 PushedNotifications pushedNotifications = JavApns.getInstance().getPushedNotifications(application.getIdApp());
@@ -89,15 +99,15 @@ public class IOSFeedbackChecker extends HecticusThread {
                     for (PushedNotification notification : pushedNotifications) {
                         if(!notification.isSuccessful()) {
                             ObjectNode operation = Json.newObject();
-                            operation.put("operation", "DELETE");
-                            operation.put("actual_id", notification.getDevice().getToken());
-                            operation.put("type", "ios");
+                            operation.put(Constants.OPERATION, Constants.DELETE);
+                            operation.put(Constants.ACTUAL_ID, notification.getDevice().getToken());
+                            operation.put(Constants.PUSH_TYPE, "ios");
                             toClean.add(operation);
                         }
                     }
                 }
                 ObjectNode operations = Json.newObject();
-                operations.put("operations", Json.toJson(toClean));
+                operations.put(Constants.OPERATIONS, Json.toJson(toClean));
                 try {
                     F.Promise<WSResponse> resultWS = WS.url(application.getCleanDeviceUrl()).post(operations);
                     ObjectNode response = (ObjectNode)resultWS.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();

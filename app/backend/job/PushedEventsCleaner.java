@@ -1,21 +1,26 @@
 package backend.job;
 
 import akka.actor.Cancellable;
-import models.basic.Config;
+import backend.HecticusThread;
+import models.Config;
 import models.basic.PushedEvent;
 import utils.Utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by plesse on 11/6/14.
  */
 public class PushedEventsCleaner extends HecticusThread {
+
+    public PushedEventsCleaner() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("PushedEventsCleaner-" + System.currentTimeMillis());
+    }
 
     protected PushedEventsCleaner(String name, AtomicBoolean run, Cancellable cancellable) {
         super("PushedEventsCleaner-"+name, run, cancellable);
@@ -30,16 +35,12 @@ public class PushedEventsCleaner extends HecticusThread {
     }
 
     @Override
-    public void process() {
+    public void process(Map args) {
         try {
             TimeZone tz = TimeZone.getDefault();
             Calendar actualDate = new GregorianCalendar(tz);
             actualDate.add(Calendar.DAY_OF_MONTH, -Config.getInt("clean-window"));
             List<PushedEvent> eventsToDelete = PushedEvent.finder.where().le("time", actualDate.getTimeInMillis()).findList();
-
-//            SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
-//            System.out.println("a borrar = " + eventsToDelete.size() + " " + sf.format(actualDate.getTime()) + " " + actualDate.getTimeInMillis());
-
             for(PushedEvent pushedEvent : eventsToDelete) {
                 pushedEvent.delete();
             }

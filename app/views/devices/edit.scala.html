@@ -1,0 +1,47 @@
+@(id: Long, instanceViewForm: Form[models.apps.Device])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@main(title = Messages("devices.edit"), nav = "create") {
+
+    @if(instanceViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@instanceViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(controllers.routes.DevicesView.update(id), 'enctype -> "multipart/form-data") {
+
+        <fieldset>
+            <legend>@Messages("devices.info")</legend>
+
+            @inputText(
+                instanceViewForm("name"),
+                '_label -> Messages("devices.name"),
+                '_help -> Messages("devices.name.help"),
+                'class -> "form-control",
+                '_error -> instanceViewForm.globalError
+            )
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value=@Messages("devices.submit.update") class="btn btn-success">
+            <a href="@controllers.routes.DevicesView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+    @form(controllers.routes.DevicesView.delete(id), 'class -> "topRight") {
+        <input type="submit" value=@Messages("devices.submit.delete") class="btn btn-danger">
+
+    }
+
+}

@@ -1,19 +1,13 @@
 package controllers.test;
 
-import backend.job.HecticusProducer;
-import backend.job.HecticusThread;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.HecticusController;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * Created by plesse on 7/15/14.

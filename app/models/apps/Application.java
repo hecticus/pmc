@@ -2,6 +2,8 @@ package models.apps;
 
 import com.avaje.ebean.Page;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import models.HecticusModel;
 import models.basic.PushedEvent;
 import play.data.validation.Constraints;
@@ -15,6 +17,7 @@ import scala.collection.mutable.Buffer;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Created by plesse on 7/10/14.
@@ -26,8 +29,7 @@ public class Application extends HecticusModel {
     private Long idApp;
     @Constraints.Required
     private String name;
-    @Constraints.Required
-    private int active;
+    private Boolean active;
     @OneToMany(mappedBy="app", cascade = CascadeType.ALL)
     private List<AppDevice> appDevices;
 
@@ -43,45 +45,30 @@ public class Application extends HecticusModel {
     @Constraints.Required
     private String cleanDeviceUrl;
 
-//    @Constraints.Required
     private String iosPushApnsCertProduction;
 
-//    @Constraints.Required
     private String iosPushApnsCertSandbox;
 
-//    @Constraints.Required
     private String iosPushApnsPassphrase;
 
-//    @Constraints.Required
     private String googleApiKey;
 
-//    @Constraints.Required
     private String mailgunApikey;
 
-//    @Constraints.Required
     private String mailgunFrom;
 
-//    @Constraints.Required
     private String mailgunTo;
 
-//    @Constraints.Required
     private String mailgunApiurl;
 
     @Constraints.Required
     private String title;
 
-//    @Constraints.Required
     private String sound;
 
-    @Constraints.Required
-    private int debug;
+    private Boolean debug;
 
-//    @Constraints.Required
-    private int iosSandbox;
-
-    @OneToOne
-    @JoinColumn(name = "id_resolver")
-    private Resolver resolver;
+    private Boolean iosSandbox;
 
     public String validate() {
         if(iosPushApnsCertProduction != null && !iosPushApnsCertProduction.isEmpty()){
@@ -110,7 +97,7 @@ public class Application extends HecticusModel {
         this.mailgunTo = "";
         this.mailgunApiurl = "";
         this.sound = "";
-        this.iosSandbox = 0;
+        this.iosSandbox = false;
     }
 
     @Override
@@ -169,19 +156,12 @@ public class Application extends HecticusModel {
         return idApp;
     }
 
-    public Resolver getResolver() {
-        return resolver;
-    }
-
-    public void setResolver(Resolver resolver) {
-        this.resolver = resolver;
-    }
-
     public String getName() {
         return name;
     }
 
-    public int getActive() {
+    public boolean isActive() {
+        if(active == null) active = false;
         return active;
     }
 
@@ -233,7 +213,8 @@ public class Application extends HecticusModel {
         return sound;
     }
 
-    public int getDebug() {
+    public boolean isDebug() {
+        if(debug == null) debug = false;
         return debug;
     }
 
@@ -241,7 +222,7 @@ public class Application extends HecticusModel {
         this.name = name;
     }
 
-    public void setActive(int active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -289,7 +270,7 @@ public class Application extends HecticusModel {
         this.sound = sound;
     }
 
-    public void setDebug(int debug) {
+    public void setDebug(boolean debug) {
         this.debug = debug;
     }
 
@@ -301,11 +282,11 @@ public class Application extends HecticusModel {
         this.iosPushApnsCertSandbox = iosPushApnsCertSandbox;
     }
 
-    public int getIosSandbox() {
+    public boolean isIosSandbox() {
         return iosSandbox;
     }
 
-    public void setIosSandbox(int iosSandbox) {
+    public void setIosSandbox(boolean iosSandbox) {
         this.iosSandbox = iosSandbox;
     }
 
@@ -335,6 +316,37 @@ public class Application extends HecticusModel {
 
     public static Page<Application> page(int page, int pageSize, String sortBy, String order, String filter) {
         return finder.where().ilike("name", "%" + filter + "%").orderBy(sortBy + " " + order).findPagingList(pageSize).getPage(page);
+    }
+
+    public AppDevice getDevice(final String type){
+        AppDevice appDevice;
+        try {
+            appDevice = Iterables.find(appDevices, new Predicate<AppDevice>() {
+                public boolean apply(AppDevice obj) {
+                    return obj.getDev().getName().equalsIgnoreCase(type);
+                }
+            });
+        } catch (NoSuchElementException ex){
+            appDevice = null;
+        }
+        return appDevice;
+    }
+
+    public boolean isDeviceActive(final String type){
+        AppDevice appDevice;
+        try {
+            appDevice = Iterables.find(appDevices, new Predicate<AppDevice>() {
+                public boolean apply(AppDevice obj) {
+                    return obj.getDev().getName().equalsIgnoreCase(type);
+                }
+            });
+        } catch (NoSuchElementException ex){
+            appDevice = null;
+        }
+        if(appDevice != null) {
+            return appDevice.getStatus();
+        }
+        return false;
     }
 
     public static scala.collection.immutable.List<Tuple2<String, String>> toSeq() {

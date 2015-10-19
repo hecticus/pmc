@@ -1,25 +1,14 @@
 package controllers.apps;
 
-import backend.job.HecticusProducer;
-import backend.job.HecticusThread;
-import backend.job.ThreadSupervisor;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.HecticusController;
+import models.Config;
 import models.apps.Application;
-import models.basic.Config;
-import play.api.DefaultGlobal;
-import play.libs.F;
-import play.libs.F.*;
 import play.libs.Json;
-import play.libs.ws.WS;
-import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results;
 import utils.Utils;
 
 import javax.persistence.PersistenceException;
-import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by plesse on 7/11/14.
@@ -42,10 +31,10 @@ public class AppsWS extends HecticusController {
             Application app = Application.finder.byId(idApp);
             if(app != null){
                 if(jsonInfo.has("debug")){
-                    app.setDebug(jsonInfo.get("debug").asInt());
+                    app.setDebug(jsonInfo.get("debug").asBoolean());
                 }
                 if(jsonInfo.has("active")){
-                    app.setActive(jsonInfo.get("active").asInt());
+                    app.setActive(jsonInfo.get("active").asBoolean());
                 }
                 if(jsonInfo.has("batch-url")){
                     app.setBatchClientsUrl(jsonInfo.get("batch-url").asText());

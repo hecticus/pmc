@@ -1,0 +1,70 @@
+@(id: Long, pusherViewForm: Form[models.apps.Pusher])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {}
+
+@main(title = Messages("pushers.edit"), nav = "create") {
+
+    @if(pusherViewForm.hasErrors) {
+        <div class="alert alert-dismissable alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>@Messages("generic.error.title")</strong> @Messages("generic.error.content")
+            <p>@pusherViewForm.errorsAsJson</p>
+        </div>
+    }
+
+
+    @helper.form(controllers.routes.PushersView.update(id), 'enctype -> "multipart/form-data") {
+
+        <fieldset>
+            <legend>@Messages("pushers.info")</legend>
+
+            @inputText(
+                pusherViewForm("name"),
+                '_label -> Messages("pushers.name"),
+                '_help -> Messages("pushers.name.help"),
+                'class -> "form-control",
+                '_error -> pusherViewForm.globalError
+            )
+
+            @inputText(
+                pusherViewForm("className"),
+                '_label -> Messages("pushers.className"),
+                '_help -> Messages("pushers.className.help"),
+                'class -> "form-control",
+                '_error -> pusherViewForm.globalError
+            )
+
+            @inputText(
+                pusherViewForm("params"),
+                '_label -> Messages("pushers.params"),
+                '_help -> Messages("pushers.params.help"),
+                'class -> "form-control",
+                '_error -> pusherViewForm.globalError
+            )
+
+            @select(
+                pusherViewForm("device.idDevice"),
+                models.apps.Device.toSeq,
+                '_label -> Messages("pushers.device"),
+                'class -> "form-control"
+            )
+
+
+        </fieldset>
+
+        <div class="actions">
+            <input type="submit" value=@Messages("pushers.submit.update") class="btn btn-success">
+            <a href="@controllers.routes.PushersView.list()" class="btn btn-primary">@Messages("generic.cancel")</a>
+        </div>
+
+    }
+
+    @form(controllers.routes.PushersView.delete(id), 'class -> "topRight") {
+        <input type="submit" value=@Messages("pushers.submit.delete") class="btn btn-danger">
+
+    }
+
+}
