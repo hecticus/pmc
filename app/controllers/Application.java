@@ -39,6 +39,10 @@ public class Application extends Controller {
         }
     }
 
+    public static Result options(String url){
+        response().setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT");
+        return ok("OK");
+    }
 
     /*Plugin Authenticate*/
 

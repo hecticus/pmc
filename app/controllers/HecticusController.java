@@ -11,7 +11,7 @@ import javax.persistence.MappedSuperclass;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import play.mvc.Controller;
 

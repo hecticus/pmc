@@ -1,14 +1,15 @@
 package backend.job.test;
 
 import akka.actor.Cancellable;
-import backend.job.HecticusThread;
+import backend.HecticusThread;
 import backend.rabbitmq.RabbitMQ;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import models.basic.Config;
+import models.Config;
 import play.libs.Json;
 import utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -30,7 +31,7 @@ public class HecticusGenerator extends HecticusThread {
     }
 
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
             Random rand = new Random();
             int n = rand.nextInt(5000) + 1;

@@ -1,15 +1,13 @@
-import akka.actor.ActorSystem;
-import akka.actor.Cancellable;
-import backend.job.*;
-
+import backend.ServerInstance;
+import backend.rabbitmq.RabbitMQ;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.PlayAuthenticate.Resolver;
 import com.feth.play.module.pa.exceptions.AccessDeniedException;
 import com.feth.play.module.pa.exceptions.AuthException;
+import controllers.routes;
+import exceptions.CouldNotCreateInstanceException;
+import models.Config;
 import models.SecurityRole;
-
-import models.basic.Config;
-import models.basic.Instance;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -18,26 +16,15 @@ import play.mvc.Action;
 import play.mvc.Call;
 import play.mvc.Http;
 import play.mvc.Result;
-import scala.concurrent.duration.Duration;
 import utils.Utils;
-import controllers.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Created by plesse on 7/10/14.
  */
 public class Global extends GlobalSettings {
-
-    public static AtomicBoolean run = null;
-    HecticusThread supervisor = null;
 
     private void initialData() {
         if (SecurityRole.find.findRowCount() == 0) {
@@ -96,8 +83,7 @@ public class Global extends GlobalSettings {
             public Call onException(final AuthException e) {
                 if (e instanceof AccessDeniedException) {
                     return routes.Signup
-                            .oAuthDenied(((AccessDeniedException) e)
-                                    .getProviderKey());
+                            .oAuthDenied(((AccessDeniedException) e).getProviderKey());
                 }
 
                 // more custom problem handling here...
@@ -106,69 +92,28 @@ public class Global extends GlobalSettings {
         });
         initialData();
 
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(Config.getString("server-ip-file")));
-            Utils.serverIp = br.readLine();
-            Instance actual = Instance.finder.where().eq("ip",Utils.serverIp).findUnique();
-            if(actual != null) {
-                Utils.test = actual.getTest() == 1;
-                actual.setRunning(1);
-                Instance.update(actual);
-                Utils.actual = actual;
-            } else {
-                Utils.test = false;
-                actual = new Instance(Utils.serverIp, Config.getString("app-name")+"-"+Utils.serverIp, 1);
-                Instance.save(actual);
-                Utils.actual = actual;
-            }
-        } catch (Exception ex) {
-            Utils.test = false;
-            Utils.serverIp = null;
-            Utils.actual = null;
-            Utils.printToLog(Global.class, "Error cargando el IP del servidor", "Ocurrio un error cargando el IP del servidor desde el archivo. El PMC levantara pero no procesara eventos fallidos que esten en MySQL", true, ex, "support-level-1", Config.LOGGER_ERROR);
-        } finally {
-            try {if (br != null)br.close();} catch (Exception ex) {}
+        try{
+            ServerInstance.getInstance();
+        } catch (CouldNotCreateInstanceException ex){
+            Utils.printToLog(Global.class, "ERROR CRITICO Apagando " + Config.getString("app-name"), "No se pudo crear la instancia", true, ex, "support-level-1", Config.LOGGER_ERROR);
+            super.onStop(application);
         }
-        if(Utils.actual == null) {
-            Utils.printToLog(Global.class, null, "Arrancando " + Config.getString("app-name") + (Utils.serverIp == null ? "" : "-" + Utils.serverIp) + " test = " + Utils.test, false, null, "support-level-1", Config.LOGGER_INFO);
-        } else {
-            Utils.printToLog(Global.class, null, "Arrancando " + Utils.actual.getName() + " test = " + Utils.test, false, null, "support-level-1", Config.LOGGER_INFO);
-        }
-        ActorSystem system = ActorSystem.create("application");
-        run = new AtomicBoolean(true);
-        Utils.run = run;
-        Utils.printToLog(Global.class, null, "Arrancando ThreadSupervisor", false, null, "support-level-1", Config.LOGGER_INFO);
-        supervisor = new ThreadSupervisor(run, system);
-        Cancellable cancellable = system.scheduler().schedule(Duration.create(1, SECONDS), Duration.create(5, MINUTES), supervisor, system.dispatcher());
-        supervisor.setCancellable(cancellable);
     }
 
     @Override
     public void onStop(Application application) {
         try {
-            if(Utils.serverIp != null) {
-                Instance actual = Instance.finder.where().eq("ip", Utils.serverIp).findUnique();
-                if (actual != null) {
-                    actual.setRunning(0);
-                    Instance.update(actual);
-                } else {
-                    actual = new Instance(Utils.serverIp, Config.getString("app-name") + Utils.serverIp, 0);
-                    Instance.save(actual);
-                }
-            }
+            ServerInstance.getInstance().shutdown();
         } catch (Exception ex) {
-            Utils.serverIp = null;
-            Utils.printToLog(Global.class, "Error Actualizando instancia", "Ocurrio un error marcando la instancia como apagada, se continuara con el shutdown", true, ex, "support-level-1", Config.LOGGER_ERROR);
+
+        }
+        try {
+            RabbitMQ.getInstance().closeInstance();
+
+        } catch (Exception ex) {
+
         }
         super.onStop(application);
-        run.set(false);
-        if(Utils.actual == null) {
-            Utils.printToLog(Global.class, "Apagando " + Config.getString("app-name"), "Apagando " + Config.getString("app-name")+(Utils.serverIp==null?"":"-"+Utils.serverIp)+", se recibio la señal de shutdown", true, null, "support-level-1", Config.LOGGER_INFO);
-        } else {
-            Utils.printToLog(Global.class, "Apagando " + Config.getString("app-name"), "Apagando " + Utils.actual.getName() + ", se recibio la señal de shutdown", true, null, "support-level-1", Config.LOGGER_INFO);
-        }
-        supervisor.cancel();
     }
 
     @SuppressWarnings("rawtypes")
@@ -193,13 +138,28 @@ public class Global extends GlobalSettings {
         }
     };
 
+    private class ActionWrapper extends Action.Simple {
+        public ActionWrapper(Action<?> action) {
+            this.delegate = action;
+        }
+
+        @Override
+        public F.Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
+            F.Promise<Result> result = this.delegate.call(ctx);
+            Http.Response response = ctx.response();
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, HECTICUS-X-AUTH-TOKEN, x-gameapi-app-key");
+            return result;
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public Action onRequest(Http.Request request, Method actionMethod) {
         String ipString = request.remoteAddress();
         String invoker = actionMethod.getDeclaringClass().getName();
         String[] octetos = ipString.split("\\.");
-        if(invoker.startsWith("controllers.apps") || invoker.startsWith("controllers.Application") || invoker.startsWith("controllers.events") || invoker.startsWith("controllers.Signup") || invoker.startsWith("controllers.Account") || invoker.startsWith("controllers.ConfigsView") || invoker.startsWith("com.feth") || invoker.startsWith("controllers.InstancesView") || invoker.startsWith("controllers.ApplicationsView") || invoker.startsWith("controllers.EventToPushView") || invoker.startsWith("controllers.UsersView")){
+        if(invoker.startsWith("controllers.apps") || invoker.startsWith("controllers.Application") || invoker.startsWith("controllers.events") || invoker.startsWith("controllers.Signup") || invoker.startsWith("controllers.Account") || invoker.startsWith("controllers.ConfigsView") || invoker.startsWith("com.feth") || invoker.startsWith("controllers.InstancesView") || invoker.startsWith("controllers.ApplicationsView") || invoker.startsWith("controllers.EventToPushView") || invoker.startsWith("controllers.UsersView") || invoker.startsWith("controllers.DevicesView") || invoker.startsWith("controllers.ResolversView") || invoker.startsWith("controllers.PushersView") || invoker.startsWith("controllers.CleanersView") || invoker.startsWith("controllers.Instances") || invoker.startsWith("controllers.Jobs")){
             if(ipString.equals("127.0.0.1") || ipString.startsWith("10.0.3")
                     || (ipString.startsWith("10.182.") && Integer.parseInt(octetos[2]) <= 127 )
                     || ipString.startsWith("10.181.")
@@ -211,14 +171,14 @@ public class Global extends GlobalSettings {
                 if(!invoker.startsWith("controllers.Application")){
                     Logger.info("Pass request from "+ipString+" to "+invoker);
                 }
-                return super.onRequest(request, actionMethod);
+                return new ActionWrapper(super.onRequest(request, actionMethod));
             }else{
                 Logger.info("Deny request from "+ipString+" to "+invoker);
-                return newAction;
+                return new ActionWrapper(newAction);
             }
         }else{
             Logger.info("Deny request from "+ipString+" to "+invoker);
-            return newAction;
+            return new ActionWrapper(newAction);
         }
     }
 }

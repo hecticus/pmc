@@ -2,7 +2,7 @@ package controllers;
 
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
-import models.basic.Instance;
+import models.apps.Pusher;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Result;
@@ -11,16 +11,15 @@ import java.io.IOException;
 
 import static play.data.Form.form;
 
-import utils.Utils;
-import views.html.instances.*;
+import views.html.pushers.*;
 
 /**
- * Created by plesse on 11/4/14.
+ * Created by plessmann on 22/07/15.
  */
-public class InstancesView extends HecticusController {
+public class PushersView extends HecticusController {
 
-    final static Form<Instance> InstanceViewForm = form(Instance.class);
-    public static Result GO_HOME = redirect(routes.InstancesView.list(0, "name", "asc", ""));
+    final static Form<Pusher> PusherViewForm = form(Pusher.class);
+    public static Result GO_HOME = redirect(routes.PushersView.list(0, "name", "asc", ""));
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result index() {
@@ -29,32 +28,31 @@ public class InstancesView extends HecticusController {
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result blank() {
-        return ok(form.render(InstanceViewForm));
+        return ok(form.render(PusherViewForm));
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result list(int page, String sortBy, String order, String filter) {
-        return ok(list.render(Instance.page(page, 10, sortBy, order, filter), sortBy, order, filter, false));
+        return ok(list.render(Pusher.page(page, 10, sortBy, order, filter), sortBy, order, filter, false));
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result edit(Long id) {
-        Instance objBanner = Instance.finder.byId(id);
-        Form<Instance> filledForm = InstanceViewForm.fill(Instance.finder.byId(id));
+        Pusher objBanner = Pusher.finder.byId(id);
+        Form<Pusher> filledForm = PusherViewForm.fill(Pusher.finder.byId(id));
         return ok(edit.render(id, filledForm));
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result update(Long id) {
-        Form<Instance> filledForm = InstanceViewForm.bindFromRequest();
+        Form<Pusher> filledForm = PusherViewForm.bindFromRequest();
         if(filledForm.hasErrors()) {
             System.out.println(filledForm.toString());
             return badRequest(edit.render(id, filledForm));
         }
-        Instance gfilledForm = filledForm.get();
+        Pusher gfilledForm = filledForm.get();
         gfilledForm.update(id);
-        Utils.test = gfilledForm.getTest() == 1;
-        flash("success", Messages.get("instances.java.updated", gfilledForm.getName()));
+        flash("success", Messages.get("pushers.java.updated", gfilledForm.getName()));
         return GO_HOME;
 
     }
@@ -64,7 +62,7 @@ public class InstancesView extends HecticusController {
         String[] aids = ids.split(",");
 
         for (int i=0; i<aids.length; i++) {
-            Instance oPost = Instance.finder.byId(Long.parseLong(aids[i]));
+            Pusher oPost = Pusher.finder.byId(Long.parseLong(aids[i]));
             //oWoman.setSort(i);
             oPost.save();
         }
@@ -74,30 +72,30 @@ public class InstancesView extends HecticusController {
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result lsort() {
-        return ok(list.render(Instance.page(0, 0, "configKey", "asc", ""),"date", "asc", "",true));
+        return ok(list.render(Pusher.page(0, 0, "configKey", "asc", ""),"date", "asc", "",true));
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result delete(Long id) {
-        Instance instance = Instance.finder.byId(id);
+        Pusher instance = Pusher.finder.byId(id);
         instance.delete();
-        flash("success", Messages.get("instances.java.deleted", instance.getName()));
+        flash("success", Messages.get("pushers.java.deleted", instance.getName()));
         return GO_HOME;
 
     }
 
     @Restrict(@Group(Application.ADMIN_ROLE))
     public static Result submit() throws IOException {
-        Form<Instance> filledForm = InstanceViewForm.bindFromRequest();
+        Form<Pusher> filledForm = PusherViewForm.bindFromRequest();
 
         if(filledForm.hasErrors()) {
             System.out.println(filledForm.toString());
             return badRequest(form.render(filledForm));
         }
 
-        Instance gfilledForm = filledForm.get();
+        Pusher gfilledForm = filledForm.get();
         gfilledForm.save();
-        flash("success", Messages.get("instances.java.created", gfilledForm.getName()));
+        flash("success", Messages.get("pushers.java.created", gfilledForm.getName()));
         return GO_HOME;
 
     }

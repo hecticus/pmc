@@ -1,5 +1,6 @@
 package backend.apns;
 
+import backend.ServerInstance;
 import javapns.Push;
 import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
@@ -7,7 +8,7 @@ import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotifications;
 import javapns.notification.transmission.PushQueue;
 import models.apps.Application;
-import models.basic.Config;
+import models.Config;
 import utils.Utils;
 
 import java.io.File;
@@ -34,21 +35,22 @@ public class JavApns {
     }
 
     public JavApns() {
-        Utils.printToLog(JavApns.class, null, "Levantando JavApns", false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
+        Utils.printToLog(JavApns.class, null, "Levantando JavApns", false, null, "support-level-1",models.Config.LOGGER_INFO);
         this.connections = new HashMap<Long, PushQueue>();
         threads = Config.getInt("max-apns-threads");
         List<Application> apps = Application.finder.all();
         try{
-            for(int i = 0; Utils.run.get() && i < apps.size(); ++i){
-                if(apps.get(i).getActive() == 1){
-                    File cert  = new File((apps.get(i).getIosSandbox() == 0 ? apps.get(i).getIosPushApnsCertProduction() : apps.get(i).getIosPushApnsCertSandbox()));
-                    PushQueue queue = Push.queue(cert, apps.get(i).getIosPushApnsPassphrase(), apps.get(i).getIosSandbox() == 0, threads);
+
+            for(int i = 0; ServerInstance.getInstance().isInstanceRun().get() && i < apps.size(); ++i){
+                if(apps.get(i).isActive()){
+                    File cert  = new File((!apps.get(i).isIosSandbox() ? apps.get(i).getIosPushApnsCertProduction() : apps.get(i).getIosPushApnsCertSandbox()));
+                    PushQueue queue = Push.queue(cert, apps.get(i).getIosPushApnsPassphrase(), !apps.get(i).isIosSandbox(), threads);
                     queue.start();
                     connections.put(apps.get(i).getIdApp(), queue);
                 }
             }
         }catch(Exception e){}
-        Utils.printToLog(JavApns.class, null, "Levantado JavApns con " + threads + " por app", false, null, "support-level-1",models.basic.Config.LOGGER_INFO);
+        Utils.printToLog(JavApns.class, null, "Levantado JavApns con " + threads + " por app", false, null, "support-level-1",models.Config.LOGGER_INFO);
     }
 
     /**
@@ -65,8 +67,8 @@ public class JavApns {
         if(connections.containsKey(idApp)) {
             connections.get(idApp).add(payload, device);
         } else {
-            File cert  = new File((app.getIosSandbox() == 0 ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
-            PushQueue queue = Push.queue(cert, app.getIosPushApnsPassphrase(), app.getIosSandbox() == 0, threads);
+            File cert  = new File((!app.isIosSandbox() ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
+            PushQueue queue = Push.queue(cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), threads);
             queue.start();
             queue.add(payload, device);
             connections.put(idApp, queue);
@@ -89,8 +91,8 @@ public class JavApns {
                 connections.get(idApp).add(payload, devices[i]);
             }
         } else {
-            File cert  = new File((app.getIosSandbox() == 0 ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
-            PushQueue queue = Push.queue(cert, app.getIosPushApnsPassphrase(), app.getIosSandbox() == 0, threads);
+            File cert  = new File((!app.isIosSandbox() ? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
+            PushQueue queue = Push.queue(cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), threads);
             queue.start();
             for(int i = 0; i < devices.length; ++i){
                 queue.add(payload, devices[i]);

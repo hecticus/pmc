@@ -1,23 +1,36 @@
 package backend.job;
 
 import akka.actor.Cancellable;
+import backend.Constants;
+import backend.HecticusThread;
+import backend.ServerInstance;
 import backend.rabbitmq.RabbitMQ;
-import models.basic.Config;
+import models.Config;
 import models.basic.Event;
 import utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by plesse on 8/1/14.
  */
 public class RabbitMQFailChecker extends HecticusThread {
+
     private int maxRetry;
+
+    public RabbitMQFailChecker() {
+        this.setActTime(System.currentTimeMillis());
+        this.setInitTime(System.currentTimeMillis());
+        this.setPrevTime(System.currentTimeMillis());
+        //set name
+        this.setName("RabbitMQFailChecker-" + System.currentTimeMillis());
+    }
+
     public RabbitMQFailChecker(String name, AtomicBoolean run, Cancellable cancellable) {
         super("RabbitMQFailChecker-"+name, run, cancellable);
         maxRetry = Config.getInt("rabbitFC-max-retry");
@@ -34,9 +47,9 @@ public class RabbitMQFailChecker extends HecticusThread {
     }
 
     @Override
-    public void process() {
+    public void process(Map args) {
         try{
-            List<Event> events = Event.finder.where().eq("server", Utils.serverIp).findList();
+            List<Event> events = Event.finder.where().eq("instance", ServerInstance.getInstance().getRealInstance()).findList();
             for(int i = 0; isAlive() && i < events.size(); ++i){
                 Event e = events.get(i);
                 String body = null;
@@ -52,14 +65,13 @@ public class RabbitMQFailChecker extends HecticusThread {
 
                     }
                 }
-//                String body = URLDecoder.decode(e.getEvent(),"UTF-8");
                 if(body != null && !body.isEmpty()){
                     boolean result = false;
-                    if(e.getType().equalsIgnoreCase("event")){
+                    if(e.getType().equalsIgnoreCase(Constants.EVENT)){
                         result = RabbitMQ.getInstance().insertEventLyraWithResult(body);
-                    } else if(e.getType().equalsIgnoreCase("push")){
+                    } else if(e.getType().equalsIgnoreCase(Constants.PUSH)){
                         result = RabbitMQ.getInstance().insertPushLyraWithResult(body);
-                    } else if(e.getType().equalsIgnoreCase("result")){
+                    } else if(e.getType().equalsIgnoreCase(Constants.RESULT)){
                         result = RabbitMQ.getInstance().insertPushResultLyraWithResult(body);
                     }
                     if(result){

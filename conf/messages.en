@@ -152,11 +152,16 @@ playauthenticate.restricted.secrets=Secrets, everywhere!
 
 main.start=Start
 main.admin=Administration
-main.configurations=Configurations
+
 main.instances=Instances
 main.applications=Applications
 main.push=Send Push
 main.users=Users
+main.devices=Devices
+main.resolvers=Resolvers
+main.pushers=Pushers
+main.cleaners=Cleaners
+
 
 main.list=List
 main.operations=Operations
@@ -174,62 +179,6 @@ generic.list.next=Next
 generic.list.listing=Listing from
 generic.list.through=through
 generic.list.of=of
-
-
-configs.list.head=Configurations
-configs.list.title={0,choice,0#There are no configurations|1#One configuration found|1<{0,number,integer} configurations found}
-configs.list.filter.name=Filter by Configuration name...
-configs.list.new=Add new Configuration
-
-configs.create=Create Configuration
-configs.edit=Edit Configuration
-configs.info=Configuration Data
-
-configs.key=Key
-configs.key.help=String used to get the configuration value
-
-configs.value=Value
-configs.value.help=value of this configuration
-
-configs.description=Description
-configs.description.help=usage of this configuration
-
-configs.submit.create=Create this Configuration
-configs.submit.update=Update this Configuration
-configs.submit.delete=Delete this Configuration
-
-configs.java.created= The Configuration {0} has been created!
-configs.java.updated= The Configuration {0} has been updated!
-configs.java.deleted= The Configuration {0} has been deleted!
-
-instances.list.head=Instancies
-instances.list.title={0,choice,0#There are no instances|1#One instance found|1<{0,number,integer} instances found}
-instances.list.filter.name=Filter by instance name...
-instances.list.new=Add new Instance
-
-instances.create=Create Instance
-instances.edit=Edit Instance
-instances.info=Instance Data
-
-instances.ip=Server IP Address
-instances.ip.help=IP of the server
-
-instances.name=Name
-instances.name.help=Name of the instance
-
-instances.running=Running
-instances.running.help=State of the instance
-
-instances.test=Test
-instances.test.help=debug mode
-
-instances.submit.create=Create this Instance
-instances.submit.update=Update this Instance
-instances.submit.delete=Delete this Instance
-
-instances.java.created= The Instance {0} has been created!
-instances.java.updated= The Instance {0} has been updated!
-instances.java.deleted= The Instance {0} has been deleted!
 
 applications.list.head=Applications
 applications.list.title={0,choice,0#There are no applications|1#One application found|1<{0,number,integer} applications found}
@@ -299,7 +248,9 @@ applications.device=Device
 applications.device.add=Add Device
 applications.device.remove=Remove Device
 applications.device.active=Active
-applications.device.active.help=Allow to send to this device. 0 or 1
+applications.device.pusher=Pusher
+applications.device.resolver=Resolver
+applications.device.cleaner=Cleaner
 
 applications.submit.create=Create this Application
 applications.submit.update=Update this Application
@@ -375,3 +326,102 @@ users.submit.delete=Delete this User
 users.java.created= The User {0} has been created!
 users.java.updated= The User {0} has been updated!
 users.java.deleted= The User {0} has been deleted!
+
+devices.list.head=Devices
+devices.list.title={0,choice,0#There are no devices|1#One device found|1<{0,number,integer} devices found}
+devices.list.filter.name=Filter by device name...
+devices.list.new=Add new Device
+
+devices.create=Create Device
+devices.edit=Edit Device
+devices.info=Device Data
+
+devices.name=Name
+devices.name.help=Name of the device
+
+devices.submit.create=Create this Device
+devices.submit.update=Update this Device
+devices.submit.delete=Delete this Device
+
+devices.java.created= The Device {0} has been created!
+devices.java.updated= The Device {0} has been updated!
+devices.java.deleted= The Device {0} has been deleted!
+
+resolvers.list.head=Resolvers
+resolvers.list.title={0,choice,0#There are no resolvers|1#One resolver found|1<{0,number,integer} resolvers found}
+resolvers.list.filter.name=Filter by resolver name...
+resolvers.list.new=Add new Resolver
+
+resolvers.create=Create Resolver
+resolvers.edit=Edit Resolver
+resolvers.info=Resolver Data
+
+resolvers.name=Name
+resolvers.name.help=Name of the resolver
+
+resolvers.className=Class Name
+resolvers.className.help=Class Name of the resolver
+
+resolvers.device=Device
+
+resolvers.submit.create=Create this Resolver
+resolvers.submit.update=Update this Resolver
+resolvers.submit.delete=Delete this Resolver
+
+resolvers.java.created= The Resolver {0} has been created!
+resolvers.java.updated= The Resolver {0} has been updated!
+resolvers.java.deleted= The Resolver {0} has been deleted!
+
+pushers.list.head=Pushers
+pushers.list.title={0,choice,0#There are no pushers|1#One pusher found|1<{0,number,integer} pushers found}
+pushers.list.filter.name=Filter by pusher name...
+pushers.list.new=Add new Pusher
+
+pushers.create=Create Pusher
+pushers.edit=Edit Pusher
+pushers.info=Pusher Data
+
+pushers.name=Name
+pushers.name.help=Name of the pusher
+
+pushers.className=Class Name
+pushers.className.help=Class Name of the pusher
+
+pushers.params=Parameters
+pushers.params.help=Json parameters for the pusher
+
+pushers.device=Device
+
+pushers.submit.create=Create this Pusher
+pushers.submit.update=Update this Pusher
+pushers.submit.delete=Delete this Pusher
+
+pushers.java.created= The Pusher {0} has been created!
+pushers.java.updated= The Pusher {0} has been updated!
+pushers.java.deleted= The Pusher {0} has been deleted!
+
+cleaners.list.head=Cleaners
+cleaners.list.title={0,choice,0#There are no cleaners|1#One cleaner found|1<{0,number,integer} cleaners found}
+cleaners.list.filter.name=Filter by cleaner name...
+cleaners.list.new=Add new Cleaner
+
+cleaners.create=Create Cleaner
+cleaners.edit=Edit Cleaner
+cleaners.info=Cleaner Data
+
+cleaners.name=Name
+cleaners.name.help=Name of the cleaner
+
+cleaners.className=Class Name
+cleaners.className.help=Class Name of the cleaner
+
+cleaners.device=Device
+
+cleaners.submit.create=Create this Cleaner
+cleaners.submit.update=Update this Cleaner
+cleaners.submit.delete=Delete this Cleaner
+
+cleaners.java.created= The Cleaner {0} has been created!
+cleaners.java.updated= The Cleaner {0} has been updated!
+cleaners.java.deleted= The Cleaner {0} has been deleted!
+

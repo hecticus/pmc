@@ -1,4 +1,4 @@
-@(currentPage: com.avaje.ebean.Page[models.basic.Instance], currentSortBy: String, currentOrder: String, currentFilter: String, sortView: Boolean)
+@(currentPage: com.avaje.ebean.Page[models.apps.Device], currentSortBy: String, currentOrder: String, currentFilter: String, sortView: Boolean)
 
 @****************************************
 * Helper generating navigation links    *
@@ -22,7 +22,7 @@
     }
 
     // Generate the link
-    controllers.routes.InstancesView.list(newPage, sortBy, order, currentFilter)
+    controllers.routes.DevicesView.list(newPage, sortBy, order, currentFilter)
 
 }
 
@@ -37,12 +37,12 @@
 
 @title = {}
 
-@main(title = Messages("instances.list.head"), nav = "") {
+@main(title = Messages("devices.list.head"), nav = "") {
     <div class="bs-docs-section">
 
         <div class="row">
             <div class="col-lg-12">
-                <h1 id="homeTitle">@Messages("instances.list.title", currentPage.getTotalRowCount)</h1>
+                <h1 id="homeTitle">@Messages("devices.list.title", currentPage.getTotalRowCount)</h1>
             </div>
         </div>
 
@@ -62,15 +62,15 @@
 
                 @if(!sortView) {
                     <div class="col-lg-6">
-                        <input type="search" class="form-control floating-label" id="searchbox" name="f" placeholder=@Messages("instances.list.filter.name")>
+                        <input type="search" class="form-control floating-label" id="searchbox" name="f" placeholder=@Messages("devices.list.filter.name")>
                     </div>
                     <div class="col-lg-6">
-                        <input type="submit" id="searchsubmit" value=@Messages("instances.list.filter.name") class="btn btn-info">
+                        <input type="submit" id="searchsubmit" value=@Messages("devices.list.filter.name") class="btn btn-info">
                     </div>
                 }
 
                 @if(sortView) {
-                    <a class="btn success" id="ajax" href="#" data-url="/garotas/v1/instances/sort/" >@Messages("generic.list.apply")</a>
+                    <a class="btn success" id="ajax" href="#" data-url="/garotas/v1/devices/sort/" >@Messages("generic.list.apply")</a>
                 }
 
             </form>
@@ -89,10 +89,9 @@
                         <div class="list-group">
                             @for((instance, index) <-  currentPage.getList().zipWithIndex) {
                             <div class="list-group-item">
-                                <a href="@controllers.routes.InstancesView.edit(instance.getIdInstance())">
+                                <a href="@controllers.routes.DevicesView.edit(instance.getIdDevice())">
                                     <div class="row-content">
-                                        <h4 class="list-group-item-heading">@Html(""+instance.getIdInstance()) - @Html(instance.getName())</h4>
-                                        <p class="list-group-item-text">@Html(instance.getIp())</p>
+                                        <h4 class="list-group-item-heading">@Html(""+instance.getIdDevice()) - @Html(instance.getName())</h4>
                                     </div>
                                 </a>
                             </div>
@@ -144,7 +143,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <a href="@controllers.routes.InstancesView.blank" class="btn btn-primary">@Messages("instances.list.new")</a>
+                <a href="@controllers.routes.DevicesView.blank" class="btn btn-primary">@Messages("devices.list.new")</a>
             </div>
         </div>
 

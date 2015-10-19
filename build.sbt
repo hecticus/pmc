@@ -1,3 +1,4 @@
+import play.PlayJava
 import com.typesafe.sbt.SbtNativePackager._
 import NativePackagerKeys._
 
@@ -7,7 +8,9 @@ name := """PMC"""
 version := "1.0-SNAPSHOT"
 
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
+lazy val root = (project in file(".")).enablePlugins(PlayJava).aggregate(jobCore).dependsOn(jobCore)
+
+lazy val jobCore = project.in(file("modules/JobCore")).enablePlugins(PlayJava)
 
 scalaVersion := "2.10.1"
 
@@ -16,9 +19,6 @@ libraryDependencies ++= Seq(
   javaEbean,
   cache,
   javaWs,
-  "com.typesafe.akka" %% "akka-actor" % "2.3.3",
-  "com.typesafe.akka" %% "akka-contrib" % "2.3.3",
-  "com.typesafe.akka" %% "akka-remote" % "2.3.4",
   "com.rabbitmq" % "amqp-client" % "3.0.1",
   "mysql" % "mysql-connector-java" % "5.1.26",
   "net.vz.mongodb.jackson" %% "play-mongo-jackson-mapper" % "1.1.0",
