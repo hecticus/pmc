@@ -14,6 +14,7 @@ import play.libs.Json;
 import utils.Utils;
 
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 /**
@@ -41,15 +42,15 @@ public class iOS extends Pusher {
                 PushedNotifications result = null;
                 File cert  = new File((!app.isIosSandbox()? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
                 if(app.getSound() != null && !app.getSound().isEmpty()){
-                    result = Push.combined(msg, 0, app.getSound(), cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
+                    result = Push.combined(URLDecoder.decode(msg, Constants.ENCODING_UTF_8), 0, app.getSound(), cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
                 } else {
-                    result = Push.alert(msg, cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
+                    result = Push.alert(URLDecoder.decode(msg, Constants.ENCODING_UTF_8), cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
                 }
                 PushNotificationPayload payload = PushNotificationPayload.alert(msg);
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     payload.addSound(app.getSound());
                 }
-                JavApns.getInstance().enqueue(app, payload, registrationIds);
+//                JavApns.getInstance().enqueue(app, payload, registrationIds);
                 ArrayList<String> failedIds = new ArrayList<>();
                 if(result != null){
                     for (PushedNotification notification : result) {
