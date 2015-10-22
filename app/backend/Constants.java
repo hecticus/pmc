@@ -67,7 +67,7 @@ public class Constants {
     public static final String WS_INSERT_EVENT = "http://%s/events/v1/insert";
 
 
-
+    public static final String TEXT = "text";
 
 
 
