@@ -96,12 +96,15 @@ public class EventToPushView extends HecticusController {
             Device device = Device.finder.where().eq("name", eventToPush.getType().intValue() == 0?"droid":"ios").findUnique();
             AppDevice allow = AppDevice.finder.where().eq("app.idApp", application.getIdApp()).eq("dev.idDevice", device.getIdDevice()).findUnique();
             if(allow != null){
+                //Create the URL for the POST at Route identifier:  POST -> /push/:idApp/:method ->  controllers.events.EventsWS.sendPush(idApp:Long, method : Integer)
                 url = String.format(Constants.WS_PUSH_EVENT_INTEFACE, Config.getPMCHost(), application.getIdApp(), eventToPush.getType().intValue());
             }
         }
         if(url != null){
+            //Actually call the WS...
             F.Promise<WSResponse> result = WS.url(url).setContentType("application/json").post(event);
             ObjectNode fResponse = Json.newObject();
+            //Start building the response...
             WSResponse r = null;
             String resp = null;
             try{
@@ -109,15 +112,19 @@ public class EventToPushView extends HecticusController {
                 ObjectNode response = (ObjectNode) r.asJson();
                 resp = response.toString();
                 fResponse.put("response", Json.toJson(response));
-            } catch(Exception e){
-                try{
-                    resp = r.asXml().toString();
-                } catch(Exception e1){
+                //If there is an error.
+                if (fResponse.get("response").get("error").asInt() == 1) {
+                    //Show the error in the view.
+                    flash("warning", Messages.get("events.java.notpushed", resp ));
+                    return GO_HOME;
                 }
+            } catch(Exception e){
+                try{ resp = r.asXml().toString(); } catch(Exception e1){ }
                 fResponse.put("response", "Error pushing " + resp + " exception: " + e.getMessage());
             }
         }
-        flash("success", Messages.get("events.java.pushed", eventToPush.getMessage()));
+        //Show the success message in the view.
+        flash("success", Messages.get("events.java.pushed", eventToPush.getMessage() ));
         return GO_HOME;
     }
 }

@@ -40,29 +40,44 @@ public class iOS extends Pusher {
         if(!app.isDebug()){
             try {
                 PushedNotifications result = null;
+                //Get the appropiate certificate content.  Development(sandbox) or Production.
                 File cert  = new File((!app.isIosSandbox()? app.getIosPushApnsCertProduction() : app.getIosPushApnsCertSandbox()));
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     result = Push.combined(URLDecoder.decode(msg, Constants.ENCODING_UTF_8), 0, app.getSound(), cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
                 } else {
+                    //This is slow... Result returns an array with feedback on each TokenId sent to the APN
                     result = Push.alert(URLDecoder.decode(msg, Constants.ENCODING_UTF_8), cert, app.getIosPushApnsPassphrase(), !app.isIosSandbox(), registrationIds);
                 }
                 PushNotificationPayload payload = PushNotificationPayload.alert(msg);
                 if(app.getSound() != null && !app.getSound().isEmpty()){
                     payload.addSound(app.getSound());
                 }
-//                JavApns.getInstance().enqueue(app, payload, registrationIds);
+                //JavApns.getInstance().enqueue(app, payload, registrationIds);
+                //New ArrayList to store the possible errors returned from the APN
                 ArrayList<String> failedIds = new ArrayList<>();
+                ArrayList<String> failedReasons = new ArrayList<>();
                 if(result != null){
+                    //Iterate 'result' to check each TokenId for any failure.
                     for (PushedNotification notification : result) {
                         if(!notification.isSuccessful()) {
                             String invalidToken = notification.getDevice().getToken();
+                            String invalidTokenDesc = notification.getException().toString();
                             failedIds.add(invalidToken);
+                            failedReasons.add(invalidTokenDesc);
                         }
                     }
-                    fResponse = buildBasicResponse(0, Constants.OK);
+                    //Check if the ArrayList failedIds is not empty, meaning there was an error with at least one push.
+                    if (failedIds.size() > 0) {
+                        //Tell there was an error
+                        fResponse = buildAPNResponseFailed(1, "Ocurrio un error en  "+ failedIds.size() +" push: " +failedIds.toString() + " - Posible causa: " + failedReasons.toString(), app.getName(), msg);
+                    } else {
+                         //Tell the push was successful
+                        fResponse = buildAPNResponse(0, result.toString().replace('"', '\''), app.getName(), msg);
+                    }
                 } else {
-                    fResponse = buildBasicResponse(1, String.format(Constants.ERROR_EXTRA, "Result es null"));
+                    fResponse = buildAPNResponseFailed(1, "Result es null. (APN devolvio null)", app.getName(), msg);
                 }
+                //Insert elements to Rabbit
                 if(canInsertResult() && !failedIds.isEmpty()){
                     ObjectNode response = Json.newObject();
                     response.put(Constants.ORIGINAL_IDS, Json.toJson(registrationIds));
@@ -88,8 +103,8 @@ public class iOS extends Pusher {
                     }
                 }
             } catch (Exception e) {
-                fResponse = buildErrorResponse(-1, "Error", e);
                 Utils.printToLog(iOS.class, "Error en el HecticusPusher", "El ocurrio un error en el HecticusPusher procesando el evento: " + event.toString(), false, e, "support-level-1", Config.LOGGER_ERROR);
+                fResponse = buildErrorResponse(-1, "Error en el HecticusPusher", e);
             }
         }
         return fResponse;

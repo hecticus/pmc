@@ -134,6 +134,7 @@ public class EventsWS extends HecticusController {
                                 return buildBasicResponse(1, "Error: no se consiguio el resolver");
                             }
 
+                            //Define if pusher is (3)IOSPooled.java or (2)IOS.java (BD tables: 'app_device' and 'pushers')
                             Class pusherClassName = Class.forName(device.getPusher().getClassName().trim());
                             if (pusherClassName != null) {
                                 Pusher pusher = (Pusher) pusherClassName.newInstance();

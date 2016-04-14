@@ -289,7 +289,8 @@ events.type.help=Device type to receive the push
 events.receivers=Receivers
 events.receivers.help=Comma-separated list of the Registration IDs to be notified
 events.push=Push
-events.java.pushed= The Notification {0} has been pushed!
+events.java.pushed= The Notification - {0} - has been pushed!
+events.java.notpushed= One or more notifications had an error: \n {0}
 
 users.list.head=Users
 users.list.title={0,choice,0#There are no users|1#One user found|1<{0,number,integer} users found}

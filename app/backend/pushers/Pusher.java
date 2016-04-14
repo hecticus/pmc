@@ -81,4 +81,22 @@ public abstract class Pusher {
         return responseNode;
     }
 
+    public static ObjectNode buildAPNResponse(int code, String responseAPN, String appName, String pushMessage) {
+        ObjectNode responseNode = Json.newObject();
+        responseNode.put(Config.ERROR_KEY, code);
+        responseNode.put(Config.DESCRIPTION_KEY, responseAPN);
+        responseNode.put("app_name", appName);
+        responseNode.put("push_message", pushMessage);
+        return responseNode;
+    }
+
+    public static ObjectNode buildAPNResponseFailed(int code, String responseAPN, String appName, String pushMessage) {
+        ObjectNode responseNode = Json.newObject();
+        responseNode.put(Config.ERROR_KEY, code);
+        responseNode.put("error_" + Config.DESCRIPTION_KEY, responseAPN);
+        responseNode.put("app_name", appName);
+        responseNode.put("push_message", pushMessage);
+        return responseNode;
+    }
+
 }
