@@ -107,6 +107,10 @@ public class HecticusProducer extends HecticusThread {
                         }
                     }
                 } catch (Exception ex) {
+                    //Log key if appID=1.
+                    if (appID == 1) {
+                        Utils.printToLog(HecticusProducer.class, null, "DEBIG: Evento: \"" + msg + "\" - Cliente key: " + key, true, ex, "support-level-1", Config.LOGGER_ERROR);
+                    }
                     Utils.printToLog(HecticusProducer.class, null, "No se enviara el evento \"" + msg + "\" al cliente " + key, false, ex, "support-level-1", Config.LOGGER_ERROR);
                 }
             }
