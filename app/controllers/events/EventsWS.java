@@ -57,15 +57,20 @@ public class EventsWS extends HecticusController {
     private static ObjectNode launchProc(ObjectNode event, boolean producerFlag){
         try{
             HecticusThread process = null;
+            ObjectNode response = Json.newObject();
             AtomicBoolean instanceRun = ServerInstance.getInstance().isInstanceRun();
             if(producerFlag){
+                response.put("producer_flag", 1);
+                response.put("process", "HecticusProducer");
                 process = new HecticusProducer("WS", instanceRun, event);
             } else {
+                response.put("producer_flag", 1);
+                response.put("process", "HecticusPusher");
                 process = new HecticusPusher("WS", instanceRun, event);
             }
             Thread th = new Thread(process);
             th.start();
-            ObjectNode response = Json.newObject();
+
             response.put("error", 0);
             response.put("description", process.getName());
             return response;
