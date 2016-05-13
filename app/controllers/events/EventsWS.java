@@ -284,6 +284,8 @@ public class EventsWS extends HecticusController {
     }
 
     private static ObjectNode insertEv(ObjectNode event) {
+        //Log response (Or send to email).
+        Utils.printToLog(EventsWS.class, "-Debug LEONEL TVMAX- Insertando eventos" , event.toString(), true, null, "support-level-1", Config.LOGGER_ERROR);
         ObjectNode fResponse = Json.newObject();
         try {
             int allowInsert = Config.getInt("allow-insert-events");
