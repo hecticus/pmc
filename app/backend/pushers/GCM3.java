@@ -59,12 +59,14 @@ public class GCM3 extends Pusher{
                             }
                             response.put(Constants.INSERTION_TIME, insertionTime);
                             response.put(Constants.APP, app.getIdApp());
+                            /*
                             try {
                                 RabbitMQ.getInstance().insertPushResultLyra(response.toString());
                             } catch (Exception e) {
                                 String emsg = "Proceso continua. Error insertando resultado de push en rabbit, response = " + response.toString();
                                 Utils.printToLog(this, "Error en el HecticusPusher", emsg, true, e, "support-level-1", Config.LOGGER_ERROR);
                             }
+                            */
                         }
                         fResponse = buildBasicResponse(0, Constants.OK, response);
                     } else {
