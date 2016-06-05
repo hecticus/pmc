@@ -71,11 +71,11 @@ public class GCM2 extends Pusher {
                         fResponse = buildBasicResponse(0, Constants.OK, response);
                     } else {
                         fResponse = buildBasicResponse(1, "Error en la respuesta de Google, status: " + status);
-                        Utils.printToLog(GCM2.class, null, "Error en la respuesta de Google, status: " + status, false, null, "support-level-1", Config.LOGGER_ERROR);
+                        //Utils.printToLog(GCM2.class, null, "Error en la respuesta de Google, status: " + status, false, null, "support-level-1", Config.LOGGER_ERROR);
                     }
                 } catch (Exception e) {
                     fResponse = buildErrorResponse(-1, Constants.ERROR, e);
-                    Utils.printToLog(GCM2.class, null, "Error llamando a Google", false, e, "support-level-1", Config.LOGGER_ERROR);
+                    //Utils.printToLog(GCM2.class, null, "Error llamando a Google", false, e, "support-level-1", Config.LOGGER_ERROR);
                 }
             }
         } else {
