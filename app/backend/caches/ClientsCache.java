@@ -72,9 +72,10 @@ public class ClientsCache {
         ObjectNode response = null;
         Iterator<JsonNode> clientsIterator = null;
         ObjectNode actualClient = null;
+        long idClient = 0;
         while (invoker.isAlive() && !done) {
             try {
-                result = WS.url(app.getBatchClientsUrl() + "/" + index + "/" + batchSize).get();
+                result = WS.url(app.getBatchClientsUrl() + "/" + idClient + "/" + batchSize).get();
                 wsResponse = result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS);
                 if (wsResponse.getStatus() == 200) {
                     response = (ObjectNode) wsResponse.asJson();
@@ -84,6 +85,7 @@ public class ClientsCache {
                         while (invoker.isAlive() && clientsIterator.hasNext()) {
                             done = false;
                             actualClient = (ObjectNode) clientsIterator.next();
+                            idClient = actualClient.get("idClient").asLong();
                             clients.put(generateClientKey(app.getIdApp(), actualClient), new Client(actualClient));
                         }
                     }
