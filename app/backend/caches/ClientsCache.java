@@ -75,7 +75,11 @@ public class ClientsCache {
         long idClient = 0;
         while (invoker.isAlive() && !done) {
             try {
-                result = WS.url(app.getBatchClientsUrl() + "/" + idClient + "/" + batchSize).get();
+                if((app.getIdApp() == 2) || (app.getIdApp() == 3)) //TODO Cambiar luego cuando se cambien todas las aplicacions  ya que esto es una alizada
+                    result = WS.url(app.getBatchClientsUrl() + "/" + idClient + "/" + batchSize).get();
+                else
+                    result = WS.url(app.getBatchClientsUrl() + "/" + index + "/" + batchSize).get();
+
                 wsResponse = result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS);
                 if (wsResponse.getStatus() == 200) {
                     response = (ObjectNode) wsResponse.asJson();
