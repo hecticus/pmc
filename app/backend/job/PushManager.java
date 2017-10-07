@@ -52,7 +52,6 @@ public class PushManager extends HecticusThread {
 
             String eventString = RabbitMQ.getInstance().getNextPushLyra();
             if(eventString != null){
-                Utils.printToLog(PushManager.class, null, "Entro a procesar XPALX" + eventString, true, null, "support-level-1", Config.LOGGER_INFO);
                 ObjectNode event = (ObjectNode) Json.parse(eventString);
                 event.put(Constants.PM_TIME, System.currentTimeMillis());
                 sendPushRequest(event);
@@ -71,7 +70,6 @@ public class PushManager extends HecticusThread {
         try{
             F.Promise<WSResponse> result = WS.url(String.format(Constants.WS_PUSH_EVENT, Config.getPMCHost())).post(event);
             ObjectNode response = (ObjectNode)result.get(Config.getLong("ws-timeout-millis"), TimeUnit.MILLISECONDS).asJson();
-            Utils.printToLog(PushManager.class, null, "Entro a leer PMC XPALX", true, null, "support-level-1", Config.LOGGER_INFO);
 
         }catch (Exception ex){
             Utils.printToLog(PushManager.class, null, "Error en el WS de distribucion de eventos", false, ex, "support-level-1", Config.LOGGER_ERROR);
